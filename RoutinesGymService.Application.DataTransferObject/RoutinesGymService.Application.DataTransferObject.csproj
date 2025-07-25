@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj" />
+    <ProjectReference Include="..\RoutinesGymService.Transversal.Common\RoutinesGymService.Transversal.Common.csproj" />
+  </ItemGroup>
+
 </Project>
