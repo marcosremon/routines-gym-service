@@ -1,0 +1,103 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36127.28
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService", "RoutinesGymService\RoutinesGymService.csproj", "{0B54EE12-4976-4E44-98D1-6E7B5CD478F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{1F4F52F4-70F4-49A7-8496-84EF361E3DB1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{196FD5B5-5253-41F2-B5E4-FB36F32AF5B9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infraestructure", "Infraestructure", "{B3C20526-5EE1-4736-952B-EEB97A60B85D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Service", "Service", "{B6EFB35F-7DC1-417B-87EF-3EE8705C9A2D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transversal", "Transversal", "{B8F65FF4-B835-4818-85AC-D856B237E266}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Application.DataTransferObject", "RoutinesGymService.Application.DataTransferObject\RoutinesGymService.Application.DataTransferObject.csproj", "{B29D4837-B202-4F6B-831D-8F9C3674794C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Application.Interface", "RoutinesGymService.Application.Interface\RoutinesGymService.Application.Interface.csproj", "{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Application.UseCase", "RoutinesGymService.Application.UseCase\RoutinesGymService.Application.UseCase.csproj", "{E4DA5681-390E-45D6-9BBA-8E08D10052A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Domain.Model", "RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj", "{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Infraestructure.Persistence", "RoutinesGymService.Infraestructure.Persistence\RoutinesGymService.Infraestructure.Persistence.csproj", "{54654264-0469-454C-9DA3-249EDF900C55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.Common", "RoutinesGymService.Transversal.Common\RoutinesGymService.Transversal.Common.csproj", "{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.JsonInterchange", "RoutinesGymService.Transversal.JsonInterchange\RoutinesGymService.Transversal.JsonInterchange.csproj", "{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.Security", "RoutinesGymService.Transversal.Security\RoutinesGymService.Transversal.Security.csproj", "{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.Mailing", "RoutinesGymService.Transversal.Mailing\RoutinesGymService.Transversal.Mailing.csproj", "{D08AA816-A98C-4157-91A9-0B546B022B52}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B54EE12-4976-4E44-98D1-6E7B5CD478F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B54EE12-4976-4E44-98D1-6E7B5CD478F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B54EE12-4976-4E44-98D1-6E7B5CD478F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B54EE12-4976-4E44-98D1-6E7B5CD478F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B29D4837-B202-4F6B-831D-8F9C3674794C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B29D4837-B202-4F6B-831D-8F9C3674794C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B29D4837-B202-4F6B-831D-8F9C3674794C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B29D4837-B202-4F6B-831D-8F9C3674794C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4DA5681-390E-45D6-9BBA-8E08D10052A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4DA5681-390E-45D6-9BBA-8E08D10052A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4DA5681-390E-45D6-9BBA-8E08D10052A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4DA5681-390E-45D6-9BBA-8E08D10052A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54654264-0469-454C-9DA3-249EDF900C55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54654264-0469-454C-9DA3-249EDF900C55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54654264-0469-454C-9DA3-249EDF900C55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54654264-0469-454C-9DA3-249EDF900C55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D08AA816-A98C-4157-91A9-0B546B022B52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D08AA816-A98C-4157-91A9-0B546B022B52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D08AA816-A98C-4157-91A9-0B546B022B52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D08AA816-A98C-4157-91A9-0B546B022B52}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0B54EE12-4976-4E44-98D1-6E7B5CD478F7} = {B6EFB35F-7DC1-417B-87EF-3EE8705C9A2D}
+		{B29D4837-B202-4F6B-831D-8F9C3674794C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E4DA5681-390E-45D6-9BBA-8E08D10052A2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE} = {196FD5B5-5253-41F2-B5E4-FB36F32AF5B9}
+		{54654264-0469-454C-9DA3-249EDF900C55} = {B3C20526-5EE1-4736-952B-EEB97A60B85D}
+		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D} = {B8F65FF4-B835-4818-85AC-D856B237E266}
+		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA} = {B8F65FF4-B835-4818-85AC-D856B237E266}
+		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0} = {B8F65FF4-B835-4818-85AC-D856B237E266}
+		{D08AA816-A98C-4157-91A9-0B546B022B52} = {B8F65FF4-B835-4818-85AC-D856B237E266}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6BC8EE02-A4EC-481A-A989-D00E346C5864}
+	EndGlobalSection
+EndGlobal
