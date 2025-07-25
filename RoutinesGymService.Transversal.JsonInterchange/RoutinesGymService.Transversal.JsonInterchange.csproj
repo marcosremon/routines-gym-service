@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RoutinesGymService.Application.DataTransferObject\RoutinesGymService.Application.DataTransferObject.csproj" />
+    <ProjectReference Include="..\RoutinesGymService.Transversal.Common\RoutinesGymService.Transversal.Common.csproj" />
+  </ItemGroup>
+
 </Project>

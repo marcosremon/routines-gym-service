@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transver
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.Mailing", "RoutinesGymService.Transversal.Mailing\RoutinesGymService.Transversal.Mailing.csproj", "{D08AA816-A98C-4157-91A9-0B546B022B52}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Application.Mapper", "RoutinesGymService.Application.Mapper\RoutinesGymService.Application.Mapper.csproj", "{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{D08AA816-A98C-4157-91A9-0B546B022B52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D08AA816-A98C-4157-91A9-0B546B022B52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D08AA816-A98C-4157-91A9-0B546B022B52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,6 +102,7 @@ Global
 		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA} = {B8F65FF4-B835-4818-85AC-D856B237E266}
 		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0} = {B8F65FF4-B835-4818-85AC-D856B237E266}
 		{D08AA816-A98C-4157-91A9-0B546B022B52} = {B8F65FF4-B835-4818-85AC-D856B237E266}
+		{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6BC8EE02-A4EC-481A-A989-D00E346C5864}
