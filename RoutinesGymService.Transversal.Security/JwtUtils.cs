@@ -1,6 +1,6 @@
 ﻿namespace RoutinesGymService.Transversal.Security
 {
-    public class Class1
+    public class JwtUtils
     {
 
     }
