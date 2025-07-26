@@ -1,4 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.CreateRoutine;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.DeleteRoutine;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetAllUserRoutines;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineById;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineStats;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
+using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.JsonInterchange.Routine.CreateRoutine;
+using RoutinesGymService.Transversal.JsonInterchange.Routine.DeleteRoutine;
+using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
+using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
+using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
+using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
 using TFC.Application.Interface.Application;
 
 namespace RoutinesGymService.Controllers
@@ -16,146 +29,309 @@ namespace RoutinesGymService.Controllers
 
         #region create-routine
         [HttpPost("create-routine")]
-        public async Task<ActionResult<CreateRoutineResponse>> CreateRoutine([FromBody] CreateRoutineRequest createRoutineRequest)
+        public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
+            CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
+            createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                CreateRoutineResponse response = await _routineApplication.CreateRoutine(createRoutineRequest);
-                if (response.IsSuccess)
+                if (createRoutineRequestJson == null ||
+                    string.IsNullOrEmpty(createRoutineRequestJson.UserEmail) ||
+                    string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
                 {
-                    Log.Instance.Trace($"Rutina añadida correctamente al usuario con email: {createRoutineRequest.UserEmail}");
-                    return Created(string.Empty, response);
+                    createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    createRoutineResponseJson.IsSuccess = false;
+                    createRoutineResponseJson.Message = "invalid data, the email or the routine name is null or empty";
                 }
+                else
+                {
+                    CreateRoutineRequest createRoutineRequest = new CreateRoutineRequest
+                    {
+                        UserEmail = createRoutineRequestJson.UserEmail,
+                        RoutineName = createRoutineRequestJson.RoutineName,
+                        RoutineDescription = createRoutineRequestJson.RoutineDescription,
+                        SplitDays = createRoutineRequestJson.SplitDays
+                    };
 
-                Log.Instance.Trace($"Error al añadir la rutina: {response?.Message}");
-                return BadRequest(response?.Message);
+                    CreateRoutineResponse createRoutineResponse = await _routineApplication.CreateRoutine(createRoutineRequest);
+                    if (createRoutineResponse.IsSuccess)
+                    {
+                        createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        createRoutineResponseJson.IsSuccess = createRoutineResponse.IsSuccess;
+                        createRoutineResponseJson.Message = createRoutineResponse.Message;
+                        createRoutineResponseJson.RoutineDTO = createRoutineResponse.RoutineDTO;
+                    }
+                    else
+                    {
+                        createRoutineResponseJson.IsSuccess = createRoutineResponse.IsSuccess;
+                        createRoutineResponseJson.Message = createRoutineResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"CreateRoutine --> Error al añadir la rutina: {ex.Message}");
-                return BadRequest(ex.Message);
+                createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                createRoutineResponseJson.IsSuccess = false;
+                createRoutineResponseJson.Message = $"unexpected error on RoutineController -> create-controller: {ex.Message}";
             }
+
+            return Ok(createRoutineResponseJson);
         }
         #endregion
 
         #region update-routine
         [HttpPost("update-routine")]
-        public async Task<ActionResult<UpdateRoutineResponse>> UpdateRoutine([FromBody] UpdateRoutineRequest updateRoutineRequest)
+        public async Task<ActionResult<UpdateRoutineResponseJson>> UpdateRoutine([FromBody] UpdateRoutineRequestJson updateRoutineRequestJson)
         {
+            UpdateRoutineResponseJson updateRoutineResponseJson = new UpdateRoutineResponseJson();
+            updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                UpdateRoutineResponse response = await _routineApplication.UpdateUser(updateRoutineRequest);
-                if (response.IsSuccess)
+                if (updateRoutineRequestJson == null ||
+                    updateRoutineRequestJson.RoutineId == null)
                 {
-                    Log.Instance.Trace($"Rutina con nombre: {updateRoutineRequest.RoutineName} actualizada correctamente");
-                    return Ok(response);
+                    updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    updateRoutineResponseJson.IsSuccess = false;
+                    updateRoutineResponseJson.Message = "invalid data, parameters are null or empty";
                 }
+                else
+                {
+                    UpdateRoutineRequest updateRoutineRequest = new UpdateRoutineRequest
+                    {
+                        RoutineId = updateRoutineRequestJson.RoutineId,
+                        RoutineName = updateRoutineRequestJson.RoutineName,
+                        RoutineDescription = updateRoutineRequestJson.RoutineDescription,
+                        SplitDays = updateRoutineRequestJson.SplitDays
+                    };
 
-                Log.Instance.Trace($"Error al actualizar la rutina: {response?.Message}");
-                return BadRequest(response?.Message);
+                    UpdateRoutineResponse updateRoutineResponse = await _routineApplication.UpdateUser(updateRoutineRequest);
+                    if (updateRoutineResponse.IsSuccess)
+                    {
+                        updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
+                        updateRoutineResponseJson.Message = updateRoutineResponse.Message;
+                        updateRoutineResponseJson.RoutineDTO = updateRoutineResponse.RoutineDTO;
+                    }
+                    else
+                    {
+                        updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
+                        updateRoutineResponseJson.Message = updateRoutineResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"UpdateRoutine --> Error al actualizar la rutina: {ex.Message}");
-                return BadRequest(ex.Message);
+                updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                updateRoutineResponseJson.IsSuccess = false;
+                updateRoutineResponseJson.Message = $"unexpected error on RoutineController -> update-routine: {ex.Message}";
             }
+
+            return Ok(updateRoutineResponseJson);
         }
         #endregion
 
         #region delete-routine
         [HttpPost("delete-routine")]
-        public async Task<ActionResult<DeleteRoutineResponse>> DeleteRoutine([FromBody] DeleteRoutineRequest deleteRoutineRequest)
+        public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
+            DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
+            deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                DeleteRoutineResponse response = await _routineApplication.DeleteRoutine(deleteRoutineRequest);
-                if (response.IsSuccess)
+                if (deleteRoutineRequestJson == null ||
+                    string.IsNullOrEmpty(deleteRoutineRequestJson.UserEmail) ||
+                    deleteRoutineRequestJson.RoutineId == null)
                 {
-                    Log.Instance.Trace($"Rutina con id: {deleteRoutineRequest.RoutineId} eliminada correctamente");
-                    return NoContent();
+                    deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    deleteRoutineResponseJson.IsSuccess = false;
+                    deleteRoutineResponseJson.Message = "invalid data, the email or the routine id is null or empty";
                 }
+                else
+                {
+                    DeleteRoutineRequest deleteRoutineRequest = new DeleteRoutineRequest
+                    {
+                        UserEmail = deleteRoutineRequestJson.UserEmail,
+                        RoutineId = deleteRoutineRequestJson.RoutineId
+                    };
 
-                Log.Instance.Trace($"Error al eliminar la rutina: {response?.Message}");
-                return BadRequest(response?.Message);
+                    DeleteRoutineResponse deleteRoutineResponse = await _routineApplication.DeleteRoutine(deleteRoutineRequest);
+                    if (deleteRoutineResponse.IsSuccess)
+                    {
+                        deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        deleteRoutineResponseJson.IsSuccess = deleteRoutineResponse.IsSuccess;
+                        deleteRoutineResponseJson.Message = deleteRoutineResponse.Message;
+                        deleteRoutineResponseJson.UserId = deleteRoutineResponse.UserId;
+                    }
+                    else
+                    {
+                        deleteRoutineResponseJson.IsSuccess = deleteRoutineResponse.IsSuccess;
+                        deleteRoutineResponseJson.Message = deleteRoutineResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"DeleteRoutine --> Error al eliminar la rutina: {ex.Message}");
-                return BadRequest(ex.Message);
+                deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                deleteRoutineResponseJson.IsSuccess = false;
+                deleteRoutineResponseJson.Message = $"unexpected error on RoutineController -> delete-routine: {ex.Message}";
             }
+
+            return Ok(deleteRoutineResponseJson);
         }
         #endregion
 
         #region get-all-user-routines
         [HttpPost("get-all-user-routines")]
-        public async Task<ActionResult<GetAllUserRoutinesResponse>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequest getAllUserRoutinesRequest)
+        public async Task<ActionResult<GetAllUserRoutinesResponseJson>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequestJson getAllUserRoutinesRequestJson)
         {
+            GetAllUserRoutinesResponseJson getAllUserRoutinesResponseJson = new GetAllUserRoutinesResponseJson();
+            getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                GetAllUserRoutinesResponse response = await _routineApplication.GetAllUserRoutines(getAllUserRoutinesRequest);
-                if (response.IsSuccess)
+                if (getAllUserRoutinesRequestJson == null ||
+                    string.IsNullOrEmpty(getAllUserRoutinesRequestJson.UserEmail))
                 {
-                    Log.Instance.Trace($"Rutinas del usuario obtenidas correctamente");
-                    return Ok(response);
+                    getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getAllUserRoutinesResponseJson.IsSuccess = false;
+                    getAllUserRoutinesResponseJson.Message = "invalid data, the email is null or empty";
                 }
+                else
+                {
+                    GetAllUserRoutinesRequest getAllUserRoutinesRequest = new GetAllUserRoutinesRequest
+                    {
+                        UserEmail = getAllUserRoutinesRequestJson.UserEmail
+                    };
 
-                Log.Instance.Trace($"Error al obtener las rutinas: {response?.Message}");
-                return BadRequest(response?.Message);
+                    GetAllUserRoutinesResponse getAllUserRoutinesResponse = await _routineApplication.GetAllUserRoutines(getAllUserRoutinesRequest);
+                    if (getAllUserRoutinesResponse.IsSuccess)
+                    {
+                        getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getAllUserRoutinesResponseJson.IsSuccess = getAllUserRoutinesResponse.IsSuccess;
+                        getAllUserRoutinesResponseJson.Message = getAllUserRoutinesResponse.Message;
+                        getAllUserRoutinesResponseJson.Routines = getAllUserRoutinesResponse.Routines;
+                    }
+                    else
+                    {
+                        getAllUserRoutinesResponseJson.IsSuccess = getAllUserRoutinesResponse.IsSuccess;
+                        getAllUserRoutinesResponseJson.Message = getAllUserRoutinesResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"GetAllUserRoutines --> Error al obtener las rutinas: {ex.Message}");
-                return BadRequest(ex.Message);
+                getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getAllUserRoutinesResponseJson.IsSuccess = false;
+                getAllUserRoutinesResponseJson.Message = $"unexpected error on RoutineController -> get-all-user-routines: {ex.Message}";
             }
+
+            return Ok(getAllUserRoutinesResponseJson);
         }
         #endregion
 
         #region get-routine-stats
         [HttpPost("get-routine-stats")]
-        public async Task<ActionResult<GetRoutineStatsResponse>> GetRoutineStats([FromBody] GetRoutineStatsRequest getRoutineStatsRequest)
+        public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
+            GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();
+            getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                GetRoutineStatsResponse response = await _routineApplication.GetRoutineStats(getRoutineStatsRequest);
-                if (response.IsSuccess)
+                if (getRoutineStatsRequestJson == null ||
+                    string.IsNullOrEmpty(getRoutineStatsRequestJson.UserEmail))
                 {
-                    Log.Instance.Trace($"Estadisticas de las rutinas obtenidas correctamente");
-                    return Ok(response);
+                    getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getRoutineStatsResponseJson.IsSuccess = false;
+                    getRoutineStatsResponseJson.Message = "invalid data, the email is null or empty";
                 }
+                else
+                {
+                    GetRoutineStatsRequest getRoutineStatsRequest = new GetRoutineStatsRequest
+                    {
+                        UserEmail = getRoutineStatsRequestJson.UserEmail,
+                    };
 
-                Log.Instance.Trace($"Error al obtener las estadisticas de las rutinas: {response?.Message}");
-                // Devuelve el objeto de respuesta aunque sea error
-                return Ok(response);
+                    GetRoutineStatsResponse getRoutineStatsResponse = await _routineApplication.GetRoutineStats(getRoutineStatsRequest);
+                    if (getRoutineStatsResponse.IsSuccess)
+                    {
+                        getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
+                        getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
+                        getRoutineStatsResponseJson.routinesCount  = getRoutineStatsResponse.routinesCount;
+                        getRoutineStatsResponseJson.exercisesCount = getRoutineStatsResponse.exercisesCount;
+                        getRoutineStatsResponseJson.splitsCount = getRoutineStatsResponse.splitsCount;
+                    }
+                    else
+                    {
+                        getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
+                        getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
+                        getRoutineStatsResponseJson.routinesCount = getRoutineStatsResponse.routinesCount;
+                        getRoutineStatsResponseJson.exercisesCount = getRoutineStatsResponse.exercisesCount;
+                        getRoutineStatsResponseJson.splitsCount = getRoutineStatsResponse.splitsCount;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"GetRoutineStats --> Error al obtener las estadisticas de las rutinas: {ex.Message}");
-                return BadRequest(ex.Message);
+                getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getRoutineStatsResponseJson.IsSuccess = false;
+                getRoutineStatsResponseJson.Message = $"unexpected error on RoutineController -> get-routine-stats: {ex.Message}";
             }
+
+            return Ok(getRoutineStatsResponseJson);
         }
         #endregion
 
         #region get-routine-by-id
         [HttpPost("get-routine-by-id")]
-        public async Task<ActionResult<GetRoutineByIdResponse>> GetRoutineById([FromBody] GetRoutineByIdRequest getRoutineByIdRequest)
+        public async Task<ActionResult<GetRoutineByIdResponseJson>> GetRoutineById([FromBody] GetRoutineByIdRequestJson getRoutineByIdRequestJson)
         {
+            GetRoutineByIdResponseJson getRoutineByIdResponseJson = new GetRoutineByIdResponseJson();
+            getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                GetRoutineByIdResponse response = await _routineApplication.GetRoutineById(getRoutineByIdRequest);
-                if (response.IsSuccess)
+                if (getRoutineByIdRequestJson == null ||
+                    getRoutineByIdRequestJson.RoutineId == null)
                 {
-                    Log.Instance.Trace($"Rutina con id: {getRoutineByIdRequest.RoutineId} obtenida correctamente");
-                    return Ok(response);
+                    getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getRoutineByIdResponseJson.IsSuccess = false;
+                    getRoutineByIdResponseJson.Message = "invalid data, the routine id is null or empty";
                 }
+                else
+                {
+                    GetRoutineByIdRequest getRoutineByIdRequest = new GetRoutineByIdRequest
+                    {
+                        RoutineId = getRoutineByIdRequestJson.RoutineId
+                    };
 
-                Log.Instance.Trace($"Error al obtener la rutina: {response?.Message}");
-                return BadRequest(response?.Message);
+                    GetRoutineByIdResponse getRoutineByIdResponse = await _routineApplication.GetRoutineById(getRoutineByIdRequest);
+                    if (getRoutineByIdResponse.IsSuccess)
+                    {
+                        getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getRoutineByIdResponseJson.IsSuccess = getRoutineByIdResponse.IsSuccess;
+                        getRoutineByIdResponseJson.Message = getRoutineByIdResponse.Message;
+                        getRoutineByIdResponseJson.RoutineDTO = getRoutineByIdResponse.RoutineDTO;
+                    }
+                    else
+                    {
+                        getRoutineByIdResponseJson.IsSuccess = getRoutineByIdResponse.IsSuccess;
+                        getRoutineByIdResponseJson.Message = getRoutineByIdResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"GetRoutineById --> Error al obtener la rutina: {ex.Message}");
-                return BadRequest(ex.Message);
+                getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getRoutineByIdResponseJson.IsSuccess = false;
+                getRoutineByIdResponseJson.Message = $"unexpected error on RoutineController -> get-routine-by-id: {ex.Message}";
             }
+
+            return Ok(getRoutineByIdResponseJson);
         }
         #endregion
     }

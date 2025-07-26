@@ -2,6 +2,6 @@
 {
     public class GetRoutineByIdRequestJson
     {
-        public int RoutineId { get; set; }
+        public long? RoutineId { get; set; }
     }
 }
