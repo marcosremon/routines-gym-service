@@ -1,4 +1,4 @@
-﻿namespace TFC.Application.Interface.Persistence
+﻿namespace RoutinesGymService.Application.Interface.Repository
 {
     public interface IRoutineRepository
     {
