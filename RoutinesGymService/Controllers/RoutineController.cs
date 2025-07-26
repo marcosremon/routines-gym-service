@@ -27,7 +27,7 @@ namespace RoutinesGymService.Controllers
             _routineApplication = routineApplication;
         }
 
-        #region create-routine
+        #region Create Routine
         [HttpPost("create-routine")]
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
@@ -80,7 +80,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region update-routine
+        #region Update Routine
         [HttpPost("update-routine")]
         public async Task<ActionResult<UpdateRoutineResponseJson>> UpdateRoutine([FromBody] UpdateRoutineRequestJson updateRoutineRequestJson)
         {
@@ -132,7 +132,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region delete-routine
+        #region Delete Routine
         [HttpPost("delete-routine")]
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
@@ -183,7 +183,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region get-all-user-routines
+        #region Get All User Routines
         [HttpPost("get-all-user-routines")]
         public async Task<ActionResult<GetAllUserRoutinesResponseJson>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequestJson getAllUserRoutinesRequestJson)
         {
@@ -232,7 +232,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region get-routine-stats
+        #region Get Routine Stats
         [HttpPost("get-routine-stats")]
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
@@ -286,7 +286,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region get-routine-by-id
+        #region Get Routine By Id
         [HttpPost("get-routine-by-id")]
         public async Task<ActionResult<GetRoutineByIdResponseJson>> GetRoutineById([FromBody] GetRoutineByIdRequestJson getRoutineByIdRequestJson)
         {

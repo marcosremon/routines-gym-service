@@ -3,18 +3,19 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Add
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
+using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExercise;
+using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.UpdateExercise;
 using TFC.Application.DTO.Exercise.UpdateExercise;
 using TFC.Application.Interface.Application;
-using TFC.Transversal.Logs;
 
 namespace RoutinesGymService.Controllers
 {
     [ApiController]
-    [Route("api/exercise")]
+    [Route("exercise")]
     public class ExerciseController : ControllerBase
     {
         private readonly IExerciseApplication _exerciseApplication;
@@ -24,114 +25,281 @@ namespace RoutinesGymService.Controllers
             _exerciseApplication = exerciseApplication;
         }
 
+        #region Add exercise progress
         [HttpPost("add-exercise-progress")]
-        public async Task<ActionResult<AddExerciseAddExerciseProgressResponse>> AddExerciseProgress([FromBody] AddExerciseAddExerciseProgressRequest addExerciseRequest)
+        public async Task<ActionResult<AddExerciseAddExerciseProgressResponseJson>> AddExerciseProgress([FromBody] AddExerciseAddExerciseProgressRequestJson addExerciseRequestJson)
         {
+            AddExerciseAddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseAddExerciseProgressResponseJson();
+            addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                AddExerciseAddExerciseProgressResponse response = await _exerciseApplication.AddExerciseProgress(addExerciseRequest);
-                if (response.IsSuccess)
+                if (addExerciseRequestJson == null ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail) ||
+                    addExerciseRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.DayName))
                 {
-                    Log.Instance.Trace($"Ejercicio añadido correctamente al usuario con id: {response.UserDTO?.UserId}");
-                    return Created(string.Empty, response);
+                    addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
+                    addExerciseAddExerciseProgressResponseJson.Message = "invalid data, user email or routine id is null or empty";
                 }
-
-                Log.Instance.Trace($"Error al añadir el ejercicio: {response?.Message}");
-                return Ok(response);
+                else
+                {
+                    AddExerciseAddExerciseProgressRequest addExerciseRequest = new AddExerciseAddExerciseProgressRequest
+                    {
+                        ProgressList = addExerciseRequestJson.ProgressList,
+                        UserEmail = addExerciseRequestJson.UserEmail,
+                        RoutineId = addExerciseRequestJson.RoutineId,
+                        DayName = addExerciseRequestJson.DayName
+                    };
+                    
+                    AddExerciseAddExerciseProgressResponse addExerciseAddExerciseProgressResponse = await _exerciseApplication.AddExerciseProgress(addExerciseRequest);
+                    if (addExerciseAddExerciseProgressResponse.IsSuccess)
+                    {
+                        addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
+                        addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
+                        addExerciseAddExerciseProgressResponseJson.UserDTO = addExerciseAddExerciseProgressResponse.UserDTO;
+                    }
+                    else
+                    {
+                        addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
+                        addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"AddExercise --> Error al añadir el ejercicio: {ex.Message}");
-                return BadRequest(ex.Message);
+                addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
+                addExerciseAddExerciseProgressResponseJson.Message = $"unexpected error on ExerciseController -> add-exercise-progress {ex.Message}";
             }
-        }
 
+            return Ok(addExerciseAddExerciseProgressResponseJson);
+        }
+        #endregion
+
+        #region Update exercise
         [HttpPost("update-exercise")]
-        public async Task<ActionResult<UpdateExerciseResponse>> UpdateExercise([FromBody] UpdateExerciseRequest updateExerciseRequest)
+        public async Task<ActionResult<UpdateExerciseResponseJson>> UpdateExercise([FromBody] UpdateExerciseRequestJson updateExerciseRequestJson)
         {
+            UpdateExerciseResponseJson updateExerciseResponseJson = new UpdateExerciseResponseJson();
+            updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                UpdateExerciseResponse response = await _exerciseApplication.UpdateExercise(updateExerciseRequest);
-                if (response.IsSuccess)
+                if (updateExerciseRequestJson == null ||
+                    updateExerciseRequestJson.UserId == null ||
+                    updateExerciseRequestJson.RoutineId == null ||
+                    updateExerciseRequestJson.DayName == null ||
+                    string.IsNullOrEmpty(updateExerciseRequestJson.ExerciseName))
                 {
-                    Log.Instance.Trace($"Ejercicio actualizado correctamente para el usuario con id: {response.UserDTO?.UserId}");
-                    return Ok(response);
+                    updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    updateExerciseResponseJson.IsSuccess = false;
+                    updateExerciseResponseJson.Message = "invalid data, user id, routine id, day name or exercise name is null or empty";
                 }
+                else
+                {
+                    UpdateExerciseRequest updateExerciseRequest = new UpdateExerciseRequest
+                    {
+                        UserId = updateExerciseRequestJson.UserId,
+                        RoutineId = updateExerciseRequestJson.RoutineId,
+                        DayName = updateExerciseRequestJson.DayName,
+                        ExerciseName = updateExerciseRequestJson.ExerciseName,
+                        Sets = updateExerciseRequestJson.Sets,
+                        Reps = updateExerciseRequestJson.Reps,
+                        Weight = updateExerciseRequestJson.Weight
+                    };
 
-                Log.Instance.Trace($"Error al actualizar el ejercicio: {response?.Message}");
-                return BadRequest(response?.Message);
+                    UpdateExerciseResponse updateExerciseResponse = await _exerciseApplication.UpdateExercise(updateExerciseRequest);
+                    if (updateExerciseResponse.IsSuccess)
+                    {
+                        updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
+                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
+                        updateExerciseResponseJson.UserDTO = updateExerciseResponse.UserDTO;
+                    }
+                    else
+                    {
+                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
+                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"UpdateExercise --> Error al actualizar el ejercicio: {ex.Message}");
-                return BadRequest(ex.Message);
+                updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                updateExerciseResponseJson.IsSuccess = false;
+                updateExerciseResponseJson.Message = $"unexpected error on ExerciseController -> update-exercise {ex.Message}";
             }
-        }
 
+            return Ok(updateExerciseResponseJson);
+        }
+        #endregion
+
+        #region Delete exercise
         [HttpPost("delete-exercise")]
-        public async Task<ActionResult<DeleteExerciseResponse>> DeleteExercise([FromBody] DeleteExerciseRequest deleteExerciseRequest)
+        public async Task<ActionResult<DeleteExerciseResponseJson>> DeleteExercise([FromBody] DeleteExerciseRequestJson deleteExerciseRequestJson)
         {
+            DeleteExerciseResponseJson deleteExerciseResponseJson = new DeleteExerciseResponseJson();
+            deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                DeleteExerciseResponse response = await _exerciseApplication.DeleteExercise(deleteExerciseRequest);
-                if (response.IsSuccess)
+                if (deleteExerciseRequestJson == null ||
+                    string.IsNullOrEmpty(deleteExerciseRequestJson.UserEmail) ||
+                    deleteExerciseRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(deleteExerciseRequestJson.DayName) ||
+                    deleteExerciseRequestJson.ExerciseId == null)
                 {
-                    Log.Instance.Trace($"Ejercicio eliminado correctamente para el usuario con id: {response.UserDTO?.UserId}");
-                    return Ok(response);
+                    deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    deleteExerciseResponseJson.IsSuccess = false;
+                    deleteExerciseResponseJson.Message = "invalid data, user email, routine id, day name or exercise id is null or empty";
                 }
+                else
+                {
+                    DeleteExerciseRequest deleteExerciseRequest = new DeleteExerciseRequest
+                    {
+                        UserEmail = deleteExerciseRequestJson.UserEmail,
+                        RoutineId = deleteExerciseRequestJson.RoutineId,
+                        DayName = deleteExerciseRequestJson.DayName,
+                        ExerciseId = deleteExerciseRequestJson.ExerciseId
+                    };
 
-                Log.Instance.Trace($"Error al eliminar el ejercicio: {response?.Message}");
-                return BadRequest(response.Message);
+                    DeleteExerciseResponse deleteExerciseResponse = await _exerciseApplication.DeleteExercise(deleteExerciseRequest);
+                    if (deleteExerciseResponse.IsSuccess)
+                    {
+                        deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
+                        deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
+                        deleteExerciseResponseJson.UserDTO = deleteExerciseResponse.UserDTO;
+                    }
+                    else
+                    {
+                        deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
+                        deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"DeleteExercise --> Error al eliminar el ejercicio: {ex.Message}");
-                return BadRequest(ex.Message);
+                deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                deleteExerciseResponseJson.IsSuccess = false;
+                deleteExerciseResponseJson.Message = $"unexpected error on ExerciseController -> delete-exercise {ex.Message}";
             }
-        }
 
+            return Ok(deleteExerciseResponseJson);
+        }
+        #endregion
+
+        #region Add exercise
         [HttpPost("add-exercise")]
-        public async Task<ActionResult<AddExerciseResponse>> addExercise([FromBody] AddExerciseRequest addExerciseRequest)
+        public async Task<ActionResult<AddExerciseResponseJson>> addExercise([FromBody] AddExerciseRequestJson addExerciseRequestJson)
         {
+            AddExerciseResponseJson addExerciseResponseJson = new AddExerciseResponseJson();
+            addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                AddExerciseResponse response = await _exerciseApplication.addExercise(addExerciseRequest);
-                if (response.IsSuccess)
+                if (addExerciseRequestJson == null ||
+                    addExerciseRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName) ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.DayName) ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail))
                 {
-                    Log.Instance.Trace($"Ejercicio creado correctamente para el usuario con id: {response.UserDTO?.UserId}");
-                    return Ok(response);
+                    addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    addExerciseResponseJson.IsSuccess = false;
+                    addExerciseResponseJson.Message = "invalid data, routine id, exercise name, day name or user email is null or empty";
                 }
+                else
+                {
+                    AddExerciseRequest addExerciseRequest = new AddExerciseRequest
+                    {
+                        RoutineId = addExerciseRequestJson.RoutineId.Value,
+                        ExerciseName = addExerciseRequestJson.ExerciseName,
+                        DayName = addExerciseRequestJson.DayName,
+                        UserEmail = addExerciseRequestJson.UserEmail,
+                        Sets = addExerciseRequestJson.Sets,
+                        Reps = addExerciseRequestJson.Reps,
+                        Weight = addExerciseRequestJson.Weight
+                    };
 
-                Log.Instance.Trace($"Error al eliminar el ejercicio: {response?.Message}");
-                return BadRequest(response.Message);
+                    AddExerciseResponse addExerciseResponse = await _exerciseApplication.AddExercise(addExerciseRequest);
+                    if (addExerciseResponse.IsSuccess)
+                    {
+                        addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
+                        addExerciseResponseJson.Message = addExerciseResponse.Message;
+                        addExerciseResponseJson.UserDTO = addExerciseResponse.UserDTO;
+                    }
+                    else
+                    {
+                        addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
+                        addExerciseResponseJson.Message = addExerciseResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"DeleteExercise --> Error al eliminar el ejercicio: {ex.Message}");
-                return BadRequest(ex.Message);
+                addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                addExerciseResponseJson.IsSuccess = false;
+                addExerciseResponseJson.Message = $"unexpected error on ExerciseController -> add-exercise {ex.Message}";
             }
-        }
 
+            return Ok(addExerciseResponseJson);
+        }
+        #endregion
+
+        #region Get exercises by day and routine id
         [HttpPost("get-exercises-by-day-and-routine-id")]
-        public async Task<ActionResult<GetExercisesByDayAndRoutineIdResponse>> GetExercisesByDayAndRoutineId([FromBody] GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest)
+        public async Task<ActionResult<GetExercisesByDayAndRoutineIdResponseJson>> GetExercisesByDayAndRoutineId([FromBody] GetExercisesByDayAndRoutineIdRequestJson getExercisesByDayNameRequestJson)
         {
+            GetExercisesByDayAndRoutineIdResponseJson getExercisesByDayAndRoutineIdResponseJson = new GetExercisesByDayAndRoutineIdResponseJson();
+            getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             {
-                GetExercisesByDayAndRoutineIdResponse response = await _exerciseApplication.GetExercisesByDayAndRoutineId(getExercisesByDayNameRequest);
-                if (response.IsSuccess)
+                if (getExercisesByDayNameRequestJson == null ||
+                    getExercisesByDayNameRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(getExercisesByDayNameRequestJson.DayName))
                 {
-                    Log.Instance.Trace($"Ejercicios obtenidos correctamente");
-                    return Ok(response);
+                    getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getExercisesByDayAndRoutineIdResponseJson.IsSuccess = false;
+                    getExercisesByDayAndRoutineIdResponseJson.Message = "invalid data, routine id or day name is null or empty";
                 }
+                else
+                {
+                    GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest = new GetExercisesByDayAndRoutineIdRequest
+                    {
+                        RoutineId = getExercisesByDayNameRequestJson.RoutineId.Value,
+                        DayName = getExercisesByDayNameRequestJson.DayName
+                    };
 
-                Log.Instance.Trace($"Error al obtener los ejercicios: {response?.Message}");
-                return BadRequest(response?.Message);
+                    GetExercisesByDayAndRoutineIdResponse getExercisesByDayAndRoutineIdResponse = await _exerciseApplication.GetExercisesByDayAndRoutineId(getExercisesByDayNameRequest);
+                    if (getExercisesByDayAndRoutineIdResponse.IsSuccess)
+                    {
+                        getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getExercisesByDayAndRoutineIdResponseJson.IsSuccess = getExercisesByDayAndRoutineIdResponse.IsSuccess;
+                        getExercisesByDayAndRoutineIdResponseJson.Message = getExercisesByDayAndRoutineIdResponse.Message;
+                        getExercisesByDayAndRoutineIdResponseJson.Exercises = getExercisesByDayAndRoutineIdResponse.Exercises;
+                        getExercisesByDayAndRoutineIdResponseJson.PastProgress = getExercisesByDayAndRoutineIdResponse.PastProgress;
+                    }
+                    else
+                    {
+                        getExercisesByDayAndRoutineIdResponseJson.IsSuccess = getExercisesByDayAndRoutineIdResponse.IsSuccess;
+                        getExercisesByDayAndRoutineIdResponseJson.Message = getExercisesByDayAndRoutineIdResponse.Message;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log.Instance.Error($"GetExercisesByDayName --> Error al obtener los ejercicios: {ex.Message}");
-                return BadRequest(ex.Message);
+                getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getExercisesByDayAndRoutineIdResponseJson.IsSuccess = false;
+                getExercisesByDayAndRoutineIdResponseJson.Message = $"unexpected error on ExerciseController -> get-exercises-by-day-and-routine-id {ex.Message}";
             }
+
+            return Ok(getExercisesByDayAndRoutineIdResponseJson);
         }
+        #endregion
     }
 }
