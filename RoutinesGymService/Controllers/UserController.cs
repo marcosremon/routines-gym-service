@@ -35,7 +35,7 @@ namespace RoutinesGymService.Controllers
             _userApplication = userApplication;
         }
 
-        #region get-users
+        #region Get users
         [HttpGet("get-users")]
         [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
@@ -70,7 +70,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region get-user-by-email
+        #region Get user by email
         [HttpPost("get-user-by-email")]
         public async Task<ActionResult<GetUserByEmailResponseJson>> GetUserByEmail([FromBody] GetUserByEmailRequestJson getUserByEmailRequestJson)
         {
@@ -121,7 +121,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region create-user
+        #region Create user
         [HttpPost("create-user")]
         public async Task<ActionResult<CreateUserResponseJson>> CreateUser([FromBody] CreateUserRequestJson createUserRequestJson)
         {
@@ -180,7 +180,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region create-google-user
+        #region Create Google user
         [HttpPost("create-google-user")]
         public async Task<ActionResult<CreateGoogleUserResponseJson>> CreateGoogleUser([FromBody] CreateGoogleUserRequestJson createGoogleUserRequestJson)
         {
@@ -239,7 +239,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region create-admin
+        #region Create admin
         [HttpPost("create-admin")]
         [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<CreateAdminResponseJson>> CreateAdmin([FromBody] CreateAdminRequestJson createAdminRequstJson)
@@ -298,7 +298,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region update-user
+        #region Update user
         [HttpPost("update-user")]
         public async Task<ActionResult<UpdateUserResponseJson>> UpdateUser([FromBody] UpdateUserRequestJson updateUserRequestJson)
         {
@@ -354,7 +354,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region delete-user
+        #region Delete user
         [HttpPost("delete-user")]
         public async Task<ActionResult<DeleteUserResponseJson>> DeleteUser([FromBody] DeleteUserRequestJson deleteUserRequestJson)
         {
@@ -403,7 +403,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region create-new-password
+        #region Create new password
         [HttpPost("create-new-password")]
         public async Task<ActionResult<CreateNewPasswordResponseJson>> CreateNewPassword([FromBody] CreateNewPasswordRequestJson createNewPasswordRequestJson)
         {
@@ -452,7 +452,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region change-password-with-password-and-email
+        #region Change password with password and email
         [HttpPost("change-password-with-password-and-email")]
         public async Task<ActionResult<ChangePasswordWithPasswordAndEmailResponseJson>> ChangePasswordWithPasswordAndEmail([FromBody] ChangePasswordWithPasswordAndEmailRequestJson changePasswordWithPasswordAndEmailRequestJson)
         {
