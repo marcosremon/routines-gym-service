@@ -2,7 +2,7 @@
 
 namespace RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser
 {
-    public class DeleteUserResponseJson : BaseRespoonseJson
+    public class DeleteUserResponseJson : BaseResponseJson
     {
         public long UserId { get; set; }
     }

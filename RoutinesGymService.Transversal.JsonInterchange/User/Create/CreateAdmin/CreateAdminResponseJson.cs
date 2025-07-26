@@ -2,7 +2,7 @@
 
 namespace RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateAdmin
 {
-    public class CreateAdminResponseJson : BaseRespoonseJson
+    public class CreateAdminResponseJson : BaseResponseJson
     {
     }
 }
