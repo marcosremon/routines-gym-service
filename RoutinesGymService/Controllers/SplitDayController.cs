@@ -2,11 +2,9 @@
 using RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
-using TFC.Transversal.Logs;
 
 namespace RoutinesGymService.Controllers
 {
