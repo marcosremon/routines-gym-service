@@ -1,0 +1,10 @@
+﻿using RoutinesGymService.Application.DataTransferObject.Entity;
+using RoutinesGymService.Transversal.Common;
+
+namespace RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine
+{
+    public class UpdateRoutineResponseJson : BaseResponseJson
+    {
+        public RoutineDTO? RoutineDTO { get; set; }
+    }
+}

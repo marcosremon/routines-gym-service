@@ -22,7 +22,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
 using TFC.Application.Interface.Application;
 
-namespace TFC.Service.WebApi.Controllers
+namespace RoutinesGymService.Controllers
 {
     [ApiController]
     [Route("user")]
@@ -41,6 +41,8 @@ namespace TFC.Service.WebApi.Controllers
         public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
         {
             GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
+            getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
             try
             { 
                 GetUsersResponse getUsersResponse = await _userApplication.GetUsers();
@@ -53,17 +55,15 @@ namespace TFC.Service.WebApi.Controllers
                 }
                 else
                 {
-                    getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
                     getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
                     getUsersResponseJson.Message = getUsersResponse.Message;
-                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
                 }
             }
             catch (Exception ex)
             {
                 getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
                 getUsersResponseJson.IsSuccess = false;
-                getUsersResponseJson.Message = $"unexpected error on UserController -> get-users -> catch {ex.Message}";
+                getUsersResponseJson.Message = $"unexpected error on UserController -> get-users {ex.Message}";
             }
 
             return Ok(getUsersResponseJson);
@@ -157,7 +157,7 @@ namespace TFC.Service.WebApi.Controllers
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
                     if (createUserResponse.IsSuccess)
                     {
-                        createUserResponseJson.ResponseCodeJson = ResponseCodesJson.CREATED;
+                        createUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
                         createUserResponseJson.Message = createUserResponse.Message;
                         createUserResponseJson.UserDTO = createUserResponse.UserDTO;
@@ -216,7 +216,7 @@ namespace TFC.Service.WebApi.Controllers
                     CreateGoogleUserResponse createGoogleUserResponse = await _userApplication.CreateGoogleUser(createGenericUserRequest);
                     if (createGoogleUserResponse.IsSuccess)
                     {
-                        createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.CREATED;
+                        createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
                         createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
                         createGoogleUserResponseJson.UserDTO = createGoogleUserResponse.UserDTO;
@@ -276,7 +276,7 @@ namespace TFC.Service.WebApi.Controllers
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
                     if (createUserResponse.IsSuccess)
                     {
-                        createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.CREATED;
+                        createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
                         createAdminResponseJson.Message = createUserResponse.Message;
                     }
@@ -429,7 +429,7 @@ namespace TFC.Service.WebApi.Controllers
                     CreateNewPasswordResponse createNewPasswordResponse = await _userApplication.CreateNewPassword(createNewPasswordRequest);
                     if (createNewPasswordResponse.IsSuccess)
                     {
-                        createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.CREATED;
+                        createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
                         createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
                         createNewPasswordResponseJson.UserId = createNewPasswordResponse.UserId;
