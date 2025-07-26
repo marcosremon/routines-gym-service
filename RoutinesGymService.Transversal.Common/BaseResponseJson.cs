@@ -1,6 +1,6 @@
 ﻿namespace RoutinesGymService.Transversal.Common
 {
-    public class BaseRespoonseJson
+    public class BaseResponseJson
     {
         public ResponseCodesJson ResponseCodeJson { get; set; }
         public bool IsSuccess { get; set; } = false;
