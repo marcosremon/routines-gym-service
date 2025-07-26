@@ -3,14 +3,14 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Add
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
+using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.UpdateExercise;
-using TFC.Application.DTO.Exercise.UpdateExercise;
-using TFC.Application.Interface.Application;
 
 namespace RoutinesGymService.Controllers
 {
