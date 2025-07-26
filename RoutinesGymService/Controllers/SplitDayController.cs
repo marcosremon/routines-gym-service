@@ -19,7 +19,7 @@ namespace RoutinesGymService.Controllers
             _splitDayApplication = splitDayApplication;
         }
 
-        #region update-split-day
+        #region Update split day
         [HttpPost("update-split-day")]
         public async Task<ActionResult<UpdateSplitDayResponseJson>> UpdateSplitDay([FromBody] UpdateSplitDayRequestJson updateSplitDayRequestJson)
         {
@@ -72,7 +72,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region delete-split-day
+        #region Delete split day
         [HttpPost("delete-split-day")]
         public async Task<ActionResult<DeleteSplitDayResponseJson>> DeleteSplitDay([FromBody] DeleteSplitDayRequestJson deleteSplitDayRequestJson)
         {

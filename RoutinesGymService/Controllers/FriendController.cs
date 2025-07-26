@@ -21,7 +21,7 @@ namespace RoutinesGymService.Controllers
             _friendApplication = friendApplication;
         }
 
-        #region get-all-user-friends 
+        #region Get all user friends 
         [HttpPost("get-all-user-friends")]
         public async Task<ActionResult<GetAllUserFriendsResponseJson>> GetAllUserFriends([FromBody] GetAllUserFriendsRequestJson getAllUserFriendsRequestJson)
         {
@@ -70,7 +70,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region add-new-user-friend 
+        #region Add new user friend 
         [HttpPost("add-new-user-friend")]
         public async Task<ActionResult<AddNewUserFriendResponseJson>> AddNewUserFriend([FromBody] AddNewUserFriendRequestJson addNewUserFriendRequestJson)
         {
@@ -121,7 +121,7 @@ namespace RoutinesGymService.Controllers
         }
         #endregion
 
-        #region delete-friend
+        #region Delete friend
         [HttpPost("delete-friend")]
         public async Task<ActionResult<DeleteFriendResponseJson>> DeleteFriend([FromBody] DeleteFriendRequestJson deleteFriendRequestJson)
         {
