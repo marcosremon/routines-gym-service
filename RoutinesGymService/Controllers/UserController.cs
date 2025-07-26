@@ -9,6 +9,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteU
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
+using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -20,7 +21,6 @@ using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
-using TFC.Application.Interface.Application;
 
 namespace RoutinesGymService.Controllers
 {

@@ -2,7 +2,7 @@
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 
-namespace TFC.Application.Interface.Application
+namespace RoutinesGymService.Application.Interface.Application
 {
     public interface IFriendApplication
     {

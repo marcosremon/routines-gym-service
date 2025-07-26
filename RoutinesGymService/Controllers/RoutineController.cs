@@ -5,6 +5,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetA
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineById;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineStats;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
+using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.CreateRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.DeleteRoutine;
@@ -12,7 +13,6 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
-using TFC.Application.Interface.Application;
 
 namespace RoutinesGymService.Controllers
 {

@@ -8,7 +8,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 
-namespace TFC.Application.Interface.Application
+namespace RoutinesGymService.Application.Interface.Application
 {
     public interface IUserApplication
     {

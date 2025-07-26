@@ -5,7 +5,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetR
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineStats;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
 
-namespace TFC.Application.Interface.Application
+namespace RoutinesGymService.Application.Interface.Application
 {
     public interface IRoutineApplication
     {
