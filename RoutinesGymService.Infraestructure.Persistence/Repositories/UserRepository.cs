@@ -8,47 +8,55 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Infraestructure.Persistence.Context;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        public Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
+        private readonly ApplicationDbContext _context;
+
+        public UserRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest)
+        public async Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<CreateNewPasswordResponse> CreateNewPassword(CreateNewPasswordRequest createNewPasswordRequest)
+        public async Task<CreateNewPasswordResponse> CreateNewPassword(CreateNewPasswordRequest createNewPasswordRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
+        public async Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
+        public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
+        public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GetUsersResponse> GetUsers()
+        public async Task<GetUsersResponse> GetUsers()
         {
             throw new NotImplementedException();
         }
 
-        public Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
+        public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
         {
             throw new NotImplementedException();
         }

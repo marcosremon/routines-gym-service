@@ -5,37 +5,45 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetR
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineStats;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Infraestructure.Persistence.Context;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
     public class RoutineRepository : IRoutineRepository
     {
-        public Task<CreateRoutineResponse> CreateRoutine(CreateRoutineRequest createRoutineRequest)
+        private readonly ApplicationDbContext _context;
+
+        public RoutineRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<CreateRoutineResponse> CreateRoutine(CreateRoutineRequest createRoutineRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DeleteRoutineResponse> DeleteRoutine(DeleteRoutineRequest deleteRoutineRequest)
+        public async Task<DeleteRoutineResponse> DeleteRoutine(DeleteRoutineRequest deleteRoutineRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GetAllUserRoutinesResponse> GetAllUserRoutines(GetAllUserRoutinesRequest getAllUserRoutinesRequest)
+        public async Task<GetAllUserRoutinesResponse> GetAllUserRoutines(GetAllUserRoutinesRequest getAllUserRoutinesRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest)
+        public async Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
+        public async Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<UpdateRoutineResponse> UpdateRoutine(UpdateRoutineRequest updateRoutineRequest)
+        public async Task<UpdateRoutineResponse> UpdateRoutine(UpdateRoutineRequest updateRoutineRequest)
         {
             throw new NotImplementedException();
         }

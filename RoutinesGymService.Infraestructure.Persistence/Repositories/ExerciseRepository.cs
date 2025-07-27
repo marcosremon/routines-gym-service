@@ -4,32 +4,40 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Del
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Infraestructure.Persistence.Context;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
     public class ExerciseRepository : IExerciseRepository
     {
-        public Task<AddExerciseResponse> addExercise(AddExerciseRequest addExerciseRequest)
+        private readonly ApplicationDbContext _context;
+
+        public ExerciseRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<AddExerciseResponse> addExercise(AddExerciseRequest addExerciseRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseRequest)
+        public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DeleteExerciseResponse> DeleteExercise(DeleteExerciseRequest deleteExerciseRequest)
+        public async Task<DeleteExerciseResponse> DeleteExercise(DeleteExerciseRequest deleteExerciseRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<GetExercisesByDayAndRoutineIdResponse> GetExercisesByDayAndRoutineId(GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest)
+        public async Task<GetExercisesByDayAndRoutineIdResponse> GetExercisesByDayAndRoutineId(GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest)
         {
             throw new NotImplementedException();
         }
 
-        public Task<UpdateExerciseResponse> UpdateExercise(UpdateExerciseRequest updateExerciseRequest)
+        public async Task<UpdateExerciseResponse> UpdateExercise(UpdateExerciseRequest updateExerciseRequest)
         {
             throw new NotImplementedException();
         }
