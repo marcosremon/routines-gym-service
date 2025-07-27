@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Transversal.Common;
+﻿using RoutinesGymService.Application.DataTransferObject.SplitDay.GetRoutineSplits;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Transversal.JsonInterchange.SplitDay.GetRoutineSplits
 {

@@ -11,6 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RoutinesGymService.Application.Interface\RoutinesGymService.Application.Interface.csproj" />
+    <ProjectReference Include="..\RoutinesGymService.Application.UseCase\RoutinesGymService.Application.UseCase.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj" />
   </ItemGroup>
 
