@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
@@ -14,7 +16,9 @@
     <ProjectReference Include="..\RoutinesGymService.Application.DataTransferObject\RoutinesGymService.Application.DataTransferObject.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Application.Interface\RoutinesGymService.Application.Interface.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj" />
+    <ProjectReference Include="..\RoutinesGymService.Infraestructure.Persistence\RoutinesGymService.Infraestructure.Persistence.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Transversal.JsonInterchange\RoutinesGymService.Transversal.JsonInterchange.csproj" />
+    <ProjectReference Include="..\RoutinesGymService.Transversal.Mailing\RoutinesGymService.Transversal.Mailing.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Transversal.Security\RoutinesGymService.Transversal.Security.csproj" />
   </ItemGroup>
 
