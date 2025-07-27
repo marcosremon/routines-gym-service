@@ -208,8 +208,7 @@ namespace RoutinesGymService.Controllers
                         Username = createGoogleUserRequestJson.Username,
                         Surname = createGoogleUserRequestJson.Surname,
                         Email = createGoogleUserRequestJson.Email,
-                        Password = createGoogleUserRequestJson.Password,
-                        ConfirmPassword = createGoogleUserRequestJson.ConfirmPassword,
+                        Password = createGoogleUserRequestJson.Email, // no se puede sacar la contraseña desde google, a si que se usa el email como contraseña
                         Role = Role.USER
                     };
 
