@@ -1,10 +1,10 @@
-﻿using TFC.Application.DTO.Exercise.UpdateExercise;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 
-namespace TFC.Application.Interface.Application
+namespace RoutinesGymService.Application.Interface.Application
 {
     public interface IExerciseApplication
     {
