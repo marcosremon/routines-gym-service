@@ -1,6 +1,64 @@
-﻿namespace RoutinesGymService.Application.UseCase
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
+using RoutinesGymService.Application.Interface.Application;
+using RoutinesGymService.Application.Interface.Repository;
+
+namespace RoutinesGymService.Application.UseCase
 {
-    public class UserApplication
+    public class UserApplication : IUserApplication
     {
+        private readonly IUserRepository _userRepository;
+
+        public UserApplication(IUserRepository userRepository)
+        {
+            _userRepository = userRepository;
+        }
+
+        public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
+        {
+            return await _userRepository.ChangePasswordWithPasswordAndEmail(changePasswordWithPasswordAndEmailRequest);
+        }
+
+        public async Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest)
+        {
+            return await _userRepository.CreateGoogleUser(createGenericUserRequest);
+        }
+
+        public async Task<CreateNewPasswordResponse> CreateNewPassword(CreateNewPasswordRequest createNewPasswordRequest)
+        {
+            return await _userRepository.CreateNewPassword(createNewPasswordRequest);
+        }
+
+        public async Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
+        {
+            return await _userRepository.CreateUser(createGenericUserRequest);
+        }
+
+        public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
+        {
+            return await _userRepository.DeleteUser(deleteUserRequest);
+        }
+
+        public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
+        {
+            return await _userRepository.GetUserByEmail(getUserByEmailRequest);
+        }
+
+        public async Task<GetUsersResponse> GetUsers()
+        {
+            return await _userRepository.GetUsers();
+        }
+
+        public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
+        {
+            return await _userRepository.UpdateUser(updateUserRequest);
+        }
     }
 }
