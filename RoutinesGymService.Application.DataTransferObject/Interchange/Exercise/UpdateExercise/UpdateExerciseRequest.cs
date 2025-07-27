@@ -1,6 +1,6 @@
 ﻿using RoutinesGymService.Domain.Model.Enums;
 
-namespace TFC.Application.DTO.Exercise.UpdateExercise
+namespace RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise
 {
     public class UpdateExerciseRequest
     {
