@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
+﻿using Microsoft.EntityFrameworkCore;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
@@ -8,7 +9,12 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Application.Mapper;
+using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Mailing;
+using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -21,44 +27,351 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<CreateNewPasswordResponse> CreateNewPassword(CreateNewPasswordRequest createNewPasswordRequest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
         {
-            throw new NotImplementedException();
+            GetUserByEmailResponse getUserByEmailResponse = new GetUserByEmailResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getUserByEmailRequest.Email);
+                if (user == null)
+                {
+                    getUserByEmailResponse.IsSuccess = false;
+                    getUserByEmailResponse.Message = "User not found with the provided email";
+                }
+                else
+                {
+                    getUserByEmailResponse.IsSuccess = true;
+                    getUserByEmailResponse.Message = "User found successfully";
+                    getUserByEmailResponse.RoutinesCount = user.Routines.Count;
+                    getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
+                    getUserByEmailResponse.UserDTO = UserMapper.userToDTO(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                getUserByEmailResponse.Message = $"unexpected error on UserRepository -> GetUserByEmail: {ex.Message}";
+                getUserByEmailResponse.IsSuccess = false;
+            }
+
+            return getUserByEmailResponse;
         }
 
         public async Task<GetUsersResponse> GetUsers()
         {
-            throw new NotImplementedException();
+            GetUsersResponse getUsersResponse = new GetUsersResponse();
+            try
+            {
+                List<User> users = await _context.Users.ToListAsync();
+                if (users == null || users.Count == 0)
+                {
+                    getUsersResponse.Message = "No users found";
+                    getUsersResponse.IsSuccess = false;
+                }
+                else
+                {
+                    getUsersResponse.IsSuccess = true;
+                    getUsersResponse.Message = "Users found successfully";
+                    getUsersResponse.UsersDTO = users.Select(user => UserMapper.userToDTO(user)).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                getUsersResponse.Message = $"unexpected error on UserRepository -> GetUsers: {ex.Message}";
+                getUsersResponse.IsSuccess = false;
+            }
+
+            return getUsersResponse;
+        }
+
+        public async Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
+        {
+            CreateUserResponse createUserResponse = new CreateUserResponse();
+            try
+            {
+                if (MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                {
+                    createUserResponse.IsSuccess = false;
+                    createUserResponse.Message = "Invalid email format";
+                }
+                else
+                {
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createGenericUserRequest.Email);
+                    if (user != null)
+                    {
+                        createUserResponse.IsSuccess = false;
+                        createUserResponse.Message = "User already exists with the provided email";
+                    }
+                    else
+                    {
+                        user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == u.Dni);
+                        if (user != null)
+                        {
+                            createUserResponse.IsSuccess = false;
+                            createUserResponse.Message = "User already exists with the provided DNI";
+                        }
+                        else
+                        {
+                            if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
+                            {
+                                createUserResponse.IsSuccess = false;
+                                createUserResponse.Message = "Password and Confirm Password do not match";
+                            }
+                            else
+                            {
+                                if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                                {
+                                    createUserResponse.IsSuccess = false;
+                                    createUserResponse.Message = "Password does not meet the required criteria";
+                                }
+                                else
+                                {
+                                    string friendCode = GenericUtils.CreateFriendCode(8);
+                                    while (true)
+                                    {
+                                        if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
+                                            break;
+
+                                        friendCode = GenericUtils.CreateFriendCode(8);
+                                    }
+
+                                    User newUser = new User
+                                    {
+                                        Dni = createGenericUserRequest.Dni!,
+                                        Username = createGenericUserRequest.Username!,
+                                        Surname = createGenericUserRequest.Surname ?? "",
+                                        Email = createGenericUserRequest.Email!,
+                                        FriendCode = friendCode,
+                                        Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                                        Role = createGenericUserRequest.Role.ToString().ToLower(),
+                                        InscriptionDate = DateTime.UtcNow
+                                    };
+
+                                    await _context.Users.AddAsync(newUser);
+                                    await _context.SaveChangesAsync();
+
+                                    createUserResponse.IsSuccess = true;
+                                    createUserResponse.Message = "User created successfully";
+                                    createUserResponse.UserDTO = UserMapper.userToDTO(newUser);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                createUserResponse.Message = $"unexpected error on UserRepository -> CreateUser: {ex.Message}";
+                createUserResponse.IsSuccess = false;
+            }
+        
+            return createUserResponse;
+        }
+
+        public async Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest)
+        {
+            CreateGoogleUserResponse createGoogleUserResponse = new CreateGoogleUserResponse();
+            try
+            {
+                if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                {
+                    createGoogleUserResponse.IsSuccess = false;
+                    createGoogleUserResponse.Message = "Invalid email format";
+                }
+                else
+                {
+                    string friendCode = PasswordUtils.CreatePassword(8);
+                    while (true)
+                    {
+                        if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
+                        {
+                            break;
+                        }
+                        friendCode = PasswordUtils.CreatePassword(8);
+                    }
+
+                    User user = new User()
+                    {
+                        Dni = createGenericUserRequest.Dni ?? "",
+                        Username = createGenericUserRequest.Username ?? "no name",
+                        Surname = createGenericUserRequest.Surname ?? "",
+                        FriendCode = friendCode,
+                        Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                        Email = createGenericUserRequest.Email!,
+                        Role = createGenericUserRequest.Role.ToString().ToLower(),
+                        InscriptionDate = DateTime.UtcNow
+                    };
+
+                    await _context.Users.AddAsync(user);
+                    await _context.SaveChangesAsync();
+                
+                    MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
+
+                    createGoogleUserResponse.IsSuccess = true;
+                    createGoogleUserResponse.Message = "Usuario creado correctametne";
+                    createGoogleUserResponse.UserDTO = UserMapper.userToDTO(user);
+                }
+            }
+            catch (Exception ex)
+            {
+                createGoogleUserResponse.IsSuccess = false;
+                createGoogleUserResponse.Message = $"unexpected error on UserRepository -> CreateGoogleUser: {ex.Message}";
+            }
+        
+            return createGoogleUserResponse;
+        }
+
+        public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
+        {
+            DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteUserRequest.Email);
+                if (user == null)
+                {
+                    deleteUserResponse.IsSuccess = false;
+                    deleteUserResponse.Message = "User not found with the provided email";
+                }
+                else
+                {
+                    _context.Users.Remove(user);
+                    await _context.SaveChangesAsync();
+
+                    deleteUserResponse.IsSuccess = true;
+                    deleteUserResponse.UserId = user.UserId;
+                    deleteUserResponse.Message = "User deleted successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                deleteUserResponse.IsSuccess = false;
+                deleteUserResponse.Message = $"unexpected error on UserRepository -> DeleteUser: {ex.Message}";
+            }
+        
+            return deleteUserResponse;
         }
 
         public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
         {
-            throw new NotImplementedException();
+            UpdateUserResponse updateUserResponse = new UpdateUserResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == updateUserRequest.OldEmail);
+                if (user == null)
+                {
+                    updateUserResponse.IsSuccess = false;
+                    updateUserResponse.Message = "User not found with the provided email";
+                }
+                else
+                {
+                    user.Dni = updateUserRequest.NewDni ?? user.Dni;
+                    user.Username = updateUserRequest.NewUsername ?? user.Username;
+                    user.Surname = updateUserRequest.NewSurname ?? user.Surname;
+                    user.Email = updateUserRequest.NewEmail ?? user.Email;
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    updateUserResponse.IsSuccess = true;
+                    updateUserResponse.UserDTO = UserMapper.userToDTO(user);
+                    updateUserResponse.Message = "User updated successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                updateUserResponse.IsSuccess = false;
+                updateUserResponse.Message = $"unexpected error on UserRepository -> UpdateUser: {ex.Message}";
+            }
+        
+            return updateUserResponse;
+        }
+
+        public async Task<CreateNewPasswordResponse> CreateNewPassword(CreateNewPasswordRequest createNewPasswordRequest)
+        {
+            CreateNewPasswordResponse createNewPasswordResponse = new CreateNewPasswordResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createNewPasswordRequest.UserEmail);
+                if (user == null)
+                {
+                    createNewPasswordResponse.IsSuccess = false;
+                    createNewPasswordResponse.Message = "User not found with the provided email";
+                }
+                else
+                {
+                    string newPassword = PasswordUtils.CreatePassword(8);
+                    while (true)
+                    {
+                        if (PasswordUtils.PasswordEncoder(newPassword) != user.Password)
+                            break;
+
+                        newPassword = PasswordUtils.CreatePassword(8);
+                    }
+
+                    user.Password = PasswordUtils.PasswordEncoder(newPassword);
+                    await _context.SaveChangesAsync();
+
+                    MailUtils.SendEmail(user.Username, user.Email, newPassword);
+
+                    createNewPasswordResponse.IsSuccess = true;
+                    createNewPasswordResponse.UserId = user.UserId;
+                    createNewPasswordResponse.Message = "New password created successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                createNewPasswordResponse.IsSuccess = false;
+                createNewPasswordResponse.Message = $"unexpected error on UserRepository -> CreateNewPassword: {ex.Message}";
+            }
+
+            return createNewPasswordResponse;
+        }
+
+        public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
+        {
+            ChangePasswordWithPasswordAndEmailResponse changePasswordWithPasswordAndEmailResponse = new ChangePasswordWithPasswordAndEmailResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == changePasswordWithPasswordAndEmailRequest.UserEmail);
+                if (user == null)
+                {
+                    changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
+                    changePasswordWithPasswordAndEmailResponse.Message = "User not found with the provided email";
+                }
+                else
+                {
+                    if (user.Password != PasswordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.OldPassword!))
+                    {
+                        changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
+                        changePasswordWithPasswordAndEmailResponse.Message = "Old password does not match";
+                    }
+                    else
+                    {
+                        if (!PasswordUtils.IsPasswordValid(changePasswordWithPasswordAndEmailRequest.NewPassword!))
+                        {
+                            changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
+                            changePasswordWithPasswordAndEmailResponse.Message = "New password does not meet the required criteria";
+                        }
+                        else
+                        {
+                            user.Password = PasswordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.NewPassword!);
+
+                            await _context.SaveChangesAsync();
+
+                            MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
+
+                            changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
+                            changePasswordWithPasswordAndEmailResponse.UserId = user.UserId;
+                            changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
+                changePasswordWithPasswordAndEmailResponse.Message = $"unexpected error on UserRepository -> ChangePasswordWithPasswordAndEmail: {ex.Message}";
+            }
+
+            return changePasswordWithPasswordAndEmailResponse;
         }
     }
 }
