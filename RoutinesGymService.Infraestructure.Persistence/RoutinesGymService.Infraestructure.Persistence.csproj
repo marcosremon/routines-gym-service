@@ -14,6 +14,7 @@
     <ProjectReference Include="..\RoutinesGymService.Application.Interface\RoutinesGymService.Application.Interface.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Application.UseCase\RoutinesGymService.Application.UseCase.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj" />
+    <ProjectReference Include="..\RoutinesGymService.Transversal.Security\RoutinesGymService.Transversal.Security.csproj" />
   </ItemGroup>
 
 </Project>
