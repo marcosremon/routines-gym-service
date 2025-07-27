@@ -12,4 +12,8 @@
     <None Remove="Repository\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RoutinesGymService.Application.Interface\RoutinesGymService.Application.Interface.csproj" />
+  </ItemGroup>
+
 </Project>
