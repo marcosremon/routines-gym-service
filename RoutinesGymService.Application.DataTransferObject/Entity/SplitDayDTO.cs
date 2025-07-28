@@ -5,5 +5,6 @@
         public string DayName { get; set; } = string.Empty;
         public int RoutineId { get; set; }
         public string DayExercisesDescription { get; set; } = string.Empty;
+        public List<ExerciseDTO> Exercises { get; set; } = new List<ExerciseDTO>();
     }
 }

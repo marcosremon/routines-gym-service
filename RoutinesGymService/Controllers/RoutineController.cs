@@ -51,7 +51,10 @@ namespace RoutinesGymService.Controllers
                         UserEmail = createRoutineRequestJson.UserEmail,
                         RoutineName = createRoutineRequestJson.RoutineName,
                         RoutineDescription = createRoutineRequestJson.RoutineDescription,
-                        SplitDays = createRoutineRequestJson.SplitDays
+                        SplitDays = createRoutineRequestJson.SplitDays,
+                        Sets = createRoutineRequestJson.Sets,
+                        Reps = createRoutineRequestJson.Reps,
+                        Weight = createRoutineRequestJson.Weight
                     };
 
                     CreateRoutineResponse createRoutineResponse = await _routineApplication.CreateRoutine(createRoutineRequest);
