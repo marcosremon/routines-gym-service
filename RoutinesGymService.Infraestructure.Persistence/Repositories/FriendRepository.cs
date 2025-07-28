@@ -72,7 +72,49 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<DeleteFriendResponse> DeleteFriend(DeleteFriendRequest deleteFriendRequest)
         {
-            throw new NotImplementedException();
+            DeleteFriendResponse deleteFriendResponse = new DeleteFriendResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteFriendRequest.UserEmail);
+                if (user == null)
+                {
+                    deleteFriendResponse.IsSuccess = false;
+                    deleteFriendResponse.Message = "User not found";
+                }
+                else
+                {
+                    User? friend = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteFriendRequest.FriendEmail);
+                    if (friend == null)
+                    {
+                        deleteFriendResponse.IsSuccess = false;
+                        deleteFriendResponse.Message = "Friend not found";
+                    }
+                    else
+                    {
+                        UserFriend? userFriend = _context.UserFriends.FirstOrDefault(f => f.UserId == user.UserId && f.FriendId == friend.UserId);
+                        if (userFriend == null)
+                        {
+                            deleteFriendResponse.IsSuccess = false;
+                            deleteFriendResponse.Message = "This user is already your friend";
+                        }
+                        else
+                        {   
+                            _context.UserFriends.Remove(userFriend);
+                            await _context.SaveChangesAsync();
+
+                            deleteFriendResponse.IsSuccess = true;
+                            deleteFriendResponse.Message = "Friend added successfully";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                deleteFriendResponse.IsSuccess = false;
+                deleteFriendResponse.Message = $"Unexpected error on FriendRepository -> DeleteFriendResponse: {ex.Message}";
+            }
+
+            return deleteFriendResponse;
         }
 
         public async Task<GetAllUserFriendsResponse> GetAllUserFriends(GetAllUserFriendsRequest getAllUserFriendsRequest)
