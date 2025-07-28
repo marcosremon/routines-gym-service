@@ -5,5 +5,6 @@
         public string RoutineName { get; set; } = string.Empty;
         public string RoutineDescription { get; set; } = string.Empty;
         public int UserId { get; set; }
+        public List<SplitDayDTO> SplitDays { get; set; } = new List<SplitDayDTO>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using RoutinesGymService.Domain.Model.Enums;
+using System.Text;
 
 namespace RoutinesGymService.Transversal.Common
 {
@@ -20,7 +21,24 @@ namespace RoutinesGymService.Transversal.Common
 
             return dayName;
         }
-        
+
+        public static WeekDay ChangeStringToEnumOnDayName(string dayName)
+        {
+            dayName = ChangeDayLanguage(dayName);
+            switch (dayName)
+            {
+                case "Monday": return WeekDay.MONDAY; 
+                case "Tuesday": return WeekDay.TUESDAY; 
+                case "Wednesday": return WeekDay.WEDNESDAY; 
+                case "Thursday": return WeekDay.THUESDAY; 
+                case "Friday": return WeekDay.FRIDAY; 
+                case "Saturday": return WeekDay.SATURDAY; 
+                case "Sunday": return WeekDay.SUNDAY; 
+            }
+
+            return WeekDay.MONDAY; // Default to Monday if no match found
+        }
+
         public static string CreateFriendCode(int length)
         {
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
