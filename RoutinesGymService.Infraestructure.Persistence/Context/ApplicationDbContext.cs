@@ -15,7 +15,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
         public DbSet<Routine> Routines { get; set; }
         public DbSet<SplitDay> SplitDays { get; set; }
         public DbSet<Exercise> Exercises { get; set; }
-        public DbSet<ExerciseProgress> ExerciseProgresses { get; set; }
+        public DbSet<ExerciseProgress> ExerciseProgress { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

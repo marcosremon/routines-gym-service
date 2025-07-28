@@ -19,9 +19,9 @@ namespace RoutinesGymService.Application.UseCase
             return await _splitDayRepository.DeleteSplitDay(deleteSplitDayRequest);
         }
 
-        public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest actualizarSplitDayRequest)
+        public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest updateSplitDayRequest)
         {
-            return await _splitDayRepository.UpdateSplitDay(actualizarSplitDayRequest);
+            return await _splitDayRepository.UpdateSplitDay(updateSplitDayRequest);
         }
     }
 }

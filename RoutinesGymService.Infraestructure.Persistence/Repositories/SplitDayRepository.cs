@@ -2,8 +2,11 @@
 using RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -81,9 +84,104 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             return deleteSplitDayResponse;
         }
 
-        public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest actualizarSplitDayRequest)
+        public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest updateSplitDayRequest)
         {
-            throw new NotImplementedException();
+            UpdateSplitDayResponse updateSplitDayResponse = new UpdateSplitDayResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == updateSplitDayRequest.UserEmail);
+                if (user == null)
+                {
+                    updateSplitDayResponse.IsSuccess = false;
+                    updateSplitDayResponse.Message = "User not found";
+                }
+                else
+                {
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == updateSplitDayRequest.RoutineId);
+                    if (routine == null)
+                    {
+                        updateSplitDayResponse.IsSuccess = false;
+                        updateSplitDayResponse.Message = "Routine not found";
+                    }
+                    else
+                    {
+                        if (!user.Routines.Any(r => r.RoutineId == routine.RoutineId))
+                        {
+                            updateSplitDayResponse.IsSuccess = false;
+                            updateSplitDayResponse.Message = "User does not have this routine";
+                        }
+                        else
+                        {
+                            if (updateSplitDayRequest.DeleteDays.Count == 0 && updateSplitDayRequest.AddDays.Count == 0)
+                            {
+                                updateSplitDayResponse.IsSuccess = false;
+                                updateSplitDayResponse.Message = "No days to delete or add";
+                            }
+                            else
+                            {
+                                if (updateSplitDayRequest.DeleteDays.Count > 0)
+                                {
+                                    updateSplitDayRequest.DeleteDays.ForEach(dayName =>
+                                    {
+                                        dayName = GenericUtils.ChangeDayLanguage(dayName);
+
+                                        // Buscar el SplitDay a eliminar
+                                        SplitDay? splitDayToDelete = _context.SplitDays
+                                            .Include(sd => sd.Exercises)
+                                            .FirstOrDefault(sd => sd.DayName.ToString() == dayName && sd.RoutineId == routine.RoutineId);
+
+                                        if (splitDayToDelete != null)
+                                        {
+                                            // Obtener los IDs de los ejercicios de ese día
+                                            List<int> exerciseIds = splitDayToDelete.Exercises.Select(e => e.ExerciseId).ToList();
+
+                                            // Eliminar los ExerciseProgress asociados
+                                            var progressToDelete = _context.ExerciseProgress.Where(ep => exerciseIds.Contains(ep.ExerciseId));
+                                            _context.ExerciseProgress.RemoveRange(progressToDelete);
+
+                                            // Eliminar los ejercicios asociados
+                                            _context.Exercises.RemoveRange(splitDayToDelete.Exercises);
+
+                                            // Eliminar el SplitDay
+                                            _context.SplitDays.Remove(splitDayToDelete);
+                                        }
+                                    });
+                                }
+
+                                if (updateSplitDayRequest.AddDays.Count > 0)
+                                {
+                                    updateSplitDayRequest.AddDays.ForEach(dayName =>
+                                    {
+                                        dayName = GenericUtils.ChangeDayLanguage(dayName);
+
+                                        WeekDay weekDay = Enum.Parse<WeekDay>(dayName, true);
+                                        SplitDay newSplitDay = new SplitDay
+                                        {
+                                            DayName = weekDay,
+                                            RoutineId = routine.RoutineId,
+                                            Exercises = new List<Exercise>()
+                                        };
+                                        routine.SplitDays.Add(newSplitDay);
+                                    });
+                                }
+
+                                await _context.SaveChangesAsync();
+
+                                
+                                updateSplitDayResponse.IsSuccess = true;
+                                updateSplitDayResponse.Message = "Split day updated successfully.";
+                                updateSplitDayResponse.UserDTO = UserMapper.UserToDto(user);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                updateSplitDayResponse.IsSuccess = false;
+                updateSplitDayResponse.Message = ex.Message;
+            }
+            return updateSplitDayResponse;
         }
     }
 }
