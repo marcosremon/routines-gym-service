@@ -13,7 +13,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         public int SplitDayId { get; set; }
 
         [Column("day_name")]
-        public WeekDay? DayName { get; set; } 
+        public WeekDay DayName { get; set; } 
 
         [Column("routine_id")]
         public int RoutineId { get; set; }
