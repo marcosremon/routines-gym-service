@@ -179,7 +179,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             catch (Exception ex)
             {
                 updateSplitDayResponse.IsSuccess = false;
-                updateSplitDayResponse.Message = ex.Message;
+                updateSplitDayResponse.Message = $"unexpected error on SplitDayRepository -> DeleteSplitDay: {ex.Message}";
             }
             return updateSplitDayResponse;
         }

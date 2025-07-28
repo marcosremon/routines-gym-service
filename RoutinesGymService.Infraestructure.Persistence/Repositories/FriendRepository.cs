@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 
@@ -119,7 +121,45 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<GetAllUserFriendsResponse> GetAllUserFriends(GetAllUserFriendsRequest getAllUserFriendsRequest)
         {
-            throw new NotImplementedException();
+            GetAllUserFriendsResponse getAllUserFriendsResponse = new GetAllUserFriendsResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllUserFriendsRequest.UserEmail);
+                if (user == null)
+                {
+                    getAllUserFriendsResponse.IsSuccess = false;
+                    getAllUserFriendsResponse.Message = "User not found";
+                }
+                else
+                {
+                    List<long> friendsIds = await _context.UserFriends
+                        .Where(uf => uf.UserId == user.UserId)
+                        .Select(uf => uf.FriendId)
+                        .ToListAsync();
+                    if (friendsIds == null || friendsIds.Count == 0)
+                    {
+                        getAllUserFriendsResponse.IsSuccess = false;
+                        getAllUserFriendsResponse.Message = "No friends found for this user";
+                    }
+                    else
+                    {
+                        List<User> friends = await _context.Users
+                            .Where(u => friendsIds.Contains(u.UserId))
+                            .ToListAsync();
+
+                        getAllUserFriendsResponse.IsSuccess = true;
+                        getAllUserFriendsResponse.Message = "Friends retrieved successfully";
+                        getAllUserFriendsResponse.Friends = friends.Select(f => UserMapper.UserToDto(f)).ToList();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getAllUserFriendsResponse.IsSuccess = false;
+                getAllUserFriendsResponse.Message = $"Unexpected error on FriendRepository -> GetAllUserFriends: {ex.Message}";
+            }
+        
+            return getAllUserFriendsResponse;
         }
     }
 }
