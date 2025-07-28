@@ -44,7 +44,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     getUserByEmailResponse.Message = "User found successfully";
                     getUserByEmailResponse.RoutinesCount = user.Routines.Count;
                     getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
-                    getUserByEmailResponse.UserDTO = UserMapper.userToDTO(user);
+                    getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
                 }
             }
             catch (Exception ex)
@@ -71,7 +71,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     getUsersResponse.IsSuccess = true;
                     getUsersResponse.Message = "Users found successfully";
-                    getUsersResponse.UsersDTO = users.Select(user => UserMapper.userToDTO(user)).ToList();
+                    getUsersResponse.UsersDTO = users.Select(user => UserMapper.UserToDto(user)).ToList();
                 }
             }
             catch (Exception ex)
@@ -151,7 +151,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                                     createUserResponse.IsSuccess = true;
                                     createUserResponse.Message = "User created successfully";
-                                    createUserResponse.UserDTO = UserMapper.userToDTO(newUser);
+                                    createUserResponse.UserDTO = UserMapper.UserToDto(newUser);
                                 }
                             }
                         }
@@ -208,7 +208,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     createGoogleUserResponse.IsSuccess = true;
                     createGoogleUserResponse.Message = "Usuario creado correctametne";
-                    createGoogleUserResponse.UserDTO = UserMapper.userToDTO(user);
+                    createGoogleUserResponse.UserDTO = UserMapper.UserToDto(user);
                 }
             }
             catch (Exception ex)
@@ -271,7 +271,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.SaveChangesAsync();
                     
                     updateUserResponse.IsSuccess = true;
-                    updateUserResponse.UserDTO = UserMapper.userToDTO(user);
+                    updateUserResponse.UserDTO = UserMapper.UserToDto(user);
                     updateUserResponse.Message = "User updated successfully";
                 }
             }
