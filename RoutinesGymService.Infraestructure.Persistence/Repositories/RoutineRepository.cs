@@ -230,12 +230,112 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
         {
-            throw new NotImplementedException();
+            GetRoutineStatsResponse getRoutineStatsResponse = new GetRoutineStatsResponse();
+            try
+            {
+                User? user = await _context.Users
+                    .Include(u => u.Routines)
+                    .ThenInclude(r => r.SplitDays)
+                    .ThenInclude(sd => sd.Exercises)
+                    .FirstOrDefaultAsync(u => u.Email == getRoutineStatsRequest.UserEmail);
+                if (user == null)
+                {
+                    getRoutineStatsResponse.IsSuccess = false;
+                    getRoutineStatsResponse.Message = "User not found";
+                }
+                else
+                {
+
+                    List<Routine> routines = user.Routines.ToList();
+                    if (!routines.Any())
+                    {
+                        getRoutineStatsResponse.RoutinesCount = 0;
+                        getRoutineStatsResponse.SplitsCount = 0;
+                        getRoutineStatsResponse.ExercisesCount = 0;
+                        getRoutineStatsResponse.IsSuccess = true;
+                        getRoutineStatsResponse.Message = "No routines found for the user";
+                    }
+                    else
+                    {
+                        List<SplitDay> splitDays = routines.SelectMany(r => r.SplitDays).ToList();
+                        if (!splitDays.Any())
+                        {
+                            getRoutineStatsResponse.RoutinesCount = routines.Count;
+                            getRoutineStatsResponse.SplitsCount = 0;
+                            getRoutineStatsResponse.ExercisesCount = 0;
+                            getRoutineStatsResponse.IsSuccess = true;
+                            getRoutineStatsResponse.Message = "No split days found for the user's routines";
+                        }
+                        else
+                        {
+                            List<Exercise> exercises = splitDays.SelectMany(sd => sd.Exercises).ToList();
+                            if (!exercises.Any())
+                            {
+                                getRoutineStatsResponse.RoutinesCount = routines.Count;
+                                getRoutineStatsResponse.SplitsCount = splitDays.Count;
+                                getRoutineStatsResponse.ExercisesCount = 0;
+                                getRoutineStatsResponse.IsSuccess = true;
+                                getRoutineStatsResponse.Message = "No exercises found for the user's split days";
+                            }
+                            else
+                            {
+                                getRoutineStatsResponse.RoutinesCount = routines.Count;
+                                getRoutineStatsResponse.SplitsCount = splitDays.Count;
+                                getRoutineStatsResponse.ExercisesCount = exercises.Count;
+                                getRoutineStatsResponse.IsSuccess = true;
+                                getRoutineStatsResponse.Message = "Routine stats retrieved successfully";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getRoutineStatsResponse.IsSuccess = false;
+                getRoutineStatsResponse.Message = $"unexpected error on RoutineRepository -> GetRoutineStats: {ex.Message}";
+            }
+
+            return getRoutineStatsResponse;
         }
 
         public async Task<UpdateRoutineResponse> UpdateRoutine(UpdateRoutineRequest updateRoutineRequest)
         {
-            throw new NotImplementedException();
+            UpdateRoutineResponse updateRoutineResponse = new UpdateRoutineResponse();
+            try
+            {
+                Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == updateRoutineRequest.RoutineId);
+                if (routine == null)
+                {
+                    updateRoutineResponse.IsSuccess = false;
+                    updateRoutineResponse.Message = "Routine not found";
+                }
+                else
+                {
+                    routine.RoutineName = updateRoutineRequest.RoutineName ?? routine.RoutineName;
+                    routine.RoutineDescription = updateRoutineRequest.RoutineDescription ?? routine.RoutineDescription;
+                    routine.SplitDays = updateRoutineRequest.SplitDays.Select(sd => new SplitDay
+                    {
+                        DayName = sd.DayName.ToString(),
+                        Exercises = sd.Exercises.Select(e => new Exercise
+                        {
+                            ExerciseName = e.ExerciseName
+                        }).ToList()
+                    }).ToList() ?? routine.SplitDays;
+
+                    await _context.SaveChangesAsync();
+
+                    updateRoutineResponse.IsSuccess = true;
+                    updateRoutineResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
+                    updateRoutineResponse.Message = "Routine updated successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                updateRoutineResponse.IsSuccess = false;
+                updateRoutineResponse.Message = ex.Message;
+            }
+
+            return updateRoutineResponse;
         }
     }
 }
