@@ -119,7 +119,49 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<DeleteRoutineResponse> DeleteRoutine(DeleteRoutineRequest deleteRoutineRequest)
         {
-            throw new NotImplementedException();
+            DeleteRoutineResponse deleteRoutineResponse = new DeleteRoutineResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteRoutineRequest.UserEmail);
+                if (user == null)
+                {
+                    deleteRoutineResponse.IsSuccess = false;
+                    deleteRoutineResponse.Message = "User not found";
+                }
+                else
+                {
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == deleteRoutineRequest.RoutineId && r.UserId == user.UserId);
+                    if (routine == null)
+                    {
+                        deleteRoutineResponse.IsSuccess = false;
+                        deleteRoutineResponse.Message = "Routine not found for the user";
+                    }
+                    else
+                    {
+                        if (!user.Routines.Contains(routine))
+                        {
+                            deleteRoutineResponse.IsSuccess = false;
+                            deleteRoutineResponse.Message = "This routine does not belong to the user";
+                        }
+                        else
+                        {
+                            _context.Routines.Remove(routine);
+                            await _context.SaveChangesAsync();
+
+                            deleteRoutineResponse.IsSuccess = true;
+                            deleteRoutineResponse.UserId = user.UserId;
+                            deleteRoutineResponse.Message = "Routine deleted successfully";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                deleteRoutineResponse.Message = $"unexpected error on RoutineRepository -> DeleteRoutine {ex.Message}";
+                deleteRoutineResponse.IsSuccess = false;
+            }
+
+            return deleteRoutineResponse;
         }
 
         public async Task<GetAllUserRoutinesResponse> GetAllUserRoutines(GetAllUserRoutinesRequest getAllUserRoutinesRequest)
