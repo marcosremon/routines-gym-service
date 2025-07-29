@@ -194,7 +194,7 @@ namespace RoutinesGymService.Controllers
 
         #region Add exercise
         [HttpPost("add-exercise")]
-        public async Task<ActionResult<AddExerciseResponseJson>> addExercise([FromBody] AddExerciseRequestJson addExerciseRequestJson)
+        public async Task<ActionResult<AddExerciseResponseJson>> AddExercise([FromBody] AddExerciseRequestJson addExerciseRequestJson)
         {
             AddExerciseResponseJson addExerciseResponseJson = new AddExerciseResponseJson();
             addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
@@ -219,9 +219,6 @@ namespace RoutinesGymService.Controllers
                         ExerciseName = addExerciseRequestJson.ExerciseName,
                         DayName = addExerciseRequestJson.DayName,
                         UserEmail = addExerciseRequestJson.UserEmail,
-                        Sets = addExerciseRequestJson.Sets,
-                        Reps = addExerciseRequestJson.Reps,
-                        Weight = addExerciseRequestJson.Weight
                     };
 
                     AddExerciseResponse addExerciseResponse = await _exerciseApplication.AddExercise(addExerciseRequest);

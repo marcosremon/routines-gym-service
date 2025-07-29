@@ -1,9 +1,13 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
+﻿using Microsoft.EntityFrameworkCore;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Application.Mapper;
+using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
@@ -17,27 +21,295 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<AddExerciseResponse> addExercise(AddExerciseRequest addExerciseRequest)
+        public async Task<AddExerciseResponse> AddExercise(AddExerciseRequest addExerciseRequest)
         {
-            throw new NotImplementedException();
-        }
+            AddExerciseResponse addExerciseResponse = new AddExerciseResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == addExerciseRequest.UserEmail);
+                if (user == null)
+                {
+                    addExerciseResponse.IsSuccess = false;
+                    addExerciseResponse.Message = "User not found.";
+                }
+                else
+                {
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
+                        r.RoutineId == addExerciseRequest.RoutineId &&
+                        r.UserId == user.UserId);
+                    if (routine == null)
+                    {
+                        addExerciseResponse.IsSuccess = false;
+                        addExerciseResponse.Message = "Routine not found.";
+                    }
+                    else
+                    {
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                            s.RoutineId == addExerciseRequest.RoutineId &&
+                            s.DayName == addExerciseRequest.DayName);
+                        if (splitDay == null)
+                        {
+                            addExerciseResponse.IsSuccess = false;
+                            addExerciseResponse.Message = "Split day not found.";
+                        }
+                        else
+                        {
+                            Exercise? exercise = _context.Exercises.FirstOrDefault(e =>
+                                e.RoutineId == routine.RoutineId &&
+                                e.SplitDayId == splitDay.SplitDayId &&
+                                e.ExerciseName == addExerciseRequest.ExerciseName);
+                            if (exercise != null)
+                            {
+                                addExerciseResponse.IsSuccess = false;
+                                addExerciseResponse.Message = "Exercise already exists for this routine and day.";
+                            }
+                            else
+                            {
+                                Exercise newExercise = new Exercise
+                                {
+                                    RoutineId = routine.RoutineId,
+                                    SplitDayId = splitDay.SplitDayId,
+                                    ExerciseName = addExerciseRequest.ExerciseName
+                                };
 
-        public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseRequest)
-        {
-            throw new NotImplementedException();
+                                _context.Exercises.Add(newExercise);
+                                await _context.SaveChangesAsync();
+
+                                splitDay.Exercises.Add(newExercise);
+                                await _context.SaveChangesAsync();
+
+                                addExerciseResponse.IsSuccess = true;
+                                addExerciseResponse.UserDTO = UserMapper.UserToDto(user);
+                                addExerciseResponse.Message = "Exercise added successfully.";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                addExerciseResponse.IsSuccess = false;
+                addExerciseResponse.Message = $"unexpected error on ExerciseRepository -> AddExercise: {ex.Message}";
+            }
+
+            return addExerciseResponse;
         }
 
         public async Task<DeleteExerciseResponse> DeleteExercise(DeleteExerciseRequest deleteExerciseRequest)
         {
-            throw new NotImplementedException();
+            DeleteExerciseResponse deleteExerciseResponse = new DeleteExerciseResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteExerciseRequest.UserEmail);
+                if (user == null)
+                {
+                    deleteExerciseResponse.IsSuccess = false;
+                    deleteExerciseResponse.Message = "User not found.";
+                }
+                else
+                {
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
+                        r.RoutineId == deleteExerciseRequest.RoutineId &&
+                        r.UserId == user.UserId);
+                    if (routine == null)
+                    {
+                        deleteExerciseResponse.IsSuccess = false;
+                        deleteExerciseResponse.Message = "Routine not found.";
+                    }
+                    else
+                    {
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                            s.RoutineId == deleteExerciseRequest.RoutineId &&
+                            s.DayName == deleteExerciseRequest.DayName);
+                        if (splitDay == null)
+                        {
+                            deleteExerciseResponse.IsSuccess = false;
+                            deleteExerciseResponse.Message = "Split day not found.";
+                        }
+                        else
+                        {
+                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
+                                e.RoutineId == routine.RoutineId &&
+                                e.SplitDayId == splitDay.SplitDayId &&
+                                e.ExerciseId == deleteExerciseRequest.ExerciseId);
+                            if (exercise == null)
+                            {
+                                deleteExerciseResponse.IsSuccess = false;
+                                deleteExerciseResponse.Message = "Exercise not found.";
+                            }
+                            else
+                            {
+                                _context.Exercises.Remove(exercise);
+                                await _context.SaveChangesAsync();
+                            
+                                splitDay.Exercises.Remove(exercise);
+                                await _context.SaveChangesAsync();
+
+                                List<ExerciseProgress> exerciseProgresses = await _context.ExerciseProgress
+                                    .Where(ep => ep.ExerciseId == exercise.ExerciseId)
+                                    .ToListAsync(); 
+                                _context.ExerciseProgress.RemoveRange(exerciseProgresses);
+                                await _context.SaveChangesAsync();
+                                
+                                deleteExerciseResponse.IsSuccess = true;
+                                deleteExerciseResponse.UserDTO = UserMapper.UserToDto(user);
+                                deleteExerciseResponse.Message = "Exercise deleted successfully.";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                deleteExerciseResponse.IsSuccess = false;
+                deleteExerciseResponse.Message = $"unexpected error on ExerciseRepository -> DeleteExercise: {ex.Message}";
+            }
+
+            return deleteExerciseResponse;
         }
 
         public async Task<GetExercisesByDayAndRoutineIdResponse> GetExercisesByDayAndRoutineId(GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest)
         {
-            throw new NotImplementedException();
+            GetExercisesByDayAndRoutineIdResponse getExercisesByDayAndRoutineIdResponse = new GetExercisesByDayAndRoutineIdResponse();
+            try
+            {
+                Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
+                    r.RoutineId == getExercisesByDayNameRequest.RoutineId);
+                if (routine == null)
+                {
+                    getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
+                    getExercisesByDayAndRoutineIdResponse.Message = "Routine not found.";
+                }
+                else
+                {
+                    SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                        s.RoutineId == getExercisesByDayNameRequest.RoutineId &&
+                        s.DayName == getExercisesByDayNameRequest.DayName);
+                    if (splitDay == null)
+                    {
+                        getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
+                        getExercisesByDayAndRoutineIdResponse.Message = "Split day not found.";
+                    }
+                    else
+                    {
+                        List<Exercise> exercises = await _context.Exercises
+                            .Where(e => 
+                                e.RoutineId == routine.RoutineId && 
+                                e.SplitDayId == splitDay.SplitDayId)
+                            .ToListAsync();
+                        if (exercises.Count == 0)
+                        {
+                            getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
+                            getExercisesByDayAndRoutineIdResponse.Message = "No exercises found for this routine and day.";
+                        }
+                        else
+                        {
+                            Dictionary<long, List<string>> pastProgressDict = new Dictionary<long, List<string>>();
+                            foreach (Exercise exercise in exercises)
+                            {
+                                List<ExerciseProgress> last3Progress = await _context.ExerciseProgress
+                                   .Where(p => p.ExerciseId == exercise.ExerciseId && 
+                                        p.RoutineId == splitDay.RoutineId &&
+                                        p.DayName == splitDay.DayName.ToString())
+                                   .OrderByDescending(p => p.PerformedAt)
+                                   .Take(3)
+                                   .ToListAsync();
+
+                                List<string> pastProgress = last3Progress
+                                    .Select(p => $"{p.Sets}x{p.Reps}@{p.Weight}kg")
+                                    .ToList();
+
+                                pastProgressDict[exercise.ExerciseId] = pastProgress;
+                            }
+
+                            getExercisesByDayAndRoutineIdResponse.Exercises = exercises.Select(e => ExerciseMapper.ExerciseToDto(e)).ToList();
+                            getExercisesByDayAndRoutineIdResponse.PastProgress = pastProgressDict;
+                            getExercisesByDayAndRoutineIdResponse.IsSuccess = true;
+                            getExercisesByDayAndRoutineIdResponse.Message = "Exercises retrieved successfully.";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
+                getExercisesByDayAndRoutineIdResponse.Message = $"unexpected error on ExerciseRepository -> GetExercisesByDayAndRoutineId: {ex.Message}";
+            }
+
+            return getExercisesByDayAndRoutineIdResponse;
         }
 
         public async Task<UpdateExerciseResponse> UpdateExercise(UpdateExerciseRequest updateExerciseRequest)
+        {
+            UpdateExerciseResponse updateExerciseResponse = new UpdateExerciseResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == updateExerciseRequest.UserId);
+                if (user == null)
+                {
+                    updateExerciseResponse.IsSuccess = false;
+                    updateExerciseResponse.Message = "User not found";
+                }
+                else
+                {
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
+                        r.RoutineId == updateExerciseRequest.RoutineId &&
+                        r.UserId == user.UserId);
+                    if (routine == null)
+                    {
+                        updateExerciseResponse.IsSuccess = false;
+                        updateExerciseResponse.Message = "Routine not found.";
+                    }
+                    else
+                    {
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                            s.RoutineId == updateExerciseRequest.RoutineId &&
+                            s.DayName == updateExerciseRequest.DayName.ToString());
+                        if (splitDay == null)
+                        {
+                            updateExerciseResponse.IsSuccess = false;
+                            updateExerciseResponse.Message = "Split day not found.";
+                        }
+                        else
+                        {
+                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
+                                e.RoutineId == routine.RoutineId &&
+                                e.SplitDayId == splitDay.SplitDayId &&
+                                e.ExerciseName == updateExerciseRequest.ExerciseName);
+                            if (exercise == null)
+                            {
+                                updateExerciseResponse.IsSuccess = false;
+                                updateExerciseResponse.Message = "Exercise not found.";
+                            }
+                            else
+                            {
+                                // to_do
+
+                                // Update the exercise properties
+                                //exercise.ExerciseName = updateExerciseRequest.ExerciseName ?? exercise.ExerciseName;
+                                //exercise.Sets = updateExerciseRequest.Sets ?? exercise.Sets;
+                                //exercise.Reps = updateExerciseRequest.Reps ?? exercise.Reps;
+                                //exercise.Weight = updateExerciseRequest.Weight ?? exercise.Weight;
+                                //_context.Exercises.Update(exercise);
+                                //await _context.SaveChangesAsync();
+                                //updateExerciseResponse.IsSuccess = true;
+                                //updateExerciseResponse.UserDTO = UserMapper.UserToDto(user);
+                                //updateExerciseResponse.Message = "Exercise updated successfully.";
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                updateExerciseResponse.IsSuccess = false;
+                updateExerciseResponse.Message = $"unexpected error on ExerciseRepository -> UpdateExercise: {ex.Message}";
+            }
+            
+            return updateExerciseResponse;
+        }
+        
+        public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseRequest)
         {
             throw new NotImplementedException();
         }

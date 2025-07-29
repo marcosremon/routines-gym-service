@@ -19,7 +19,7 @@ namespace RoutinesGymService.Application.UseCase
 
         public async Task<AddExerciseResponse> AddExercise(AddExerciseRequest addExerciseRequest)
         {
-            return await _exerciseRepository.addExercise(addExerciseRequest);
+            return await _exerciseRepository.AddExercise(addExerciseRequest);
         }
 
         public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseRequest)
