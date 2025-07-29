@@ -1,11 +1,9 @@
-﻿using RoutinesGymService.Domain.Model.Enums;
-
-namespace RoutinesGymService.Application.DataTransferObject.Entity
+﻿namespace RoutinesGymService.Application.DataTransferObject.Entity
 {
     public class ExerciseDTO
     {
         public string ExerciseName { get; set; } = string.Empty;
         public int RoutineId { get; set; }
-        public WeekDay DayName { get; set; }
+        public int SplitDayId { get; set; }
     }
 }
