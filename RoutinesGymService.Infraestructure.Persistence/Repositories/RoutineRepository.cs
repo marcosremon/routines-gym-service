@@ -7,6 +7,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetR
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineStats;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
@@ -166,7 +167,38 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<GetAllUserRoutinesResponse> GetAllUserRoutines(GetAllUserRoutinesRequest getAllUserRoutinesRequest)
         {
-            throw new NotImplementedException();
+            GetAllUserRoutinesResponse getAllUserRoutinesResponse = new GetAllUserRoutinesResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllUserRoutinesRequest.UserEmail);
+                if (user == null)
+                {
+                    getAllUserRoutinesResponse.IsSuccess = false;
+                    getAllUserRoutinesResponse.Message = "User not found";
+                }
+                else
+                {
+                    List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
+                    if (routines.Count == 0)
+                    {
+                        getAllUserRoutinesResponse.IsSuccess = false;
+                        getAllUserRoutinesResponse.Message = "No routines found for the user";
+                    }
+                    else
+                    {
+                        getAllUserRoutinesResponse.Routines = routines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
+                        getAllUserRoutinesResponse.IsSuccess = true;
+                        getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getAllUserRoutinesResponse.Message = $"unexpected error on RoutineRepository -> GetAllUserRoutines {ex.Message}";
+                getAllUserRoutinesResponse.IsSuccess = false;
+            }
+
+            return getAllUserRoutinesResponse;
         }
 
         public async Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest)
