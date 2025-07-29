@@ -203,7 +203,29 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest)
         {
-            throw new NotImplementedException();
+            GetRoutineByIdResponse getRoutineByIdResponse = new GetRoutineByIdResponse();
+            try
+            {
+                Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == getRoutineByIdRequest.RoutineId);
+                if (routine == null)
+                {
+                    getRoutineByIdResponse.IsSuccess = false;
+                    getRoutineByIdResponse.Message = "Routine not found";
+                }
+                else
+                {
+                    getRoutineByIdResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
+                    getRoutineByIdResponse.IsSuccess = true;
+                    getRoutineByIdResponse.Message = "Routine retrieved successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                getRoutineByIdResponse.Message = $"unexpected error on RoutineRepository -> GetRoutineById {ex.Message}";
+                getRoutineByIdResponse.IsSuccess = false;
+            }
+
+            return getRoutineByIdResponse;
         }
 
         public async Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
