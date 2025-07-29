@@ -320,11 +320,11 @@ namespace RoutinesGymService.Controllers
                 {
                     UpdateUserRequest updateUserRequest = new UpdateUserRequest
                     {
-                        OriginalEmail = updateUserRequestJson.OriginalEmail,
-                        DniToBeFound = updateUserRequestJson.DniToBeFound,
-                        Username = updateUserRequestJson.Username,
-                        Surname = updateUserRequestJson.Surname,
-                        Email = updateUserRequestJson.Email,
+                        OldEmail = updateUserRequestJson.OriginalEmail,
+                        NewDni = updateUserRequestJson.DniToBeFound,
+                        NewUsername = updateUserRequestJson.Username,
+                        NewSurname = updateUserRequestJson.Surname,
+                        NewEmail = updateUserRequestJson.Email,
                     };
 
                     UpdateUserResponse updateUserResponse = await _userApplication.UpdateUser(updateUserRequest);
@@ -333,7 +333,7 @@ namespace RoutinesGymService.Controllers
                         updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
                         updateUserResponseJson.Message = updateUserResponse.Message;
-                        updateUserResponseJson.UserId = updateUserResponse.UserId;
+                        updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
                     }
                     else
                     {
