@@ -264,17 +264,17 @@ namespace RoutinesGymService.Controllers
                         getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
                         getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
-                        getRoutineStatsResponseJson.routinesCount  = getRoutineStatsResponse.routinesCount;
-                        getRoutineStatsResponseJson.exercisesCount = getRoutineStatsResponse.exercisesCount;
-                        getRoutineStatsResponseJson.splitsCount = getRoutineStatsResponse.splitsCount;
+                        getRoutineStatsResponseJson.routinesCount  = getRoutineStatsResponse.RoutinesCount;
+                        getRoutineStatsResponseJson.exercisesCount = getRoutineStatsResponse.ExercisesCount;
+                        getRoutineStatsResponseJson.splitsCount = getRoutineStatsResponse.SplitsCount;
                     }
                     else
                     {
                         getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
                         getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
-                        getRoutineStatsResponseJson.routinesCount = getRoutineStatsResponse.routinesCount;
-                        getRoutineStatsResponseJson.exercisesCount = getRoutineStatsResponse.exercisesCount;
-                        getRoutineStatsResponseJson.splitsCount = getRoutineStatsResponse.splitsCount;
+                        getRoutineStatsResponseJson.routinesCount = getRoutineStatsResponse.RoutinesCount;
+                        getRoutineStatsResponseJson.exercisesCount = getRoutineStatsResponse.ExercisesCount;
+                        getRoutineStatsResponseJson.splitsCount = getRoutineStatsResponse.SplitsCount;
                     }
                 }
             }
