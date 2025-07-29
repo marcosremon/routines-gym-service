@@ -20,32 +20,5 @@ namespace RoutinesGymService.Application.Mapper
                 InscriptionDate = user.InscriptionDate.ToString("yyyy-MM-dd")
             };
         }
-
-        //public static UserDTO UserToDtoCompleat(User user, RoutineDTO routineDto)
-        //{
-        //    return new UserDTO
-        //    {
-        //        UserId = user.UserId,
-        //        Username = user.Username,
-        //        FriendCode = user.FriendCode,
-        //        Email = user.Email,
-        //        Routines = user.Routines.Select(r => new RoutineDTO
-        //        {
-        //            RoutineId = r.RoutineId,
-        //            RoutineName = r.RoutineName,
-        //            SplitDays = r.SplitDays.Select(sd => new SplitDayDTO
-        //            {
-        //                DayName = sd.DayName,
-        //                Exercises = sd.Exercises.Select(e => new ExerciseDTO
-        //                {
-        //                    ExerciseId = e.ExerciseId,
-        //                    ExerciseName = e.ExerciseName,
-        //                    Reps = e.Reps,
-        //                    Sets = e.Sets
-        //                }).ToList()
-        //            }).ToList()
-        //        }).ToList()
-        //    };
-        //}
     }
 }
