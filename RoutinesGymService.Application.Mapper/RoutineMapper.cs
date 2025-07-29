@@ -1,5 +1,6 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Application.Mapper
 {
@@ -13,14 +14,14 @@ namespace RoutinesGymService.Application.Mapper
                 RoutineDescription = routine.RoutineDescription ?? string.Empty,
                 SplitDays = routine.SplitDays.Select(sd => new SplitDayDTO
                 {
-                    DayName = sd.DayName.ToString(),
+                    DayName = GenericUtils.ChangeStringToEnumOnDayName(sd.DayName),
                     RoutineId = routine.RoutineId,
                     DayExercisesDescription = sd.DayExercisesDescription ?? string.Empty,
                     Exercises = sd.Exercises.Select(exercise => new ExerciseDTO
                     {
                         ExerciseName = exercise.ExerciseName ?? string.Empty,
                         RoutineId = routine.RoutineId,
-                        DayName = sd.DayName,
+                        SplitDayId = sd.SplitDayId,
                     }).ToList()
                 }).ToList()
             };

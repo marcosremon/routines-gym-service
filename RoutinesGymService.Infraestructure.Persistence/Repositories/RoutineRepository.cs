@@ -10,7 +10,6 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
-using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -58,7 +57,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                             routine.SplitDays = createRoutineRequest.SplitDays.Select(sd => new SplitDay
                             {
-                                DayName = GenericUtils.ChangeStringToEnumOnDayName(sd.DayName),
+                                DayName = sd.DayName.ToString(),
                                 DayExercisesDescription = "Default description",
                                 RoutineId = routine.RoutineId,
                                 Exercises = sd.Exercises.Select(ex => new Exercise
