@@ -2,7 +2,7 @@
 {
     public class UserFriendDTO
     {
-        public int UserId { get; set; }
-        public int FriendId { get; set; }
+        public long UserId { get; set; }
+        public long FriendId { get; set; }
     }
 }

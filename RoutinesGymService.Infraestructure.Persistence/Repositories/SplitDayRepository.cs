@@ -133,7 +133,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         if (splitDayToDelete != null)
                                         {
                                             // Obtener los IDs de los ejercicios de ese día
-                                            List<int> exerciseIds = splitDayToDelete.Exercises.Select(e => e.ExerciseId).ToList();
+                                            List<long> exerciseIds = splitDayToDelete.Exercises.Select(e => e.ExerciseId).ToList();
 
                                             // Eliminar los ExerciseProgress asociados
                                             var progressToDelete = _context.ExerciseProgress.Where(ep => exerciseIds.Contains(ep.ExerciseId));

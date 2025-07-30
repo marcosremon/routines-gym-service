@@ -4,8 +4,8 @@ namespace RoutinesGymService.Application.DataTransferObject.Entity
 {
     public class ExerciseProgressDTO
     {
-        public int ExerciseId { get; set; }
-        public int RoutineId { get; set; }
+        public long ExerciseId { get; set; }
+        public long RoutineId { get; set; }
         public WeekDay DayName { get; set; }
         public int Sets { get; set; }
         public int Reps { get; set; }

@@ -3,7 +3,7 @@
     public class ExerciseDTO
     {
         public string ExerciseName { get; set; } = string.Empty;
-        public int RoutineId { get; set; }
-        public int SplitDayId { get; set; }
+        public long RoutineId { get; set; }
+        public long SplitDayId { get; set; }
     }
 }
