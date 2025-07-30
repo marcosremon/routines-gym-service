@@ -25,94 +25,92 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<CreateRoutineResponse> CreateRoutine(CreateRoutineRequest createRoutineRequest)
         {
             CreateRoutineResponse createRoutineResponse = new CreateRoutineResponse();
-            using (ApplicationDbContext context = _context)
+            IDbContextTransaction dbContextTransaction = _context.Database.BeginTransaction();
+            try
             {
-                IDbContextTransaction dbContextTransaction = context.Database.BeginTransaction();
-                try
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createRoutineRequest.UserEmail);
+                if (user == null)
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createRoutineRequest.UserEmail);
-                    if (user == null)
+                    createRoutineResponse.Message = "User not found";
+                    createRoutineResponse.IsSuccess = false;
+                }
+                else
+                {
+                    if (user.Routines.Any(r => r.RoutineName == createRoutineRequest.RoutineName))
                     {
-                        createRoutineResponse.Message = "User not found";
+                        createRoutineResponse.Message = "Routine with this name already exists for the user";
                         createRoutineResponse.IsSuccess = false;
                     }
                     else
-                    {
-                        if (user.Routines.Any(r => r.RoutineName == createRoutineRequest.RoutineName))
+                    { 
+                        Routine routine = new Routine
                         {
-                            createRoutineResponse.Message = "Routine with this name already exists for the user";
-                            createRoutineResponse.IsSuccess = false;
-                        }
-                        else
-                        { 
-                            Routine routine = new Routine
-                            {
-                                RoutineName = createRoutineRequest.RoutineName!,
-                                RoutineDescription = createRoutineRequest.RoutineDescription ?? "sin descripcion",
-                                SplitDays = new List<SplitDay>(),
-                            };
+                            RoutineName = createRoutineRequest.RoutineName!,
+                            RoutineDescription = createRoutineRequest.RoutineDescription ?? "sin descripcion",
+                            SplitDays = new List<SplitDay>(),
+                        };
 
-                            _context.Routines.Add(routine);
-                            await _context.SaveChangesAsync();
+                        _context.Routines.Add(routine);
+                        await _context.SaveChangesAsync();
 
-                            routine.SplitDays = createRoutineRequest.SplitDays.Select(sd => new SplitDay
+                        routine.SplitDays = createRoutineRequest.SplitDays.Select(sd => new SplitDay
+                        {
+                            DayName = sd.DayName.ToString(),
+                            DayExercisesDescription = "Default description",
+                            RoutineId = routine.RoutineId,
+                            Exercises = sd.Exercises.Select(ex => new Exercise
                             {
-                                DayName = sd.DayName.ToString(),
-                                DayExercisesDescription = "Default description",
+                                ExerciseName = ex.ExerciseName,
                                 RoutineId = routine.RoutineId,
-                                Exercises = sd.Exercises.Select(ex => new Exercise
-                                {
-                                    ExerciseName = ex.ExerciseName,
-                                    RoutineId = routine.RoutineId,
-                                    SplitDayId = _context.SplitDays.Last().SplitDayId + 1,
-                                }).ToList() ?? new List<Exercise>(),
-                            }).ToList() ?? new List<SplitDay>();
+                                SplitDayId = _context.SplitDays.Last().SplitDayId + 1,
+                            }).ToList() ?? new List<Exercise>(),
+                        }).ToList() ?? new List<SplitDay>();
 
-                            await _context.SaveChangesAsync();
+                        await _context.SaveChangesAsync();
 
-                            foreach (SplitDay splitDay in routine.SplitDays)
+                        foreach (SplitDay splitDay in routine.SplitDays)
+                        {
+                            foreach (Exercise exercise in splitDay.Exercises)
                             {
-                                foreach (Exercise exercise in splitDay.Exercises)
+                                if (string.IsNullOrEmpty(exercise.ExerciseName))
                                 {
-                                    if (string.IsNullOrEmpty(exercise.ExerciseName))
+                                    createRoutineResponse.Message = "Exercise name cannot be empty";
+                                    createRoutineResponse.IsSuccess = false;
+                                }
+                                else
+                                {
+                                    ExerciseProgress progress = new ExerciseProgress
                                     {
-                                        createRoutineResponse.Message = "Exercise name cannot be empty";
-                                        createRoutineResponse.IsSuccess = false;
-                                    }
-                                    else
-                                    {
-                                        ExerciseProgress progress = new ExerciseProgress
-                                        {
-                                            ExerciseId = exercise.ExerciseId,
-                                            RoutineId = routine.RoutineId,
-                                            DayName = splitDay.DayName.ToString(),
-                                            Sets = createRoutineRequest.Sets,
-                                            Reps = createRoutineRequest.Reps,
-                                            Weight = createRoutineRequest.Weight,
-                                            PerformedAt = DateTime.UtcNow
-                                        };
+                                        ExerciseId = exercise.ExerciseId,
+                                        RoutineId = routine.RoutineId,
+                                        DayName = splitDay.DayName.ToString(),
+                                        Sets = createRoutineRequest.Sets,
+                                        Reps = createRoutineRequest.Reps,
+                                        Weight = createRoutineRequest.Weight,
+                                        PerformedAt = DateTime.UtcNow
+                                    };
 
-                                        _context.ExerciseProgress.Add(progress);
-                                    }
+                                    _context.ExerciseProgress.Add(progress);
                                 }
                             }
-
-                            await _context.SaveChangesAsync();
-                            await dbContextTransaction.CommitAsync();
-
-                            createRoutineResponse.IsSuccess = true;
-                            createRoutineResponse.RoutineDTO = Application.Mapper.RoutineMapper.RoutineToDto(routine);
-                            createRoutineResponse.Message = "Routine created successfully";
                         }
+
+                        await _context.SaveChangesAsync();
+                        await dbContextTransaction.CommitAsync();
+
+                        createRoutineResponse.IsSuccess = true;
+                        createRoutineResponse.RoutineDTO = Application.Mapper.RoutineMapper.RoutineToDto(routine);
+                        createRoutineResponse.Message = "Routine created successfully";
                     }
                 }
-                catch (Exception ex)
-                {
-                    await dbContextTransaction.RollbackAsync();
-                    createRoutineResponse.Message = $"unexpected error on RoutineRepository -> CreateRoutine {ex.Message}";
-                    createRoutineResponse.IsSuccess = false;
-                }
             }
+            catch (Exception ex)
+            {
+                await dbContextTransaction.RollbackAsync();
+                createRoutineResponse.Message = $"unexpected error on RoutineRepository -> CreateRoutine {ex.Message}";
+                createRoutineResponse.IsSuccess = false;
+            }
+            
         
             return createRoutineResponse;
         }

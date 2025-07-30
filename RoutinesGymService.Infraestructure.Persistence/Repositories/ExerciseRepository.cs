@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
@@ -7,7 +8,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Upd
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
-using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
@@ -23,7 +23,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         public async Task<AddExerciseResponse> AddExercise(AddExerciseRequest addExerciseRequest)
         {
+
             AddExerciseResponse addExerciseResponse = new AddExerciseResponse();
+            IDbContextTransaction dbContextTransaction = _context.Database.BeginTransaction();
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == addExerciseRequest.UserEmail);
@@ -78,6 +80,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 splitDay.Exercises.Add(newExercise);
                                 await _context.SaveChangesAsync();
 
+                                await dbContextTransaction.CommitAsync();
+
                                 addExerciseResponse.IsSuccess = true;
                                 addExerciseResponse.UserDTO = UserMapper.UserToDto(user);
                                 addExerciseResponse.Message = "Exercise added successfully.";
@@ -88,6 +92,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
             catch (Exception ex)
             {
+                await dbContextTransaction.RollbackAsync();
                 addExerciseResponse.IsSuccess = false;
                 addExerciseResponse.Message = $"unexpected error on ExerciseRepository -> AddExercise: {ex.Message}";
             }
@@ -98,6 +103,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<DeleteExerciseResponse> DeleteExercise(DeleteExerciseRequest deleteExerciseRequest)
         {
             DeleteExerciseResponse deleteExerciseResponse = new DeleteExerciseResponse();
+            IDbContextTransaction dbContextTransaction = _context.Database.BeginTransaction();
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteExerciseRequest.UserEmail);
@@ -150,7 +156,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     .ToListAsync(); 
                                 _context.ExerciseProgress.RemoveRange(exerciseProgresses);
                                 await _context.SaveChangesAsync();
-                                
+
+                                await dbContextTransaction.CommitAsync();
+
                                 deleteExerciseResponse.IsSuccess = true;
                                 deleteExerciseResponse.UserDTO = UserMapper.UserToDto(user);
                                 deleteExerciseResponse.Message = "Exercise deleted successfully.";
@@ -161,6 +169,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
             catch (Exception ex)
             {
+                await dbContextTransaction.RollbackAsync();
                 deleteExerciseResponse.IsSuccess = false;
                 deleteExerciseResponse.Message = $"unexpected error on ExerciseRepository -> DeleteExercise: {ex.Message}";
             }
@@ -308,10 +317,52 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             
             return updateExerciseResponse;
         }
-        
-        public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseRequest)
+
+        public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseAddExerciseProgressRequest)
         {
-            throw new NotImplementedException();
+            AddExerciseAddExerciseProgressResponse addExerciseAddExerciseProgressResponse = new AddExerciseAddExerciseProgressResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == addExerciseAddExerciseProgressRequest.UserEmail);
+                if (user == null)
+                {
+                    addExerciseAddExerciseProgressResponse.IsSuccess = false;
+                    addExerciseAddExerciseProgressResponse.Message = "User not found.";
+                }
+                else
+                {
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r =>
+                        r.RoutineId == addExerciseAddExerciseProgressRequest.RoutineId &&
+                        r.UserId == user.UserId);
+                    if (routine == null)
+                    {
+                        addExerciseAddExerciseProgressResponse.IsSuccess = false;
+                        addExerciseAddExerciseProgressResponse.Message = "Routine not found.";
+                    }
+                    else
+                    {
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                            s.RoutineId == addExerciseAddExerciseProgressRequest.RoutineId &&
+                            s.DayName == addExerciseAddExerciseProgressRequest.DayName);
+                        if (splitDay == null)
+                        {
+                            addExerciseAddExerciseProgressResponse.IsSuccess = false;
+                            addExerciseAddExerciseProgressResponse.Message = "Split day not found.";
+                        }
+                        else
+                        {
+                            // to_do
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                addExerciseAddExerciseProgressResponse.IsSuccess = false;
+                addExerciseAddExerciseProgressResponse.Message = $"unexpected error on ExerciseRepository -> AddExerciseProgress: {ex.Message}";
+            }
+        
+            return addExerciseAddExerciseProgressResponse;
         }
     }
 }
