@@ -10,13 +10,13 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Key]
         [Column("split_day_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int SplitDayId { get; set; }
+        public long SplitDayId { get; set; }
 
         [Column("day_name")]
         public string DayName { get; set; } = string.Empty;
 
         [Column("routine_id")]
-        public int RoutineId { get; set; }
+        public long RoutineId { get; set; }
 
         [Column("day_exercises_description")]
         public string DayExercisesDescription { get; set; } = string.Empty;
