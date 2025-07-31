@@ -20,7 +20,6 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Column("split_day_id")]
         public long SplitDayId { get; set; }
 
-
         [ForeignKey("SplitDayId")]
         [InverseProperty("Exercises")]
         public virtual SplitDay? SplitDay { get; set; }
