@@ -18,7 +18,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // No configuration needed - all mappings are handled via attributes
         }
     }
 }
