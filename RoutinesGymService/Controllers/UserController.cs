@@ -147,7 +147,6 @@ namespace RoutinesGymService.Controllers
                     {
                         Dni = createUserRequestJson.Dni,
                         Username = createUserRequestJson.Username,
-                        Surname = createUserRequestJson.Surname,
                         Email = createUserRequestJson.Email,
                         Password = createUserRequestJson.Password,
                         ConfirmPassword = createUserRequestJson.ConfirmPassword,
