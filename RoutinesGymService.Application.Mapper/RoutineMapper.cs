@@ -14,7 +14,7 @@ namespace RoutinesGymService.Application.Mapper
                 RoutineDescription = routine.RoutineDescription ?? string.Empty,
                 SplitDays = routine.SplitDays.Select(sd => new SplitDayDTO
                 {
-                    DayName = GenericUtils.ChangeStringToEnumOnDayName(sd.DayName),
+                    DayName = GenericUtils.ChangeIntToEnumOnDayName(sd.DayName),
                     RoutineId = routine.RoutineId,
                     DayExercisesDescription = sd.DayExercisesDescription ?? string.Empty,
                     Exercises = sd.Exercises.Select(exercise => new ExerciseDTO
