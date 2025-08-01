@@ -30,7 +30,10 @@ namespace RoutinesGymService.Domain.Model.Entities
         public byte[]? Password { get; set; }
 
         [Column("role")]
-        public string Role { get; set; } = string.Empty;
+        public int Role { get; set; }
+
+        [Column("role_string")]
+        public string RoleString { get; set; } = string.Empty;
 
         [Column("inscription_date")]
         public DateTime InscriptionDate { get; set; } = DateTime.MinValue;

@@ -30,7 +30,7 @@ namespace RoutinesGymService.Transversal.Common
                 case "Monday": return WeekDay.MONDAY; 
                 case "Tuesday": return WeekDay.TUESDAY; 
                 case "Wednesday": return WeekDay.WEDNESDAY; 
-                case "Thursday": return WeekDay.THUESDAY; 
+                case "Thursday": return WeekDay.THURSDAY;
                 case "Friday": return WeekDay.FRIDAY; 
                 case "Saturday": return WeekDay.SATURDAY; 
                 case "Sunday": return WeekDay.SUNDAY; 

@@ -1,6 +1,6 @@
 ﻿using RoutinesGymService.Domain.Model.Enums;
 
-namespace RoutinesGymService.Application.DataTransferObject.SplitDay.GetRoutineSplits
+namespace RoutinesGymService.Application.DataTransferObject.Interchange.SplitDay.GetRoutineSplits
 {
     public class DayInfoDTO
     {
