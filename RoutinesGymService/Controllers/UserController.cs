@@ -37,7 +37,7 @@ namespace RoutinesGymService.Controllers
 
         #region Get users
         [HttpGet("get-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
+        //[Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
         {
             GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
@@ -145,11 +145,11 @@ namespace RoutinesGymService.Controllers
                 {
                     CreateGenericUserRequest createGenericUserRequest = new CreateGenericUserRequest
                     {
-                        Dni = createUserRequestJson.Dni,
-                        Username = createUserRequestJson.Username,
-                        Email = createUserRequestJson.Email,
-                        Password = createUserRequestJson.Password,
-                        ConfirmPassword = createUserRequestJson.ConfirmPassword,
+                        Dni = createUserRequestJson.Dni.Trim(),
+                        Username = createUserRequestJson.Username.Trim(),
+                        Email = createUserRequestJson.Email.Trim(),
+                        Password = createUserRequestJson.Password.Trim(),
+                        ConfirmPassword = createUserRequestJson.ConfirmPassword.Trim(),
                         Role = Role.USER
                     };
 

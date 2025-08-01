@@ -9,6 +9,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -48,7 +49,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                             s.RoutineId == addExerciseRequest.RoutineId &&
-                            s.DayName == addExerciseRequest.DayName);
+                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(addExerciseRequest.DayName)));
                         if (splitDay == null)
                         {
                             addExerciseResponse.IsSuccess = false;
@@ -126,7 +127,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                             s.RoutineId == deleteExerciseRequest.RoutineId &&
-                            s.DayName == deleteExerciseRequest.DayName);
+                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(deleteExerciseRequest.DayName!)));
                         if (splitDay == null)
                         {
                             deleteExerciseResponse.IsSuccess = false;
@@ -193,7 +194,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                         s.RoutineId == getExercisesByDayNameRequest.RoutineId &&
-                        s.DayName == getExercisesByDayNameRequest.DayName);
+                        s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayNameRequest.DayName!)));
                     if (splitDay == null)
                     {
                         getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
@@ -273,7 +274,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                             s.RoutineId == updateExerciseRequest.RoutineId &&
-                            s.DayName == updateExerciseRequest.DayName.ToString());
+                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(updateExerciseRequest.DayName));
                         if (splitDay == null)
                         {
                             updateExerciseResponse.IsSuccess = false;
@@ -343,7 +344,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                             s.RoutineId == addExerciseAddExerciseProgressRequest.RoutineId &&
-                            s.DayName == addExerciseAddExerciseProgressRequest.DayName);
+                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(addExerciseAddExerciseProgressRequest.DayName!)));
                         if (splitDay == null)
                         {
                             addExerciseAddExerciseProgressResponse.IsSuccess = false;
