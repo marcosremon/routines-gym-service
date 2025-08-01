@@ -88,7 +88,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateUserResponse createUserResponse = new CreateUserResponse();
             try
             {
-                if (MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Invalid email format";
@@ -103,7 +103,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == u.Dni);
+                        user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni);
                         if (user != null)
                         {
                             createUserResponse.IsSuccess = false;
@@ -142,7 +142,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         Email = createGenericUserRequest.Email!,
                                         FriendCode = friendCode,
                                         Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
-                                        Role = createGenericUserRequest.Role.ToString().ToLower(),
+                                        Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
+                                        RoleString = createGenericUserRequest.Role.ToString().ToLower(),
                                         InscriptionDate = DateTime.UtcNow
                                     };
 
@@ -197,7 +198,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         FriendCode = friendCode,
                         Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
                         Email = createGenericUserRequest.Email!,
-                        Role = createGenericUserRequest.Role.ToString().ToLower(),
+                        Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
+                        RoleString = createGenericUserRequest.Role.ToString().ToLower(),
                         InscriptionDate = DateTime.UtcNow
                     };
 

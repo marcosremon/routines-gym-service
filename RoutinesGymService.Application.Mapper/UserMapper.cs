@@ -16,7 +16,7 @@ namespace RoutinesGymService.Application.Mapper
                 Email = user.Email,
                 FriendCode = user.FriendCode,
                 Password = "***************",
-                Role = user.Role.ToLower() == "user" ? Role.USER : Role.ADMIN,
+                Role = user.Role == 0 ? Role.USER : Role.ADMIN,
                 InscriptionDate = user.InscriptionDate.ToString("yyyy-MM-dd")
             };
         }

@@ -10,7 +10,7 @@ namespace RoutinesGymService.Application.Mapper
         {
             return new SplitDayDTO
             {
-                DayName = GenericUtils.ChangeStringToEnumOnDayName(splitDay.DayName),
+                DayName = GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName),
                 RoutineId = splitDay.RoutineId,
                 DayExercisesDescription = splitDay.DayExercisesDescription,
                 Exercises = splitDay.Exercises.Select(e => ExerciseMapper.ExerciseToDto(e)).ToList()

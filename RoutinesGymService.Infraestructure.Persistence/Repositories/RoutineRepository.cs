@@ -10,6 +10,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -55,7 +56,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                         routine.SplitDays = createRoutineRequest.SplitDays.Select(sd => new SplitDay
                         {
-                            DayName = sd.DayName.ToString(),
+                            DayName = GenericUtils.ChangeEnumToIntOnDayName(sd.DayName),
+                            DayNameString = sd.DayName.ToString(),
                             DayExercisesDescription = "Default description",
                             RoutineId = routine.RoutineId,
                             Exercises = sd.Exercises.Select(ex => new Exercise
@@ -83,7 +85,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     {
                                         ExerciseId = exercise.ExerciseId,
                                         RoutineId = routine.RoutineId,
-                                        DayName = splitDay.DayName.ToString(),
+                                        DayName = splitDay.DayNameString,
                                         Sets = createRoutineRequest.Sets,
                                         Reps = createRoutineRequest.Reps,
                                         Weight = createRoutineRequest.Weight,
@@ -99,7 +101,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         await dbContextTransaction.CommitAsync();
 
                         createRoutineResponse.IsSuccess = true;
-                        createRoutineResponse.RoutineDTO = Application.Mapper.RoutineMapper.RoutineToDto(routine);
+                        createRoutineResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
                         createRoutineResponse.Message = "Routine created successfully";
                     }
                 }
@@ -312,7 +314,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     routine.RoutineDescription = updateRoutineRequest.RoutineDescription ?? routine.RoutineDescription;
                     routine.SplitDays = updateRoutineRequest.SplitDays.Select(sd => new SplitDay
                     {
-                        DayName = sd.DayName.ToString(),
+                        DayName = GenericUtils.ChangeEnumToIntOnDayName(sd.DayName),
                         Exercises = sd.Exercises.Select(e => new Exercise
                         {
                             ExerciseName = e.ExerciseName

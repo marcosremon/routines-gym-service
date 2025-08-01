@@ -32,7 +32,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    loginResponse.IsAdmin = user.Role.ToLower() == Role.ADMIN.ToString().ToLower();
+                    loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();
                     loginResponse.IsSuccess = true;
                     loginResponse.Message = "Login successful.";
                 }

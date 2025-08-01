@@ -19,7 +19,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         public long RoutineId { get; set; }
 
         [Column("day_name")]
-        public string DayName { get; set; } = string.Empty; 
+        public string DayName { get; set; } = string.Empty;
 
         [Column("sets")]
         public int Sets { get; set; } 

@@ -49,7 +49,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         {
                             SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                                 s.RoutineId == deleteSplitDayRequest.RoutineId &&
-                                s.DayName == deleteSplitDayRequest.DayName.ToString());
+                                s.DayName == GenericUtils.ChangeEnumToIntOnDayName(deleteSplitDayRequest.DayName));
                             if (splitDay == null)
                             {
                                 deleteSplitDayResponse.IsSuccess = false;
@@ -157,7 +157,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         WeekDay weekDay = Enum.Parse<WeekDay>(dayName, true);
                                         SplitDay newSplitDay = new SplitDay
                                         {
-                                            DayName = weekDay.ToString(),
+                                            DayName = GenericUtils.ChangeEnumToIntOnDayName(weekDay),
+                                            DayNameString = dayName,
                                             RoutineId = routine.RoutineId,
                                             Exercises = new List<Exercise>()
                                         };
