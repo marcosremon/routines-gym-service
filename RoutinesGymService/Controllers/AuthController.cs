@@ -52,7 +52,7 @@ namespace RoutinesGymService.Controllers
                         loginResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         loginResponseJson.IsSuccess = loginResponse.IsSuccess;
                         loginResponseJson.Message = loginResponse.Message;
-                        loginResponse.BearerToken = loginResponse.IsAdmin 
+                        loginResponseJson.BearerToken = loginResponse.IsAdmin 
                             ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail) 
                             : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
                     }
