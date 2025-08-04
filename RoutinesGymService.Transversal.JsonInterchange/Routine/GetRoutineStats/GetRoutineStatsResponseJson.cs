@@ -4,8 +4,8 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats
 {
     public class GetRoutineStatsResponseJson : BaseResponseJson
     {
-        public int routinesCount { get; set; }
-        public int exercisesCount { get; set; }
-        public int splitsCount { get; set; }
+        public int RoutinesCount { get; set; }
+        public int ExercisesCount { get; set; }
+        public int SplitsCount { get; set; }
     }
 }
