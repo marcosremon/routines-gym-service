@@ -4,6 +4,5 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Routine.
 {
     public class DeleteRoutineResponse : BaseResponse
     {
-        public long UserId { get; set; }
     }
 }

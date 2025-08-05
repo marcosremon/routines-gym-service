@@ -4,6 +4,5 @@ namespace RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateNewPa
 {
     public class CreateNewPasswordResponseJson : BaseResponseJson
     {
-        public long UserId { get; set; }
     }
 }

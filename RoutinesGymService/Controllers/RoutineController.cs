@@ -52,9 +52,6 @@ namespace RoutinesGymService.Controllers
                         RoutineName = createRoutineRequestJson.RoutineName,
                         RoutineDescription = createRoutineRequestJson.RoutineDescription,
                         SplitDays = createRoutineRequestJson.SplitDays,
-                        Sets = createRoutineRequestJson.Sets,
-                        Reps = createRoutineRequestJson.Reps,
-                        Weight = createRoutineRequestJson.Weight
                     };
 
                     CreateRoutineResponse createRoutineResponse = await _routineApplication.CreateRoutine(createRoutineRequest);
@@ -63,7 +60,6 @@ namespace RoutinesGymService.Controllers
                         createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createRoutineResponseJson.IsSuccess = createRoutineResponse.IsSuccess;
                         createRoutineResponseJson.Message = createRoutineResponse.Message;
-                        createRoutineResponseJson.RoutineDTO = createRoutineResponse.RoutineDTO;
                     }
                     else
                     {
@@ -166,7 +162,6 @@ namespace RoutinesGymService.Controllers
                         deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         deleteRoutineResponseJson.IsSuccess = deleteRoutineResponse.IsSuccess;
                         deleteRoutineResponseJson.Message = deleteRoutineResponse.Message;
-                        deleteRoutineResponseJson.UserId = deleteRoutineResponse.UserId;
                     }
                     else
                     {

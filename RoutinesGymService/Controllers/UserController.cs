@@ -159,7 +159,6 @@ namespace RoutinesGymService.Controllers
                         createUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
                         createUserResponseJson.Message = createUserResponse.Message;
-                        createUserResponseJson.UserDTO = createUserResponse.UserDTO;
                     }
                     else
                     {
@@ -217,7 +216,6 @@ namespace RoutinesGymService.Controllers
                         createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
                         createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
-                        createGoogleUserResponseJson.UserDTO = createGoogleUserResponse.UserDTO;
                     }
                     else
                     {
@@ -381,7 +379,6 @@ namespace RoutinesGymService.Controllers
                         deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
                         deleteUserResponseJson.Message = deleteUserResponse.Message;
-                        deleteUserResponseJson.UserId = deleteUserResponse.UserId;
                     }
                     else
                     {
@@ -430,7 +427,6 @@ namespace RoutinesGymService.Controllers
                         createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
                         createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
-                        createNewPasswordResponseJson.UserId = createNewPasswordResponse.UserId;
                     }
                     else
                     {
@@ -485,7 +481,6 @@ namespace RoutinesGymService.Controllers
                         changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
                         changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
-                        changePasswordWithPasswordAndEmailResponseJson.UserId = changePasswordWithPasswordAndEmailResponse.UserId;
                     }
                     else
                     {
