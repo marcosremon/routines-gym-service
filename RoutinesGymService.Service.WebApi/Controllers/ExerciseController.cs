@@ -12,7 +12,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.UpdateExercise;
 
-namespace RoutinesGymService.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
     [Route("exercise")]

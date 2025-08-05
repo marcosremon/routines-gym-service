@@ -22,7 +22,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
 
-namespace RoutinesGymService.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
     [Route("user")]

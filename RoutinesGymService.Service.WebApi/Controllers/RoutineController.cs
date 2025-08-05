@@ -14,7 +14,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
 
-namespace RoutinesGymService.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
     [Route("routine")]

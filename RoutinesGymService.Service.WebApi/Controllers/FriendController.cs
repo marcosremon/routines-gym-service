@@ -8,7 +8,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
 
-namespace RoutinesGymService.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
     [Route("friend")]

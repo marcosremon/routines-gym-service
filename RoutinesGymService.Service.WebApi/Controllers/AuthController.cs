@@ -8,7 +8,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Auth.Login;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.LoginWeb;
 using RoutinesGymService.Transversal.Security;
 
-namespace RoutinesGymService.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
     [Route("auth")]
