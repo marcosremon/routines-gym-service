@@ -171,7 +171,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
                         deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
-                        deleteExerciseResponseJson.UserDTO = deleteExerciseResponse.UserDTO;
                     }
                     else
                     {
