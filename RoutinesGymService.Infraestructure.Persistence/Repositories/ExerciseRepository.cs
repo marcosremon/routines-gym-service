@@ -84,7 +84,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 await dbContextTransaction.CommitAsync();
 
                                 addExerciseResponse.IsSuccess = true;
-                                addExerciseResponse.UserDTO = UserMapper.UserToDto(user);
                                 addExerciseResponse.Message = "Exercise added successfully.";
                             }
                         }
@@ -161,7 +160,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 await dbContextTransaction.CommitAsync();
 
                                 deleteExerciseResponse.IsSuccess = true;
-                                deleteExerciseResponse.UserDTO = UserMapper.UserToDto(user);
                                 deleteExerciseResponse.Message = "Exercise deleted successfully.";
                             }
                         }

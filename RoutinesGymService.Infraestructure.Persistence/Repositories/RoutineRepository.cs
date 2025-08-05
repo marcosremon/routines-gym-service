@@ -86,9 +86,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         ExerciseId = exercise.ExerciseId,
                                         RoutineId = routine.RoutineId,
                                         DayName = splitDay.DayNameString,
-                                        Sets = createRoutineRequest.Sets,
-                                        Reps = createRoutineRequest.Reps,
-                                        Weight = createRoutineRequest.Weight,
                                         PerformedAt = DateTime.UtcNow
                                     };
 
@@ -101,7 +98,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         await dbContextTransaction.CommitAsync();
 
                         createRoutineResponse.IsSuccess = true;
-                        createRoutineResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
                         createRoutineResponse.Message = "Routine created successfully";
                     }
                 }
@@ -149,7 +145,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             await _context.SaveChangesAsync();
 
                             deleteRoutineResponse.IsSuccess = true;
-                            deleteRoutineResponse.UserId = user.UserId;
                             deleteRoutineResponse.Message = "Routine deleted successfully";
                         }
                     }
