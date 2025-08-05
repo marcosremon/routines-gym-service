@@ -35,8 +35,8 @@ namespace RoutinesGymService.Controllers
             try
             {
                 if (addExerciseRequestJson == null ||
-                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail) ||
                     addExerciseRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.DayName))
                 {
                     addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -59,7 +59,6 @@ namespace RoutinesGymService.Controllers
                         addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
                         addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
-                        addExerciseAddExerciseProgressResponseJson.UserDTO = addExerciseAddExerciseProgressResponse.UserDTO;
                     }
                     else
                     {
@@ -91,7 +90,7 @@ namespace RoutinesGymService.Controllers
                 if (updateExerciseRequestJson == null ||
                     updateExerciseRequestJson.UserId == null ||
                     updateExerciseRequestJson.RoutineId == null ||
-                    updateExerciseRequestJson.DayName == null ||
+                    updateExerciseRequestJson.DayName == 0 ||
                     string.IsNullOrEmpty(updateExerciseRequestJson.ExerciseName))
                 {
                     updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -147,10 +146,10 @@ namespace RoutinesGymService.Controllers
             try
             {
                 if (deleteExerciseRequestJson == null ||
-                    string.IsNullOrEmpty(deleteExerciseRequestJson.UserEmail) ||
                     deleteExerciseRequestJson.RoutineId == null ||
-                    string.IsNullOrEmpty(deleteExerciseRequestJson.DayName) ||
-                    deleteExerciseRequestJson.ExerciseId == null)
+                    deleteExerciseRequestJson.ExerciseId == null ||
+                    string.IsNullOrEmpty(deleteExerciseRequestJson.UserEmail) ||
+                    string.IsNullOrEmpty(deleteExerciseRequestJson.DayName))
                 {
                     deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     deleteExerciseResponseJson.IsSuccess = false;
@@ -227,7 +226,6 @@ namespace RoutinesGymService.Controllers
                         addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
                         addExerciseResponseJson.Message = addExerciseResponse.Message;
-                        addExerciseResponseJson.UserDTO = addExerciseResponse.UserDTO;
                     }
                     else
                     {
