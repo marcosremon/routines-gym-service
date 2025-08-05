@@ -4,6 +4,5 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Del
 {
     public class DeleteUserResponse : BaseResponse
     {
-        public long UserId { get; set; }
     }
 }

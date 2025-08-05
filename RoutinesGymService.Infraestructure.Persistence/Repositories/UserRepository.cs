@@ -152,7 +152,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                                     createUserResponse.IsSuccess = true;
                                     createUserResponse.Message = "User created successfully";
-                                    createUserResponse.UserDTO = UserMapper.UserToDto(newUser);
                                 }
                             }
                         }
@@ -210,7 +209,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     createGoogleUserResponse.IsSuccess = true;
                     createGoogleUserResponse.Message = "Usuario creado correctametne";
-                    createGoogleUserResponse.UserDTO = UserMapper.UserToDto(user);
                 }
             }
             catch (Exception ex)
@@ -239,7 +237,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.SaveChangesAsync();
 
                     deleteUserResponse.IsSuccess = true;
-                    deleteUserResponse.UserId = user.UserId;
                     deleteUserResponse.Message = "User deleted successfully";
                 }
             }
@@ -314,7 +311,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     MailUtils.SendEmail(user.Username, user.Email, newPassword);
 
                     createNewPasswordResponse.IsSuccess = true;
-                    createNewPasswordResponse.UserId = user.UserId;
                     createNewPasswordResponse.Message = "New password created successfully";
                 }
             }
@@ -361,7 +357,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
-                            changePasswordWithPasswordAndEmailResponse.UserId = user.UserId;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";
                         }
                     }
