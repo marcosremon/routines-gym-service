@@ -4,6 +4,5 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Cre
 {
     public class CreateNewPasswordResponse : BaseResponse
     {
-        public long UserId { get; set; }
     }
 }

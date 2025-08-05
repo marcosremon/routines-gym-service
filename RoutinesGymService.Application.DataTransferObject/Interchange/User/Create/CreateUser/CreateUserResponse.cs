@@ -5,6 +5,5 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Cre
 {
     public class CreateUserResponse : BaseResponse
     {
-        public UserDTO? UserDTO { get; set; }
     }
 }
