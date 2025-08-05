@@ -101,7 +101,6 @@ namespace RoutinesGymService.Controllers
                         addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
                         addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
-                        addNewUserFriendResponseJson.FriendId = addNewUserFriendResponse.FriendId;
                     }
                     else
                     {

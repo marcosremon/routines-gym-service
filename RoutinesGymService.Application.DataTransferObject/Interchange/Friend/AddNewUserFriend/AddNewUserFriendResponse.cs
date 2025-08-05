@@ -4,6 +4,5 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Friend.A
 {
     public class AddNewUserFriendResponse : BaseResponse
     {
-        public long FriendId { get; set; }
     }
 }

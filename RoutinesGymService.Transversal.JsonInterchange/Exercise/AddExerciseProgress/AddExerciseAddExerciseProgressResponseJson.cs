@@ -5,6 +5,5 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExercisePro
 {
     public class AddExerciseAddExerciseProgressResponseJson : BaseResponseJson
     {
-        public UserDTO? UserDTO { get; set; } = new UserDTO();
     }
 }
