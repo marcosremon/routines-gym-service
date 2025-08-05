@@ -6,7 +6,7 @@ using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
 
-namespace RoutinesGymService.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
     [Route("split-day")]
