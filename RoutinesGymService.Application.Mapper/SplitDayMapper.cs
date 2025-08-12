@@ -1,5 +1,6 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Application.Mapper
@@ -14,6 +15,19 @@ namespace RoutinesGymService.Application.Mapper
                 RoutineId = splitDay.RoutineId,
                 DayExercisesDescription = splitDay.DayExercisesDescription,
                 Exercises = splitDay.Exercises.Select(e => ExerciseMapper.ExerciseToDto(e)).ToList()
+            };
+        }
+
+        public static SplitDay SplitDayDtoToEntity(SplitDayDTO splitDayDto)
+        {
+            return new SplitDay
+            {
+                DayName = GenericUtils.ChangeEnumToIntOnDayName(splitDayDto.DayName),
+                DayNameString = splitDayDto.DayName.ToString().ToUpper(),
+                DayExercisesDescription = splitDayDto.DayExercisesDescription,
+                Exercises = splitDayDto.Exercises
+                    .Select(e => ExerciseMapper.ExerciseDtoToEntity(e))
+                    .ToList()
             };
         }
     }
