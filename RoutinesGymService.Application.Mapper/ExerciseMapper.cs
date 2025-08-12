@@ -14,5 +14,13 @@ namespace RoutinesGymService.Application.Mapper
                 SplitDayId = exercise.SplitDayId,
             };
         }
+
+        public static Exercise ExerciseDtoToEntity(ExerciseDTO exerciseDto)
+        {
+            return new Exercise
+            {
+                ExerciseName = exerciseDto.ExerciseName,
+            };
+        }
     }
 }

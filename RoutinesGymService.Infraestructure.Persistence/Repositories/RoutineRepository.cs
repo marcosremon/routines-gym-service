@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.CreateRoutine;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.DeleteRoutine;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetAllUserRoutines;
@@ -26,7 +27,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<CreateRoutineResponse> CreateRoutine(CreateRoutineRequest createRoutineRequest)
         {
             CreateRoutineResponse createRoutineResponse = new CreateRoutineResponse();
-            IDbContextTransaction dbContextTransaction = _context.Database.BeginTransaction();
+            IDbContextTransaction dbContextTransaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createRoutineRequest.UserEmail);
@@ -43,43 +44,70 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         createRoutineResponse.IsSuccess = false;
                     }
                     else
-                    { 
-                        Routine routine = new Routine
+                    {
+                        bool hasInvalidExercise = false;
+                        foreach (SplitDayDTO splitDay in createRoutineRequest.SplitDays)
                         {
-                            RoutineName = createRoutineRequest.RoutineName!,
-                            RoutineDescription = createRoutineRequest.RoutineDescription ?? "sin descripcion",
-                            SplitDays = new List<SplitDay>(),
-                        };
-
-                        _context.Routines.Add(routine);
-                        await _context.SaveChangesAsync();
-
-                        routine.SplitDays = createRoutineRequest.SplitDays.Select(sd => new SplitDay
-                        {
-                            DayName = GenericUtils.ChangeEnumToIntOnDayName(sd.DayName),
-                            DayNameString = sd.DayName.ToString(),
-                            DayExercisesDescription = "Default description",
-                            RoutineId = routine.RoutineId,
-                            Exercises = sd.Exercises.Select(ex => new Exercise
+                            foreach (ExerciseDTO exercise in splitDay.Exercises)
                             {
-                                ExerciseName = ex.ExerciseName,
-                                RoutineId = routine.RoutineId,
-                                SplitDayId = _context.SplitDays.Last().SplitDayId + 1,
-                            }).ToList() ?? new List<Exercise>(),
-                        }).ToList() ?? new List<SplitDay>();
-
-                        await _context.SaveChangesAsync();
-
-                        foreach (SplitDay splitDay in routine.SplitDays)
-                        {
-                            foreach (Exercise exercise in splitDay.Exercises)
-                            {
-                                if (string.IsNullOrEmpty(exercise.ExerciseName))
+                                if (exercise == null || string.IsNullOrWhiteSpace(exercise.ExerciseName))
                                 {
-                                    createRoutineResponse.Message = "Exercise name cannot be empty";
-                                    createRoutineResponse.IsSuccess = false;
+                                    hasInvalidExercise = true;
+                                    break;
                                 }
-                                else
+                            }
+                            if (hasInvalidExercise) 
+                                break;
+                        }
+
+                        if (hasInvalidExercise)
+                        {
+                            createRoutineResponse.Message = "Exercise name cannot be null or empty";
+                            createRoutineResponse.IsSuccess = false;
+                        }
+                        else
+                        {
+                            Routine routine = new Routine
+                            {
+                                RoutineName = createRoutineRequest.RoutineName!,
+                                RoutineDescription = string.IsNullOrEmpty(createRoutineRequest.RoutineDescription)
+                                    ? "sin descripcion"
+                                    : createRoutineRequest.RoutineDescription,
+                                UserId = user.UserId,
+                                SplitDays = new List<SplitDay>()
+                            };
+
+                            _context.Routines.Add(routine);
+                            await _context.SaveChangesAsync();
+
+                            foreach (SplitDayDTO requestSplitDay in createRoutineRequest.SplitDays)
+                            {
+                                SplitDay splitDay = new SplitDay
+                                {
+                                    DayName = GenericUtils.ChangeEnumToIntOnDayName(requestSplitDay.DayName),
+                                    DayNameString = requestSplitDay.DayName.ToString(),
+                                    DayExercisesDescription = "Default description",
+                                    RoutineId = routine.RoutineId,
+                                    Exercises = new List<Exercise>()
+                                };
+
+                                foreach (ExerciseDTO exerciseRequest in requestSplitDay.Exercises)
+                                {
+                                    splitDay.Exercises.Add(new Exercise
+                                    {
+                                        ExerciseName = exerciseRequest.ExerciseName,
+                                        RoutineId = routine.RoutineId,
+                                    });
+                                }
+
+                                routine.SplitDays.Add(splitDay);
+                            }
+
+                            await _context.SaveChangesAsync();
+
+                            foreach (SplitDay splitDay in routine.SplitDays)
+                            {
+                                foreach (Exercise exercise in splitDay.Exercises)
                                 {
                                     ExerciseProgress progress = new ExerciseProgress
                                     {
@@ -92,13 +120,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     _context.ExerciseProgress.Add(progress);
                                 }
                             }
+
+                            await _context.SaveChangesAsync();
+                            await dbContextTransaction.CommitAsync();
+
+                            createRoutineResponse.IsSuccess = true;
+                            createRoutineResponse.Message = "Routine created successfully";
                         }
-
-                        await _context.SaveChangesAsync();
-                        await dbContextTransaction.CommitAsync();
-
-                        createRoutineResponse.IsSuccess = true;
-                        createRoutineResponse.Message = "Routine created successfully";
                     }
                 }
             }
@@ -108,8 +136,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 createRoutineResponse.Message = $"unexpected error on RoutineRepository -> CreateRoutine {ex.Message}";
                 createRoutineResponse.IsSuccess = false;
             }
-            
-        
+
             return createRoutineResponse;
         }
 
