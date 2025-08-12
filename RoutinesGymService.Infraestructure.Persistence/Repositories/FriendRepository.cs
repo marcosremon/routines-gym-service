@@ -40,7 +40,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        if (!_context.UserFriends.Any(f => f.UserId == user.UserId && f.FriendId == friend.UserId))
+                        if (_context.UserFriends.Any(f => f.UserId == user.UserId && f.FriendId == friend.UserId))
                         {
                             addNewUserFriendResponse.IsSuccess = false;
                             addNewUserFriendResponse.Message = "This user is already your friend";
