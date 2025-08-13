@@ -7,6 +7,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
@@ -19,6 +20,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateNewPasswo
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
+using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
 
@@ -497,6 +499,57 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(changePasswordWithPasswordAndEmailResponseJson);
+        }
+        #endregion
+
+        #region Get User Profile Details
+        [HttpPost("get-user-profile-details")]
+        public async Task<ActionResult<GetUserProfileDetailsResponseJson>> GetUserProfileDetails([FromBody] GetUserProfileDetailsRequestJson getUserProfileDetailsRequestJson)
+        {
+            GetUserProfileDetailsResponseJson getUserProfileDetailsResponseJson = new GetUserProfileDetailsResponseJson();
+            getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
+            try
+            {
+                if (getUserProfileDetailsRequestJson == null || 
+                    string.IsNullOrEmpty(getUserProfileDetailsRequestJson.UserEmail))
+                {
+                    getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getUserProfileDetailsResponseJson.IsSuccess = false;
+                    getUserProfileDetailsResponseJson.Message = "invalid data, the data is null or empty";
+                }
+                else
+                {
+                    GetUserProfileDetailsRequest getUserProfileDetailsRequest = new GetUserProfileDetailsRequest
+                    {
+                        UserEmail = getUserProfileDetailsRequestJson.UserEmail,
+                    };
+
+                    GetUserProfileDetailsResponse getUserProfileDetailsResponse = await _userApplication.GetUserProfileDetails(getUserProfileDetailsRequest);
+                    if (getUserProfileDetailsResponse.IsSuccess)
+                    {
+                        getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
+                        getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
+                        getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username ;
+                        getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate ;
+                        getUserProfileDetailsResponseJson.RoutineCount = getUserProfileDetailsResponse.RoutineCount;
+                    }
+                    else
+                    {
+                        getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
+                        getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getUserProfileDetailsResponseJson.IsSuccess = false;
+                getUserProfileDetailsResponseJson.Message = $"unexpected error on UserController -> get-user-profile-details {ex.Message}";
+            }
+
+            return Ok(getUserProfileDetailsResponseJson);
         }
         #endregion
     }
