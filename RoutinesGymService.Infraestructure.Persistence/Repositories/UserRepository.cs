@@ -6,6 +6,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Repository;
@@ -369,6 +370,35 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return changePasswordWithPasswordAndEmailResponse;
+        }
+
+        public async Task<GetUserProfileDetailsResponse> GetUserProfileDetails(GetUserProfileDetailsRequest GetUserProfileDetails)
+        {
+            GetUserProfileDetailsResponse getUserProfileDetailsResponse = new GetUserProfileDetailsResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == GetUserProfileDetails.UserEmail);
+                if (user == null)
+                {
+                    getUserProfileDetailsResponse.IsSuccess = false;
+                    getUserProfileDetailsResponse.Message = "User not found with the provided email";
+                }
+                else
+                {
+                    getUserProfileDetailsResponse.IsSuccess = true;
+                    getUserProfileDetailsResponse.Message = "User profile details retrieved successfully";
+                    getUserProfileDetailsResponse.Username = user.Username;
+                    getUserProfileDetailsResponse.InscriptionDate = user.InscriptionDate;
+                    getUserProfileDetailsResponse.RoutineCount = user.Routines.Count;
+                }
+            }
+            catch (Exception ex)
+            {
+                getUserProfileDetailsResponse.IsSuccess = false;
+                getUserProfileDetailsResponse.Message = $"unexpected error on UserRepository -> GetUserProfileDetails: {ex.Message}";
+            }
+
+            return getUserProfileDetailsResponse;
         }
     }
 }
