@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplitDay;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
+using RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 
 namespace RoutinesGymService.Application.Interface.Repository
