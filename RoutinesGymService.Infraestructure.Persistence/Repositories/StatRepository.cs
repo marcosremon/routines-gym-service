@@ -3,6 +3,7 @@ using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.Interface.Repository;
+using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
@@ -16,22 +17,31 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<GetStatsResponse> GetStats()
+        public async Task<GetStatsResponse> GetStats(GetStatRequest getStatRequest)
         {
             GetStatsResponse getStatsResponse = new GetStatsResponse();
             try
             {
-                List<Stat> stats = await _context.Stats.ToListAsync();
-                if (stats == null || !stats.Any())
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getStatRequest.UserEmail);
+                if (user == null)
                 {
                     getStatsResponse.IsSuccess = false;
-                    getStatsResponse.Message = "No stats found.";
+                    getStatsResponse.Message = "User not found.";
                 }
                 else
                 {
-                    getStatsResponse.IsSuccess = true;
-                    getStatsResponse.Message = "Stats retrieved successfully.";
-                    getStatsResponse.Stats = stats;
+                    List<Stat> stats = await _context.Stats.Where(s => s.UserId == user.UserId).ToListAsync();
+                    if (stats == null || !stats.Any())
+                    {
+                        getStatsResponse.IsSuccess = false;
+                        getStatsResponse.Message = "No stats found.";
+                    }
+                    else
+                    {
+                        getStatsResponse.IsSuccess = true;
+                        getStatsResponse.Message = "Stats retrieved successfully.";
+                        getStatsResponse.Stats = stats;
+                    }
                 }
             }
             catch (Exception ex)
