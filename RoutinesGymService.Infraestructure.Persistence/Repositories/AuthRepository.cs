@@ -28,7 +28,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 if (user == null)
                 {
                     loginResponse.IsSuccess = false;
-                    loginResponse.Message = "Usuario no encontrado revise el correo y la contraseña";
+                    loginResponse.Message = "User not found";
                 }
                 else
                 {

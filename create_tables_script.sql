@@ -25,6 +25,17 @@ CREATE TABLE user_friends (
         REFERENCES users(user_id)
 );
 
+CREATE TABLE stats (
+    stats_id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    date TIMESTAMP NOT NULL DEFAULT '0001-01-01 00:00:00'::timestamp,
+    steps INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_stats_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+);
+
 CREATE TABLE routines (
     routine_id BIGSERIAL PRIMARY KEY,
     routine_name VARCHAR(255) NOT NULL DEFAULT '',
