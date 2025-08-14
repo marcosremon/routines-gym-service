@@ -5,6 +5,7 @@ using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.GetStats;
+using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
@@ -22,25 +23,39 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region GetStats
         [HttpPost("get-stats")]
-        public async Task<ActionResult<GetStatsResponseJson>> GetStats()
+        public async Task<ActionResult<GetStatsResponseJson>> GetStats([FromBody] GetStatRequestJson getStatRequestJson)
         {
             GetStatsResponseJson getStatsResponseJson = new GetStatsResponseJson();
             getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
 
             try
             {
-                GetStatsResponse getStatsResponse = await _statApplication.GetStats();
-                if (getStatsResponse.IsSuccess)
+                if (string.IsNullOrEmpty(getStatRequestJson.UserEmail))
                 {
-                    getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                    getStatsResponseJson.Message = getStatsResponse.Message;
-                    getStatsResponseJson.Stats = getStatsResponse.Stats;
+                    getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getStatsResponseJson.IsSuccess = false;
+                    getStatsResponseJson.Message = "invalid data the user email is null or empty";
                 }
                 else
                 {
-                    getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                    getStatsResponseJson.Message = getStatsResponse.Message;
+                    GetStatRequest getStatRequest = new GetStatRequest
+                    {
+                        UserEmail = getStatRequestJson.UserEmail
+                    };
+
+                    GetStatsResponse getStatsResponse = await _statApplication.GetStats(getStatRequest);
+                    if (getStatsResponse.IsSuccess)
+                    {
+                        getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
+                        getStatsResponseJson.Message = getStatsResponse.Message;
+                        getStatsResponseJson.Stats = getStatsResponse.Stats;
+                    }
+                    else
+                    {
+                        getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
+                        getStatsResponseJson.Message = getStatsResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
