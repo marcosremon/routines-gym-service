@@ -13,9 +13,9 @@ namespace RoutinesGymService.Application.UseCase
             _statRepository = statRepository;
         }
 
-        public async Task<GetStatsResponse> GetStats()
+        public async Task<GetStatsResponse> GetStats(GetStatRequest getStatRequest)
         {
-            return await _statRepository.GetStats();
+            return await _statRepository.GetStats(getStatRequest);
         }
     }
 }

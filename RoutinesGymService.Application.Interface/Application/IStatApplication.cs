@@ -4,6 +4,6 @@ namespace RoutinesGymService.Application.Interface.Application
 {
     public interface IStatApplication
     {
-        Task<GetStatsResponse> GetStats();
+        Task<GetStatsResponse> GetStats(GetStatRequest getStatRequest);
     }
 }
