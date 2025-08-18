@@ -1,5 +1,4 @@
-﻿using RoutinesGymService.Domain.Model.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoutinesGymService.Domain.Model.Entities

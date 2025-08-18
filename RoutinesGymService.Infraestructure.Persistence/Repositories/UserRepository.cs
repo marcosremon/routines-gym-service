@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
@@ -16,6 +15,8 @@ using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.Mailing;
 using RoutinesGymService.Transversal.Security;
+using Microsoft.EntityFrameworkCore;
+using RoutinesGymApp.Domain.Entities;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -220,10 +221,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         
             return createGoogleUserResponse;
         }
-
+        
         public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
         {
             DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
+
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteUserRequest.Email);
@@ -234,7 +236,38 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
+                    List<Stat> stats = await _context.Stats.Where(s => s.UserId == user.UserId).ToListAsync();
+                    _context.Stats.RemoveRange(stats);
+
+                    List<UserFriend> userFriends = await _context.UserFriends
+                        .Where(uf => uf.UserId == user.UserId || uf.FriendId == user.UserId)
+                        .ToListAsync();
+                    _context.UserFriends.RemoveRange(userFriends);
+
+                    List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
+
+                    foreach (var routine in routines)
+                    {
+                        var progress = await _context.ExerciseProgress
+                            .Where(ep => ep.RoutineId == routine.RoutineId)
+                            .ToListAsync();
+                        _context.ExerciseProgress.RemoveRange(progress);
+
+                        List<Exercise> exercises = await _context.Exercises
+                            .Where(e => e.RoutineId == routine.RoutineId)
+                            .ToListAsync();
+                        _context.Exercises.RemoveRange(exercises);
+
+                        List<SplitDay> splitDays = await _context.SplitDays
+                            .Where(sd => sd.RoutineId == routine.RoutineId)
+                            .ToListAsync();
+                        _context.SplitDays.RemoveRange(splitDays);
+                    }
+
+                    _context.Routines.RemoveRange(routines);
+
                     _context.Users.Remove(user);
+
                     await _context.SaveChangesAsync();
 
                     deleteUserResponse.IsSuccess = true;
@@ -244,9 +277,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             catch (Exception ex)
             {
                 deleteUserResponse.IsSuccess = false;
-                deleteUserResponse.Message = $"unexpected error on UserRepository -> DeleteUser: {ex.Message}";
+                deleteUserResponse.Message = $"Unexpected error on UserRepository -> DeleteUser: {ex.Message}";
             }
-        
+
             return deleteUserResponse;
         }
 

@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.GetStats;
-using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
-using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {

@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{1F4F52F4-70F4-49A7-8496-84EF361E3DB1}"
+	ProjectSection(SolutionItems) = preProject
+		create_tables_script.sql = create_tables_script.sql
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{196FD5B5-5253-41F2-B5E4-FB36F32AF5B9}"
 EndProject
