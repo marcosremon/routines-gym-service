@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;

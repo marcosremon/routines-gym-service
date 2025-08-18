@@ -6,9 +6,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserFriend> UserFriends { get; set; }
@@ -18,8 +16,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
         public DbSet<ExerciseProgress> ExerciseProgress { get; set; }
         public DbSet<Stat> Stats { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder) { }
     }
 }
