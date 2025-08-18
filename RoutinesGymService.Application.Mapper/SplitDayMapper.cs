@@ -1,6 +1,5 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Domain.Model.Entities;
-using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Application.Mapper

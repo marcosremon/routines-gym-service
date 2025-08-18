@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
