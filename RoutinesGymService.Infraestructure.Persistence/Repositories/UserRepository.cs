@@ -370,7 +370,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (user.Password != PasswordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.OldPassword!))
+                    if (PasswordUtils.PasswordDecoder(user.Password!) != changePasswordWithPasswordAndEmailRequest.OldPassword)
                     {
                         changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
                         changePasswordWithPasswordAndEmailResponse.Message = "Old password does not match";
