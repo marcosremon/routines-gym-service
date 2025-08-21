@@ -58,6 +58,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
