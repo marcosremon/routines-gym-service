@@ -1,11 +1,22 @@
 ﻿using RoutinesGymService.Domain.Model.Enums;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
 
 namespace RoutinesGymService.Transversal.Common
 {
     public class GenericUtils
     {
-        #region week day
+        private readonly IMemoryCache _cache;
+        private readonly string _userPrefix;
+
+        public GenericUtils(IMemoryCache cache, IConfiguration configuration)
+        {
+            _cache = cache;
+            _userPrefix = configuration["CacheSettings:UserPrefix"]!;
+        }
+
+        #region Week day
         public static string ChangeDayLanguage(string dayName)
         {
             switch (dayName)
@@ -73,7 +84,7 @@ namespace RoutinesGymService.Transversal.Common
         }
         #endregion
 
-        #region role
+        #region Role
         public static Role ChangeIntToEnumOnRole(int role)
         {
             switch (role)
@@ -97,7 +108,7 @@ namespace RoutinesGymService.Transversal.Common
         }
         #endregion
 
-        #region other
+        #region Create friend code
         public static string CreateFriendCode(int length)
         {
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -110,5 +121,20 @@ namespace RoutinesGymService.Transversal.Common
             return res.ToString();
         }
         #endregion
+
+        #region Clear cache
+        public void ClearUserCache(string userEmail)
+        {
+            if (string.IsNullOrWhiteSpace(userEmail))
+                return;
+
+            string userKey = $"{_userPrefix}{userEmail}";
+            string allUsersKey = $"{_userPrefix}All";
+
+            _cache.Remove(userKey);
+            _cache.Remove(allUsersKey);
+        }
+        #endregion
+
     }
 }

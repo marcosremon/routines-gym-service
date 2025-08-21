@@ -3,6 +3,7 @@ using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Infraestructure.Persistence.Repositories;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
 {
@@ -27,6 +28,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IFriendRepository, FriendRepository>();
             services.AddScoped<IStatRepository, StatRepository>();
+
+            // Other Services
+            services.AddScoped<GenericUtils>();
 
             return services;
         }

@@ -1,4 +1,9 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using RoutinesGymApp.Domain.Entities;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
@@ -15,18 +20,24 @@ using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.Mailing;
 using RoutinesGymService.Transversal.Security;
-using Microsoft.EntityFrameworkCore;
-using RoutinesGymApp.Domain.Entities;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly GenericUtils _genericUtils;
+        private readonly IMemoryCache _cache;
+        private readonly string _userPrefix;
+        private readonly int _expiryMinutes;
 
-        public UserRepository(ApplicationDbContext context)
+        public UserRepository(ApplicationDbContext context, IMemoryCache cache, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
+            _genericUtils = genericUtils;
+            _cache = cache;
+            _userPrefix = configuration["CacheSettings:UserPrefix"] ?? "User_";
+            _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
         public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
@@ -34,20 +45,36 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUserByEmailResponse getUserByEmailResponse = new GetUserByEmailResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getUserByEmailRequest.Email);
-                if (user == null)
-                {
-                    getUserByEmailResponse.IsSuccess = false;
-                    getUserByEmailResponse.Message = "User not found with the provided email";
-                }
-                else
+                string cacheKey = $"{_userPrefix}{getUserByEmailRequest.Email}";
+
+                User? cachedUser = _cache.Get<User>(cacheKey);
+                if (cachedUser != null)
                 {
                     getUserByEmailResponse.IsSuccess = true;
                     getUserByEmailResponse.Message = "User found successfully";
-                    getUserByEmailResponse.RoutinesCount = user.Routines.Count;
-                    getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
-                    getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
+                    getUserByEmailResponse.RoutinesCount = cachedUser.Routines.Count;
+                    getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == cachedUser.UserId);
+                    getUserByEmailResponse.UserDTO = UserMapper.UserToDto(cachedUser);
                 }
+                else
+                {
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getUserByEmailRequest.Email);
+                    if (user == null)
+                    {
+                        getUserByEmailResponse.IsSuccess = false;
+                        getUserByEmailResponse.Message = "User not found with the provided email";
+                    }
+                    else
+                    {
+                        getUserByEmailResponse.IsSuccess = true;
+                        getUserByEmailResponse.Message = "User found successfully";
+                        getUserByEmailResponse.RoutinesCount = user.Routines.Count;
+                        getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
+                        getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
+
+                        _cache.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
+                    }
+                } 
             }
             catch (Exception ex)
             {
@@ -63,17 +90,31 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUsersResponse getUsersResponse = new GetUsersResponse();
             try
             {
-                List<User> users = await _context.Users.ToListAsync();
-                if (users == null || users.Count == 0)
+                string cacheKey = $"{_userPrefix}All";
+                List<User>? cacheUsers = _cache.Get<List<User>>(cacheKey);
+
+                if (cacheUsers == null)
                 {
-                    getUsersResponse.Message = "No users found";
-                    getUsersResponse.IsSuccess = false;
+                    List<User> users = await _context.Users.ToListAsync();
+                    _cache.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
+
+                    getUsersResponse.IsSuccess = true;
+                    getUsersResponse.Message = "Users found successfully";
+                    getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
                 }
                 else
                 {
-                    getUsersResponse.IsSuccess = true;
-                    getUsersResponse.Message = "Users found successfully";
-                    getUsersResponse.UsersDTO = users.Select(user => UserMapper.UserToDto(user)).ToList();
+                    if (cacheUsers.Count == 0)
+                    {
+                        getUsersResponse.Message = "No users found";
+                        getUsersResponse.IsSuccess = false;
+                    }
+                    else
+                    {
+                        getUsersResponse.IsSuccess = true;
+                        getUsersResponse.Message = "Users found successfully";
+                        getUsersResponse.UsersDTO = cacheUsers.Select(UserMapper.UserToDto).ToList();
+                    }
                 }
             }
             catch (Exception ex)
@@ -268,6 +309,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     _context.Users.Remove(user);
 
+                    _genericUtils.ClearUserCache(deleteUserRequest.Email!);
+
                     await _context.SaveChangesAsync();
 
                     deleteUserResponse.IsSuccess = true;
@@ -302,7 +345,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     user.Email = updateUserRequest.NewEmail ?? user.Email;
                     
                     await _context.SaveChangesAsync();
-                    
+
+                    _genericUtils.ClearUserCache(updateUserRequest.OldEmail!);
+
                     updateUserResponse.IsSuccess = true;
                     updateUserResponse.UserDTO = UserMapper.UserToDto(user);
                     updateUserResponse.Message = "User updated successfully";
@@ -343,6 +388,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.SaveChangesAsync();
 
                     MailUtils.SendEmail(user.Username, user.Email, newPassword);
+
+                    _genericUtils.ClearUserCache(createNewPasswordRequest.UserEmail!);
 
                     createNewPasswordResponse.IsSuccess = true;
                     createNewPasswordResponse.Message = "New password created successfully";
@@ -389,6 +436,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             await _context.SaveChangesAsync();
 
                             MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
+
+                            _genericUtils.ClearUserCache(changePasswordWithPasswordAndEmailRequest.UserEmail!);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";
