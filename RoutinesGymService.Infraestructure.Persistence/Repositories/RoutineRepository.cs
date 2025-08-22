@@ -20,7 +20,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class RoutineRepository : IRoutineRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly IConfiguration _configuration;
         private readonly IMemoryCache _cache;
         private readonly int _expiryMinutes;
         private readonly GenericUtils _genericUtils;
@@ -31,7 +30,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _cache = cache;
             _context = context;
             _genericUtils = genericUtils;
-            _configuration = configuration;
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
