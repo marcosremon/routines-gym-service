@@ -19,15 +19,15 @@ namespace RoutinesGymService.Transversal.Security
 
         public static string GenerateJwtToken(Claim[] claims)
         {
-            var jwtKey = _configuration["JWT:Key"];
-            var issuer = _configuration["JWT:Issuer"];
-            var audience = _configuration["JWT:Audience"];
-            var expInMinutes = _configuration["JWT:ExpInMinutes"];
+            string jwtKey = _configuration!["JWT:Key"]!;
+            string issuer = _configuration["JWT:Issuer"]!;
+            string audience = _configuration["JWT:Audience"]!;
+            string expInMinutes = _configuration["JWT:ExpInMinutes"]!;
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
@@ -39,7 +39,7 @@ namespace RoutinesGymService.Transversal.Security
 
         public static string GenerateUserJwtToken(string username)
         {
-            var claims = new Claim[]
+            Claim[] claims = new Claim[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
@@ -65,8 +65,8 @@ namespace RoutinesGymService.Transversal.Security
         {
             if (_configuration == null) throw new InvalidOperationException("JwtUtils not initialized.");
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_configuration["jwt:Key"]);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.UTF8.GetBytes(_configuration["jwt:Key"]!);
 
             CheckTokenStatusResponse checkTokenStatusResponse = new CheckTokenStatusResponse();
             try
