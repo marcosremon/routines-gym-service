@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -27,11 +25,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly GenericUtils _genericUtils;
-        private readonly IMemoryCache _cache;
+        private readonly CacheService _cache;
         private readonly string _userPrefix;
         private readonly int _expiryMinutes;
 
-        public UserRepository(ApplicationDbContext context, IMemoryCache cache, GenericUtils genericUtils, IConfiguration configuration)
+        public UserRepository(ApplicationDbContext context, CacheService cache, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
             _genericUtils = genericUtils;

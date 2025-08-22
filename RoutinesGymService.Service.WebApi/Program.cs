@@ -1,12 +1,13 @@
-using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Infraestructure.Persistence.Dependencies;
+using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.Mailing;
 using RoutinesGymService.Transversal.Security;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<CacheService>();
 
 builder.Services.AddAuthorization();
 

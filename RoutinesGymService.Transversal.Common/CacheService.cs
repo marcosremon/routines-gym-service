@@ -1,0 +1,39 @@
+﻿using Microsoft.Extensions.Caching.Memory;
+using System.Collections.Concurrent;
+
+namespace RoutinesGymService.Transversal.Common
+{
+    public class CacheService
+    {
+        private readonly IMemoryCache _cache;
+        private readonly ConcurrentDictionary<string, byte> _keys = new();
+
+        public CacheService(IMemoryCache cache)
+        {
+            _cache = cache;
+        }
+
+        public void Set<T>(string key, T value, TimeSpan expiration)
+        {
+            _cache.Set(key, value, expiration);
+            _keys[key] = 0; 
+        }
+
+        public T? Get<T>(string key)
+        {
+            _cache.TryGetValue<T>(key, out var value);
+            return value;
+        }
+
+        public bool TryGet<T>(string key, out T value) =>
+            _cache.TryGetValue(key, out value);
+
+        public void Remove(string key)
+        {
+            _cache.Remove(key);  
+            _keys.TryRemove(key, out _);
+        }
+
+        public IEnumerable<string> GetAllKeys() => _keys.Keys;
+    }
+}
