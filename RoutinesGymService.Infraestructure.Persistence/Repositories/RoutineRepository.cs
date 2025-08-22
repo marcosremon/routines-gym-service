@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.CreateRoutine;
@@ -20,12 +19,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class RoutineRepository : IRoutineRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly IMemoryCache _cache;
-        private readonly int _expiryMinutes;
+        private readonly CacheService _cache;
         private readonly GenericUtils _genericUtils;
+        private readonly int _expiryMinutes;
         private readonly string _routinePrefix;
 
-        public RoutineRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration, IMemoryCache cache)
+        public RoutineRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration, CacheService cache)
         {
             _cache = cache;
             _context = context;
@@ -250,13 +249,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             return getAllUserRoutinesResponse;
         }
 
-        public async Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest)
+        public async Task<GetRoutineByRoutineNameResponse> GetRoutineByRoutineName(GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest)
         {
-            GetRoutineByIdResponse getRoutineByIdResponse = new GetRoutineByIdResponse();
+            GetRoutineByRoutineNameResponse getRoutineByIdResponse = new GetRoutineByRoutineNameResponse();
             try
             {
-                string cacheKey = $"{_routinePrefix}_GetRoutineById_{getRoutineByIdRequest.RoutineId}";
-
+                string cacheKey = $"{_routinePrefix}_GetRoutineByRoutineName_{getRoutineByRoutineNameRequest.RoutineName}";
+                _genericUtils.ClearCache(_routinePrefix);
                 Routine? cachedRoutine = _cache.Get<Routine>(cacheKey);
                 if (cachedRoutine != null)
                 {
@@ -266,25 +265,38 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == getRoutineByIdRequest.RoutineId);
-                    if (routine == null)
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getRoutineByRoutineNameRequest.UserEmail);
+                    if (user == null)
                     {
                         getRoutineByIdResponse.IsSuccess = false;
-                        getRoutineByIdResponse.Message = "Routine not found";
+                        getRoutineByIdResponse.Message = "User not found";
                     }
                     else
                     {
-                        getRoutineByIdResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
-                        getRoutineByIdResponse.IsSuccess = true;
-                        getRoutineByIdResponse.Message = "Routine retrieved successfully";
+                        Routine? routine = await _context.Routines
+                            .Include(r => r.SplitDays)
+                            .FirstOrDefaultAsync(r => r.RoutineName == getRoutineByRoutineNameRequest.RoutineName && r.UserId == user.UserId);
+                        if (routine == null)
+                        {
+                            getRoutineByIdResponse.IsSuccess = false;
+                            getRoutineByIdResponse.Message = "Routine not found";
+                        }
+                        else
+                        {
+                            routine.SplitDays = await _context.SplitDays.Where(sd => sd.RoutineId == routine.RoutineId).ToListAsync();
 
-                        _cache.Set(cacheKey, routine, TimeSpan.FromMinutes(_expiryMinutes));
+                            getRoutineByIdResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
+                            getRoutineByIdResponse.IsSuccess = true;
+                            getRoutineByIdResponse.Message = "Routine retrieved successfully";
+
+                            _cache.Set(cacheKey, routine, TimeSpan.FromMinutes(_expiryMinutes));
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                getRoutineByIdResponse.Message = $"unexpected error on RoutineRepository -> GetRoutineById {ex.Message}";
+                getRoutineByIdResponse.Message = $"unexpected error on RoutineRepository -> GetRoutineByRoutineName {ex.Message}";
                 getRoutineByIdResponse.IsSuccess = false;
             }
 

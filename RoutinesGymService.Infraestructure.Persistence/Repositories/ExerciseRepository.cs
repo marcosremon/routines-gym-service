@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
@@ -18,12 +17,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class ExerciseRepository : IExerciseRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly IMemoryCache _cache;
-        private readonly int _expiryMinutes;
         private readonly GenericUtils _genericUtils;
+        private readonly CacheService _cache;
+        private readonly int _expiryMinutes;
         private readonly string _exercisePrefix;
 
-        public ExerciseRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration, IMemoryCache cache)
+        public ExerciseRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration, CacheService cache)
         {
             _cache = cache;
             _context = context;

@@ -33,9 +33,9 @@ namespace RoutinesGymService.Application.UseCase
             return await _routineRepository.GetAllUserRoutines(getAllUserRoutinesRequest);
         }
 
-        public async Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest)
+        public async Task<GetRoutineByRoutineNameResponse> GetRoutineByRoutineName(GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest)
         {
-            return await _routineRepository.GetRoutineById(getRoutineByIdRequest);
+            return await _routineRepository.GetRoutineByRoutineName(getRoutineByRoutineNameRequest);
         }
 
         public async Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
