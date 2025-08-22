@@ -3,20 +3,17 @@ using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using System.Collections;
+using System.Reflection;
 
 namespace RoutinesGymService.Transversal.Common
 {
     public class GenericUtils
     {
         private readonly IMemoryCache _cache;
-        private readonly string _userPrefix;
-        private readonly string _routienPrefix;
-
+        
         public GenericUtils(IMemoryCache cache, IConfiguration configuration)
         {
             _cache = cache;
-            _userPrefix = configuration["CacheSettings:UserPrefix"]!;
-            _routienPrefix = configuration["CacheSettings:RoutinePrefix"]!;
         }
 
         #region Week day
@@ -143,20 +140,18 @@ namespace RoutinesGymService.Transversal.Common
         #region Get cache keys
         private IEnumerable<string> GetCacheKeys()
         {
-            var field = _cache.GetType().GetProperty("EntriesCollection",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
+            PropertyInfo? field = _cache.GetType().GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
             if (field != null)
             {
-                var entriesCollection = field.GetValue(_cache) as ICollection;
+                ICollection? entriesCollection = field.GetValue(_cache) as ICollection;
                 if (entriesCollection != null)
                 {
-                    foreach (var item in entriesCollection)
+                    foreach (object item in entriesCollection)
                     {
-                        var keyProperty = item?.GetType().GetProperty("Key");
+                        PropertyInfo? keyProperty = item?.GetType().GetProperty("Key");
                         if (keyProperty != null)
                         {
-                            var keyValue = keyProperty.GetValue(item)?.ToString();
+                            string? keyValue = keyProperty.GetValue(item)?.ToString();
                             if (keyValue != null)
                             {
                                 yield return keyValue;
