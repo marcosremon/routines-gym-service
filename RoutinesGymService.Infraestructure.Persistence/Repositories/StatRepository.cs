@@ -52,7 +52,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             .Where(s => s.UserId == user.UserId)
                             .ToListAsync();
 
-                        if (stats == null || !stats.Any())
+                        if (!stats.Any())
                         {
                             getStatsResponse.IsSuccess = false;
                             getStatsResponse.Message = "No stats found.";

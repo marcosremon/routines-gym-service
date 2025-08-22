@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
-using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
@@ -66,6 +64,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             };
 
                             _context.UserFriends.Add(userFriend);
+
+                            _genericUtils.ClearCache(_friendPrefix);
+
                             await _context.SaveChangesAsync();
 
                             addNewUserFriendResponse.IsSuccess = true;
