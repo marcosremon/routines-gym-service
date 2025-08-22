@@ -1,21 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
     public class FriendRepository : IFriendRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMemoryCache _cache;
+        private readonly int _expiryMinutes;
+        private readonly GenericUtils _genericUtils;
+        private readonly string _friendPrefix;
 
-        public FriendRepository(ApplicationDbContext context)
+        public FriendRepository(ApplicationDbContext context, IMemoryCache cache, GenericUtils genericUtils, IConfiguration configuration)
         {
+            _cache = cache;
             _context = context;
+            _genericUtils = genericUtils;
+            _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
+            _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
         public async Task<AddNewUserFriendResponse> AddNewUserFriend(AddNewUserFriendRequest addNewUserFriendRequest)
@@ -100,6 +113,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {   
                             _context.UserFriends.Remove(userFriend);
+                            _genericUtils.ClearCache(_friendPrefix);
+
                             await _context.SaveChangesAsync();
 
                             deleteFriendResponse.IsSuccess = true;
@@ -122,32 +137,46 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetAllUserFriendsResponse getAllUserFriendsResponse = new GetAllUserFriendsResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllUserFriendsRequest.UserEmail);
-                if (user == null)
+                string cacheKey = $"{_friendPrefix}_GetAllUserFriends_{getAllUserFriendsRequest.UserEmail}";
+
+                List<User>? cacheFriends = _cache.Get<List<User>>(cacheKey);
+                if (cacheFriends != null)
                 {
-                    getAllUserFriendsResponse.IsSuccess = false;
-                    getAllUserFriendsResponse.Message = "User not found";
+                    getAllUserFriendsResponse.IsSuccess = true;
+                    getAllUserFriendsResponse.Message = "Friends retrieved successfully";
+                    getAllUserFriendsResponse.Friends = cacheFriends.Select(f => UserMapper.UserToDto(f)).ToList();
                 }
                 else
                 {
-                    List<long> friendsIds = await _context.UserFriends
-                        .Where(uf => uf.UserId == user.UserId)
-                        .Select(uf => uf.FriendId)
-                        .ToListAsync();
-                    if (friendsIds == null || friendsIds.Count == 0)
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllUserFriendsRequest.UserEmail);
+                    if (user == null)
                     {
                         getAllUserFriendsResponse.IsSuccess = false;
-                        getAllUserFriendsResponse.Message = "No friends found for this user";
+                        getAllUserFriendsResponse.Message = "User not found";
                     }
                     else
                     {
-                        List<User> friends = await _context.Users
-                            .Where(u => friendsIds.Contains(u.UserId))
+                        List<long> friendsIds = await _context.UserFriends
+                            .Where(uf => uf.UserId == user.UserId)
+                            .Select(uf => uf.FriendId)
                             .ToListAsync();
+                        if (friendsIds == null || friendsIds.Count == 0)
+                        {
+                            getAllUserFriendsResponse.IsSuccess = false;
+                            getAllUserFriendsResponse.Message = "No friends found for this user";
+                        }
+                        else
+                        {
+                            List<User> friends = await _context.Users
+                                .Where(u => friendsIds.Contains(u.UserId))
+                                .ToListAsync();
 
-                        getAllUserFriendsResponse.IsSuccess = true;
-                        getAllUserFriendsResponse.Message = "Friends retrieved successfully";
-                        getAllUserFriendsResponse.Friends = friends.Select(f => UserMapper.UserToDto(f)).ToList();
+                            getAllUserFriendsResponse.IsSuccess = true;
+                            getAllUserFriendsResponse.Message = "Friends retrieved successfully";
+                            getAllUserFriendsResponse.Friends = friends.Select(f => UserMapper.UserToDto(f)).ToList();
+
+                            _cache.Set(cacheKey, friends, TimeSpan.FromMinutes(_expiryMinutes));
+                        }
                     }
                 }
             }
