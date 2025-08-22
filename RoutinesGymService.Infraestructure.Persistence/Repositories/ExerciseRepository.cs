@@ -7,7 +7,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Add
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
@@ -91,6 +90,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                                 splitDay.Exercises.Add(newExercise);
                                 await _context.SaveChangesAsync();
+
+                                _genericUtils.ClearCache(_exercisePrefix);
 
                                 await dbContextTransaction.CommitAsync();
 
@@ -333,7 +334,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 //updateExerciseResponse.Message = "Exercise updated successfully.";
 
 
-                                // añadir el remove cache
+                                _genericUtils.ClearCache(_exercisePrefix);
                             }
                         }
                     }
@@ -382,6 +383,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {
                             // to_do
+
+                            _genericUtils.ClearCache(_exercisePrefix);
+
                         }
                     }
                 }
