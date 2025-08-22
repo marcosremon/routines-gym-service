@@ -131,6 +131,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 }
                             }
 
+                            _genericUtils.ClearCache(_routinePrefix);
+
                             await _context.SaveChangesAsync();
                             await dbContextTransaction.CommitAsync();
 

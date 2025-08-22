@@ -191,6 +191,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     };
 
                                     await _context.Users.AddAsync(newUser);
+                                    _genericUtils.ClearCache(_userPrefix);
                                     await _context.SaveChangesAsync();
 
                                     createUserResponse.IsSuccess = true;
@@ -246,8 +247,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     };
 
                     await _context.Users.AddAsync(user);
+
+                    _genericUtils.ClearCache(_userPrefix);
+
                     await _context.SaveChangesAsync();
-                
+
                     MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
 
                     createGoogleUserResponse.IsSuccess = true;
