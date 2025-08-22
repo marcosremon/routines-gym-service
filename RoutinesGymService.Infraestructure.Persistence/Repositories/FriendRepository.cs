@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
@@ -15,12 +14,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class FriendRepository : IFriendRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly IMemoryCache _cache;
-        private readonly int _expiryMinutes;
         private readonly GenericUtils _genericUtils;
+        private readonly CacheService _cache;
+        private readonly int _expiryMinutes;
         private readonly string _friendPrefix;
 
-        public FriendRepository(ApplicationDbContext context, IMemoryCache cache, GenericUtils genericUtils, IConfiguration configuration)
+        public FriendRepository(ApplicationDbContext context, CacheService cache, GenericUtils genericUtils, IConfiguration configuration)
         {
             _cache = cache;
             _context = context;

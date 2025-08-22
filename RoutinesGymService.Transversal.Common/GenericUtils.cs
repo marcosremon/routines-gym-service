@@ -10,10 +10,14 @@ namespace RoutinesGymService.Transversal.Common
     public class GenericUtils
     {
         private readonly IMemoryCache _cache;
-        
-        public GenericUtils(IMemoryCache cache, IConfiguration configuration)
+        private readonly CacheKeyTracker _cacheKeyTracker;
+        private readonly CacheService _cacheService;
+
+        public GenericUtils(IMemoryCache cache, IConfiguration configuration, CacheService cacheService)
         {
             _cache = cache;
+            _cacheKeyTracker = new CacheKeyTracker();
+            _cacheService = cacheService;
         }
 
         #region Week day
@@ -125,42 +129,15 @@ namespace RoutinesGymService.Transversal.Common
         #region Clear cache
         public void ClearCache(string prefix)
         {
-            if (string.IsNullOrWhiteSpace(prefix))
-                return;
-
-            IEnumerable<string> keysToRemove = GetCacheKeys().Where(k => k.StartsWith(prefix));
-
-            foreach (string key in keysToRemove)
+            List<string> keys = _cacheService.GetAllKeys()
+                                    .Where(k => k.StartsWith(prefix))
+                                    .ToList();
+            foreach (var key in keys)
             {
-                _cache.Remove(key);
+               _cacheService.Remove(key); 
             }
         }
-        #endregion
 
-        #region Get cache keys
-        private IEnumerable<string> GetCacheKeys()
-        {
-            PropertyInfo? field = _cache.GetType().GetProperty("EntriesCollection", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field != null)
-            {
-                ICollection? entriesCollection = field.GetValue(_cache) as ICollection;
-                if (entriesCollection != null)
-                {
-                    foreach (object item in entriesCollection)
-                    {
-                        PropertyInfo? keyProperty = item?.GetType().GetProperty("Key");
-                        if (keyProperty != null)
-                        {
-                            string? keyValue = keyProperty.GetValue(item)?.ToString();
-                            if (keyValue != null)
-                            {
-                                yield return keyValue;
-                            }
-                        }
-                    }
-                }
-            }
-        }
         #endregion
     }
 }

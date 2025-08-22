@@ -285,51 +285,53 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         #endregion
 
         #region Get Routine By Id
-        [HttpPost("get-routine-by-id")]
-        public async Task<ActionResult<GetRoutineByIdResponseJson>> GetRoutineById([FromBody] GetRoutineByIdRequestJson getRoutineByIdRequestJson)
+        [HttpPost("get-routine-by-routine-name")]
+        public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineById([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
-            GetRoutineByIdResponseJson getRoutineByIdResponseJson = new GetRoutineByIdResponseJson();
-            getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+            GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
+            getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
 
             try
             {
-                if (getRoutineByIdRequestJson == null ||
-                    getRoutineByIdRequestJson.RoutineId == null)
+                if (getRoutineByRoutineNameRequestJson == null ||
+                    string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.RoutineName) ||
+                    string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.UserEmail))
                 {
-                    getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getRoutineByIdResponseJson.IsSuccess = false;
-                    getRoutineByIdResponseJson.Message = "invalid data, the routine id is null or empty";
+                    getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getRoutineByRoutineNameResponseJson.IsSuccess = false;
+                    getRoutineByRoutineNameResponseJson.Message = "invalid data, the routine id is null or empty";
                 }
                 else
                 {
-                    GetRoutineByIdRequest getRoutineByIdRequest = new GetRoutineByIdRequest
+                    GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest = new GetRoutineByRoutineNameRequest
                     {
-                        RoutineId = getRoutineByIdRequestJson.RoutineId
+                        RoutineName = getRoutineByRoutineNameRequestJson.RoutineName,
+                        UserEmail = getRoutineByRoutineNameRequestJson.UserEmail
                     };
 
-                    GetRoutineByIdResponse getRoutineByIdResponse = await _routineApplication.GetRoutineById(getRoutineByIdRequest);
-                    if (getRoutineByIdResponse.IsSuccess)
+                    GetRoutineByRoutineNameResponse getRoutineByRoutineNameResponse = await _routineApplication.GetRoutineByRoutineName(getRoutineByRoutineNameRequest);
+                    if (getRoutineByRoutineNameResponse.IsSuccess)
                     {
-                        getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getRoutineByIdResponseJson.IsSuccess = getRoutineByIdResponse.IsSuccess;
-                        getRoutineByIdResponseJson.Message = getRoutineByIdResponse.Message;
-                        getRoutineByIdResponseJson.RoutineDTO = getRoutineByIdResponse.RoutineDTO;
+                        getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
+                        getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
+                        getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
                     }
                     else
                     {
-                        getRoutineByIdResponseJson.IsSuccess = getRoutineByIdResponse.IsSuccess;
-                        getRoutineByIdResponseJson.Message = getRoutineByIdResponse.Message;
+                        getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
+                        getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
                     }
                 }
             }
             catch (Exception ex)
             {
-                getRoutineByIdResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getRoutineByIdResponseJson.IsSuccess = false;
-                getRoutineByIdResponseJson.Message = $"unexpected error on RoutineController -> get-routine-by-id: {ex.Message}";
+                getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getRoutineByRoutineNameResponseJson.IsSuccess = false;
+                getRoutineByRoutineNameResponseJson.Message = $"unexpected error on RoutineController -> get-routine-by-id: {ex.Message}";
             }
 
-            return Ok(getRoutineByIdResponseJson);
+            return Ok(getRoutineByRoutineNameResponseJson);
         }
         #endregion
     }

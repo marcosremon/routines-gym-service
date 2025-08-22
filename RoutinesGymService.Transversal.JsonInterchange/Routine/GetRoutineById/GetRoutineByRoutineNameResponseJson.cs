@@ -1,9 +1,9 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Transversal.Common;
 
-namespace RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineById
+namespace RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById
 {
-    public class GetRoutineByIdResponse : BaseResponse
+    public class GetRoutineByRoutineNameResponseJson : BaseResponseJson
     {
         public RoutineDTO? RoutineDTO { get; set; }
     }

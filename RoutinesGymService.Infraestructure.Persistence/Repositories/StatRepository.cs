@@ -6,17 +6,18 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStat
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
     public class StatRepository : IStatRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly IMemoryCache _cache;
+        private readonly CacheService _cache;
         private readonly string _statPrefix;
         private readonly int _expiryMinutes;
 
-        public StatRepository(ApplicationDbContext context, IMemoryCache cache, IConfiguration configuration)
+        public StatRepository(ApplicationDbContext context, CacheService cache, IConfiguration configuration)
         {
             _context = context;
             _cache = cache;

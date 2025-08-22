@@ -12,7 +12,7 @@ namespace RoutinesGymService.Application.Interface.Repository
         Task<CreateRoutineResponse> CreateRoutine(CreateRoutineRequest createRoutineRequest);
         Task<DeleteRoutineResponse> DeleteRoutine(DeleteRoutineRequest deleteRoutineRequest);
         Task<GetAllUserRoutinesResponse> GetAllUserRoutines(GetAllUserRoutinesRequest getAllUserRoutinesRequest);
-        Task<GetRoutineByIdResponse> GetRoutineById(GetRoutineByIdRequest getRoutineByIdRequest);
+        Task<GetRoutineByRoutineNameResponse> GetRoutineByRoutineName(GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest);
         Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest);
         Task<UpdateRoutineResponse> UpdateRoutine(UpdateRoutineRequest updateRoutineRequest);
     }
