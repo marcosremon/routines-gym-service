@@ -2,6 +2,7 @@
 using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using System.Collections;
 
 namespace RoutinesGymService.Transversal.Common
 {
@@ -9,11 +10,13 @@ namespace RoutinesGymService.Transversal.Common
     {
         private readonly IMemoryCache _cache;
         private readonly string _userPrefix;
+        private readonly string _routienPrefix;
 
         public GenericUtils(IMemoryCache cache, IConfiguration configuration)
         {
             _cache = cache;
             _userPrefix = configuration["CacheSettings:UserPrefix"]!;
+            _routienPrefix = configuration["CacheSettings:RoutinePrefix"]!;
         }
 
         #region Week day
@@ -123,18 +126,46 @@ namespace RoutinesGymService.Transversal.Common
         #endregion
 
         #region Clear cache
-        public void ClearUserCache(string userEmail)
+        public void ClearCache(string prefix)
         {
-            if (string.IsNullOrWhiteSpace(userEmail))
+            if (string.IsNullOrWhiteSpace(prefix))
                 return;
 
-            string userKey = $"{_userPrefix}{userEmail}";
-            string allUsersKey = $"{_userPrefix}All";
+            IEnumerable<string> keysToRemove = GetCacheKeys().Where(k => k.StartsWith(prefix));
 
-            _cache.Remove(userKey);
-            _cache.Remove(allUsersKey);
+            foreach (string key in keysToRemove)
+            {
+                _cache.Remove(key);
+            }
         }
         #endregion
 
+        #region Get cache keys
+        private IEnumerable<string> GetCacheKeys()
+        {
+            var field = _cache.GetType().GetProperty("EntriesCollection",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (field != null)
+            {
+                var entriesCollection = field.GetValue(_cache) as ICollection;
+                if (entriesCollection != null)
+                {
+                    foreach (var item in entriesCollection)
+                    {
+                        var keyProperty = item?.GetType().GetProperty("Key");
+                        if (keyProperty != null)
+                        {
+                            var keyValue = keyProperty.GetValue(item)?.ToString();
+                            if (keyValue != null)
+                            {
+                                yield return keyValue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

@@ -96,11 +96,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 if (cacheUsers == null)
                 {
                     List<User> users = await _context.Users.ToListAsync();
-                    _cache.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
-
                     getUsersResponse.IsSuccess = true;
                     getUsersResponse.Message = "Users found successfully";
                     getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
+
+                    _cache.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
                 }
                 else
                 {
@@ -287,9 +287,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
 
-                    foreach (var routine in routines)
+                    foreach (Routine routine in routines)
                     {
-                        var progress = await _context.ExerciseProgress
+                        List<ExerciseProgress> progress = await _context.ExerciseProgress
                             .Where(ep => ep.RoutineId == routine.RoutineId)
                             .ToListAsync();
                         _context.ExerciseProgress.RemoveRange(progress);
@@ -309,7 +309,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     _context.Users.Remove(user);
 
-                    _genericUtils.ClearUserCache(deleteUserRequest.Email!);
+                    _genericUtils.ClearCache(_userPrefix);
 
                     await _context.SaveChangesAsync();
 
@@ -344,9 +344,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     user.Surname = updateUserRequest.NewSurname ?? user.Surname;
                     user.Email = updateUserRequest.NewEmail ?? user.Email;
                     
+                    _genericUtils.ClearCache(_userPrefix);
                     await _context.SaveChangesAsync();
-
-                    _genericUtils.ClearUserCache(updateUserRequest.OldEmail!);
 
                     updateUserResponse.IsSuccess = true;
                     updateUserResponse.UserDTO = UserMapper.UserToDto(user);
@@ -389,7 +388,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     MailUtils.SendEmail(user.Username, user.Email, newPassword);
 
-                    _genericUtils.ClearUserCache(createNewPasswordRequest.UserEmail!);
+                    _genericUtils.ClearCache(_userPrefix);
 
                     createNewPasswordResponse.IsSuccess = true;
                     createNewPasswordResponse.Message = "New password created successfully";
@@ -437,7 +436,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                             MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
 
-                            _genericUtils.ClearUserCache(changePasswordWithPasswordAndEmailRequest.UserEmail!);
+                            _genericUtils.ClearCache(_userPrefix);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";
