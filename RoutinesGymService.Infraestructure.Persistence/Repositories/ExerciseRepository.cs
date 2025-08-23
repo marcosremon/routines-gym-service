@@ -11,6 +11,7 @@ using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -189,14 +190,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             return deleteExerciseResponse;
         }
 
-        public async Task<GetExercisesByDayAndRoutineIdResponse> GetExercisesByDayAndRoutineId(GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest)
+        public async Task<GetExercisesByDayAndRoutineNameResponse> GetExercisesByDayAndRoutineName(GetExercisesByDayAndRoutineNameRequest getExercisesByDayAndRoutineNameRequest)
         {
-            GetExercisesByDayAndRoutineIdResponse getExercisesByDayAndRoutineIdResponse = new GetExercisesByDayAndRoutineIdResponse();
+            GetExercisesByDayAndRoutineNameResponse getExercisesByDayAndRoutineIdResponse = new GetExercisesByDayAndRoutineNameResponse();
             try
             {
-                string cacheKey = $"{_exercisePrefix}GetExercisesByDayAndRoutineId{getExercisesByDayNameRequest.RoutineId}_{getExercisesByDayNameRequest.DayName}";
+                string cacheKey = $"{_exercisePrefix}_GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
 
-                GetExercisesByDayAndRoutineIdResponse? cacheExercise = _cache.Get<GetExercisesByDayAndRoutineIdResponse>(cacheKey);
+                GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cache.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
 
                 if (cacheExercise != null)
                 {
@@ -207,60 +208,71 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == getExercisesByDayNameRequest.RoutineId);
-                    if (routine == null)
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getExercisesByDayAndRoutineNameRequest.UserEmail);
+                    if (user == null)
                     {
                         getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
-                        getExercisesByDayAndRoutineIdResponse.Message = "Routine not found.";
+                        getExercisesByDayAndRoutineIdResponse.Message = "User not found.";
                     }
                     else
                     {
-                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                            s.RoutineId == getExercisesByDayNameRequest.RoutineId &&
-                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayNameRequest.DayName!)));
-                        if (splitDay == null)
+                        Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineName == getExercisesByDayAndRoutineNameRequest.RoutineName &&
+                            r.UserId == user.UserId);
+                        if (routine == null)
                         {
                             getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
-                            getExercisesByDayAndRoutineIdResponse.Message = "Split day not found.";
+                            getExercisesByDayAndRoutineIdResponse.Message = "Routine not found.";
                         }
                         else
                         {
-                            List<Exercise> exercises = await _context.Exercises
-                                .Where(e =>
-                                    e.RoutineId == routine.RoutineId &&
-                                    e.SplitDayId == splitDay.SplitDayId)
-                                .ToListAsync();
-                            if (exercises.Count == 0)
+                            SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                                s.RoutineId == routine.RoutineId &&
+                                s.DayName == GenericUtils.ChangeEnumToIntOnDayName(
+                                    GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName!)));
+                            if (splitDay == null)
                             {
                                 getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
-                                getExercisesByDayAndRoutineIdResponse.Message = "No exercises found for this routine and day.";
+                                getExercisesByDayAndRoutineIdResponse.Message = "Split day not found.";
                             }
                             else
                             {
-                                Dictionary<long, List<string>> pastProgressDict = new Dictionary<long, List<string>>();
-                                foreach (Exercise exercise in exercises)
+                                List<Exercise> exercises = await _context.Exercises
+                                    .Where(e =>
+                                        e.RoutineId == routine.RoutineId &&
+                                        e.SplitDayId == splitDay.SplitDayId)
+                                    .ToListAsync();
+                                if (exercises.Count == 0)
                                 {
-                                    List<ExerciseProgress> last3Progress = await _context.ExerciseProgress
-                                       .Where(p => p.ExerciseId == exercise.ExerciseId &&
-                                            p.RoutineId == splitDay.RoutineId &&
-                                            p.DayName == splitDay.DayName.ToString())
-                                       .OrderByDescending(p => p.PerformedAt)
-                                       .Take(3)
-                                       .ToListAsync();
-
-                                    List<string> pastProgress = last3Progress
-                                        .Select(p => $"{p.Sets}x{p.Reps}@{p.Weight}kg")
-                                        .ToList();
-
-                                    pastProgressDict[exercise.ExerciseId] = pastProgress;
+                                    getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
+                                    getExercisesByDayAndRoutineIdResponse.Message = "No exercises found for this routine and day.";
                                 }
+                                else
+                                {
+                                    Dictionary<long, List<string>> pastProgressDict = new Dictionary<long, List<string>>();
+                                    foreach (Exercise exercise in exercises)
+                                    {
+                                        List<ExerciseProgress> last3Progress = await _context.ExerciseProgress
+                                           .Where(p => p.ExerciseId == exercise.ExerciseId &&
+                                                p.RoutineId == splitDay.RoutineId &&
+                                                p.DayName == GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString())
+                                           .OrderByDescending(p => p.PerformedAt)
+                                           .Take(3)
+                                           .ToListAsync();
 
-                                getExercisesByDayAndRoutineIdResponse.Exercises = exercises.Select(e => ExerciseMapper.ExerciseToDto(e)).ToList();
-                                getExercisesByDayAndRoutineIdResponse.PastProgress = pastProgressDict;
-                                getExercisesByDayAndRoutineIdResponse.IsSuccess = true;
-                                getExercisesByDayAndRoutineIdResponse.Message = "Exercises retrieved successfully.";
+                                        List<string> pastProgress = last3Progress
+                                            .Select(p => $"{p.Sets}x{p.Reps}@{p.Weight}kg")
+                                            .ToList();
 
-                                _cache.Set(cacheKey, getExercisesByDayAndRoutineIdResponse, TimeSpan.FromMinutes(_expiryMinutes));
+                                        pastProgressDict[exercise.ExerciseId] = pastProgress;
+                                    }
+
+                                    getExercisesByDayAndRoutineIdResponse.Exercises = exercises.Select(e => ExerciseMapper.ExerciseToDto(e)).ToList();
+                                    getExercisesByDayAndRoutineIdResponse.PastProgress = pastProgressDict;
+                                    getExercisesByDayAndRoutineIdResponse.IsSuccess = true;
+                                    getExercisesByDayAndRoutineIdResponse.Message = "Exercises retrieved successfully.";
+
+                                    _cache.Set(cacheKey, getExercisesByDayAndRoutineIdResponse, TimeSpan.FromMinutes(_expiryMinutes));
+                                }
                             }
                         }
                     }
@@ -371,9 +383,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                            s.RoutineId == addExerciseAddExerciseProgressRequest.RoutineId &&
-                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(addExerciseAddExerciseProgressRequest.DayName!)));
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => 
+                            s.SplitDayId == addExerciseAddExerciseProgressRequest.splitDayId &&
+                            s.RoutineId == routine.RoutineId);
                         if (splitDay == null)
                         {
                             addExerciseAddExerciseProgressResponse.IsSuccess = false;
@@ -381,10 +393,36 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {
-                            // to_do
+                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e => 
+                                e.ExerciseName == addExerciseAddExerciseProgressRequest.ExerciseName &&
+                                e.RoutineId == routine.RoutineId &&
+                                e.SplitDayId == splitDay.SplitDayId);
+                            if (exercise == null)
+                            {
+                                addExerciseAddExerciseProgressResponse.IsSuccess = false;
+                                addExerciseAddExerciseProgressResponse.Message = "Exercise day not found.";
+                            }
+                            else
+                            {
+                                ExerciseProgress? exerciseProgress = new ExerciseProgress
+                                {
+                                    ExerciseId = exercise.ExerciseId,
+                                    RoutineId = routine.RoutineId,
+                                    DayName = GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString(),
+                                    Sets = int.Parse(addExerciseAddExerciseProgressRequest.ProgressList[0]),
+                                    Reps = int.Parse(addExerciseAddExerciseProgressRequest.ProgressList[1]),
+                                    Weight = float.Parse(addExerciseAddExerciseProgressRequest.ProgressList[2]),
+                                    PerformedAt = DateTime.UtcNow,
+                                };
 
-                            _genericUtils.ClearCache(_exercisePrefix);
+                                await _context.ExerciseProgress.AddAsync(exerciseProgress);
+                                await _context.SaveChangesAsync();
 
+                                _genericUtils.ClearCache(_exercisePrefix);
+
+                                addExerciseAddExerciseProgressResponse.IsSuccess = true;
+                                addExerciseAddExerciseProgressResponse.Message = "exercise progress added successfully";
+                            }
                         }
                     }
                 }

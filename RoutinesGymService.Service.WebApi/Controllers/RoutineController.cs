@@ -284,9 +284,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Get Routine By Id
+        #region Get Routine By Routine Name
         [HttpPost("get-routine-by-routine-name")]
-        public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineById([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
+        public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
             GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
             getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;

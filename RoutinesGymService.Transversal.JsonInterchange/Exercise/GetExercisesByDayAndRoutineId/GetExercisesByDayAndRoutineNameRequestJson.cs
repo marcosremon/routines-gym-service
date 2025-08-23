@@ -1,8 +1,9 @@
 ﻿namespace RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId
 {
-    public class GetExercisesByDayAndRoutineIdRequestJson
+    public class GetExercisesByDayAndRoutineNameRequestJson
     {
-        public int? RoutineId { get; set; }
+        public string? RoutineName { get; set; }
         public string? DayName { get; set; }
+        public string? UserEmail { get; set; }
     }
 }

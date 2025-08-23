@@ -32,9 +32,9 @@ namespace RoutinesGymService.Application.UseCase
             return await _exerciseRepository.DeleteExercise(deleteExerciseRequest);
         }
 
-        public async Task<GetExercisesByDayAndRoutineIdResponse> GetExercisesByDayAndRoutineId(GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest)
+        public async Task<GetExercisesByDayAndRoutineNameResponse> GetExercisesByDayAndRoutineName(GetExercisesByDayAndRoutineNameRequest getExercisesByDayAndRoutineNameRequest)
         {
-            return await _exerciseRepository.GetExercisesByDayAndRoutineId(getExercisesByDayNameRequest);
+            return await _exerciseRepository.GetExercisesByDayAndRoutineName(getExercisesByDayAndRoutineNameRequest);
         }
 
         public async Task<UpdateExerciseResponse> UpdateExercise(UpdateExerciseRequest updateExerciseRequest)
