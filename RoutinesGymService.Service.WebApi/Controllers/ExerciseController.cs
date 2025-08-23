@@ -36,8 +36,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             {
                 if (addExerciseRequestJson == null ||
                     addExerciseRequestJson.RoutineId == null ||
-                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail) ||
-                    string.IsNullOrEmpty(addExerciseRequestJson.DayName))
+                    addExerciseRequestJson.splitDayId == null ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName) ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail))
                 {
                     addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
@@ -50,7 +51,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         ProgressList = addExerciseRequestJson.ProgressList,
                         UserEmail = addExerciseRequestJson.UserEmail,
                         RoutineId = addExerciseRequestJson.RoutineId,
-                        DayName = addExerciseRequestJson.DayName
+                        splitDayId = addExerciseRequestJson.splitDayId,
+                        ExerciseName = addExerciseRequestJson.ExerciseName
                     };
                     
                     AddExerciseAddExerciseProgressResponse addExerciseAddExerciseProgressResponse = await _exerciseApplication.AddExerciseProgress(addExerciseRequest);
@@ -244,55 +246,57 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Get exercises by day and routine id
-        [HttpPost("get-exercises-by-day-and-routine-id")]
-        public async Task<ActionResult<GetExercisesByDayAndRoutineIdResponseJson>> GetExercisesByDayAndRoutineId([FromBody] GetExercisesByDayAndRoutineIdRequestJson getExercisesByDayNameRequestJson)
+        #region Get exercises by day and routine name
+        [HttpPost("get-exercises-by-day-and-routine-name")]
+        public async Task<ActionResult<GetExercisesByDayAndRoutineNameResponseJson>> GetExercisesByDayAndRoutineName([FromBody] GetExercisesByDayAndRoutineNameRequestJson getExercisesByDayNameAndRoutineNameRequestJson)
         {
-            GetExercisesByDayAndRoutineIdResponseJson getExercisesByDayAndRoutineIdResponseJson = new GetExercisesByDayAndRoutineIdResponseJson();
-            getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+            GetExercisesByDayAndRoutineNameResponseJson getExercisesByDayAndRoutineNameResponseJson = new GetExercisesByDayAndRoutineNameResponseJson();
+            getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
 
             try
             {
-                if (getExercisesByDayNameRequestJson == null ||
-                    getExercisesByDayNameRequestJson.RoutineId == null ||
-                    string.IsNullOrEmpty(getExercisesByDayNameRequestJson.DayName))
+                if (getExercisesByDayNameAndRoutineNameRequestJson == null ||
+                    string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.RoutineName) ||
+                    string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.DayName) ||
+                    string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.UserEmail))
                 {
-                    getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getExercisesByDayAndRoutineIdResponseJson.IsSuccess = false;
-                    getExercisesByDayAndRoutineIdResponseJson.Message = "invalid data, routine id or day name is null or empty";
+                    getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getExercisesByDayAndRoutineNameResponseJson.IsSuccess = false;
+                    getExercisesByDayAndRoutineNameResponseJson.Message = "invalid data, routine id or day name is null or empty";
                 }
                 else
                 {
-                    GetExercisesByDayAndRoutineIdRequest getExercisesByDayNameRequest = new GetExercisesByDayAndRoutineIdRequest
+                    GetExercisesByDayAndRoutineNameRequest getExercisesByDayNameAndRoutineNameRequest = new GetExercisesByDayAndRoutineNameRequest
                     {
-                        RoutineId = getExercisesByDayNameRequestJson.RoutineId.Value,
-                        DayName = getExercisesByDayNameRequestJson.DayName
+                        RoutineName = getExercisesByDayNameAndRoutineNameRequestJson.RoutineName,
+                        DayName = getExercisesByDayNameAndRoutineNameRequestJson.DayName,
+                        UserEmail = getExercisesByDayNameAndRoutineNameRequestJson.UserEmail
                     };
 
-                    GetExercisesByDayAndRoutineIdResponse getExercisesByDayAndRoutineIdResponse = await _exerciseApplication.GetExercisesByDayAndRoutineId(getExercisesByDayNameRequest);
-                    if (getExercisesByDayAndRoutineIdResponse.IsSuccess)
+                    GetExercisesByDayAndRoutineNameResponse getExercisesByDayAndRoutineNameResponse = await _exerciseApplication.GetExercisesByDayAndRoutineName(getExercisesByDayNameAndRoutineNameRequest);
+                    if (getExercisesByDayAndRoutineNameResponse.IsSuccess)
                     {
-                        getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getExercisesByDayAndRoutineIdResponseJson.IsSuccess = getExercisesByDayAndRoutineIdResponse.IsSuccess;
-                        getExercisesByDayAndRoutineIdResponseJson.Message = getExercisesByDayAndRoutineIdResponse.Message;
-                        getExercisesByDayAndRoutineIdResponseJson.Exercises = getExercisesByDayAndRoutineIdResponse.Exercises;
-                        getExercisesByDayAndRoutineIdResponseJson.PastProgress = getExercisesByDayAndRoutineIdResponse.PastProgress;
+                        getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
+                        getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
+                        getExercisesByDayAndRoutineNameResponseJson.Exercises = getExercisesByDayAndRoutineNameResponse.Exercises;
+                        getExercisesByDayAndRoutineNameResponseJson.PastProgress = getExercisesByDayAndRoutineNameResponse.PastProgress;
                     }
                     else
                     {
-                        getExercisesByDayAndRoutineIdResponseJson.IsSuccess = getExercisesByDayAndRoutineIdResponse.IsSuccess;
-                        getExercisesByDayAndRoutineIdResponseJson.Message = getExercisesByDayAndRoutineIdResponse.Message;
+                        getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
+                        getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
                     }
                 }
             }
             catch (Exception ex)
             {
-                getExercisesByDayAndRoutineIdResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getExercisesByDayAndRoutineIdResponseJson.IsSuccess = false;
-                getExercisesByDayAndRoutineIdResponseJson.Message = $"unexpected error on ExerciseController -> get-exercises-by-day-and-routine-id {ex.Message}";
+                getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getExercisesByDayAndRoutineNameResponseJson.IsSuccess = false;
+                getExercisesByDayAndRoutineNameResponseJson.Message = $"unexpected error on ExerciseController -> get-exercises-by-day-and-routine-id {ex.Message}";
             }
 
-            return Ok(getExercisesByDayAndRoutineIdResponseJson);
+            return Ok(getExercisesByDayAndRoutineNameResponseJson);
         }
         #endregion
     }

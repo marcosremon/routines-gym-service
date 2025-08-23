@@ -1,9 +1,9 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Transversal.Common;
 
-namespace RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId
+namespace RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId
 {
-    public class GetExercisesByDayAndRoutineIdResponse : BaseResponse
+    public class GetExercisesByDayAndRoutineNameResponseJson : BaseResponseJson
     {
         public List<ExerciseDTO> Exercises { get; set; } = new List<ExerciseDTO>();
         public Dictionary<long, List<string>> PastProgress { get; set; } = new();

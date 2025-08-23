@@ -10,13 +10,11 @@ namespace RoutinesGymService.Transversal.Common
     public class GenericUtils
     {
         private readonly IMemoryCache _cache;
-        private readonly CacheKeyTracker _cacheKeyTracker;
         private readonly CacheService _cacheService;
 
         public GenericUtils(IMemoryCache cache, IConfiguration configuration, CacheService cacheService)
         {
             _cache = cache;
-            _cacheKeyTracker = new CacheKeyTracker();
             _cacheService = cacheService;
         }
 
