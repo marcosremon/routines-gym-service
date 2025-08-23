@@ -64,11 +64,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getStatsResponse.Message = "Stats retrieved successfully.";
                             getStatsResponse.Stats = stats;
 
-                            MemoryCacheEntryOptions cacheOptions = new MemoryCacheEntryOptions()
-                                .SetSlidingExpiration(TimeSpan.FromMinutes(_expiryMinutes))
-                                .SetAbsoluteExpiration(TimeSpan.FromMinutes(_expiryMinutes * 2));
-
-                            _cache.Set(cacheKey, stats, cacheOptions);
+                            _cache.Set(cacheKey, stats, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
                 }
