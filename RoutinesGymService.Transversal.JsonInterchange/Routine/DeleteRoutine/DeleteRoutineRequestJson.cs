@@ -3,6 +3,6 @@
     public class DeleteRoutineRequestJson
     {
         public string? UserEmail { get; set; }
-        public long? RoutineId { get; set; }
+        public string? RoutineName { get; set; }
     }
 }

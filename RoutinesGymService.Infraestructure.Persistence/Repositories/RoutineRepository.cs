@@ -161,34 +161,55 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     deleteRoutineResponse.IsSuccess = false;
                     deleteRoutineResponse.Message = "User not found";
+                    return deleteRoutineResponse;
                 }
-                else
+
+                Routine? routine = await _context.Routines.FirstOrDefaultAsync(r =>
+                    r.RoutineName == deleteRoutineRequest.RoutineName &&
+                    r.UserId == user.UserId);
+                if (routine == null)
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == deleteRoutineRequest.RoutineId && r.UserId == user.UserId);
-                    if (routine == null)
-                    {
-                        deleteRoutineResponse.IsSuccess = false;
-                        deleteRoutineResponse.Message = "Routine not found for the user";
-                    }
-                    else
-                    {
-                        if (!user.Routines.Contains(routine))
-                        {
-                            deleteRoutineResponse.IsSuccess = false;
-                            deleteRoutineResponse.Message = "This routine does not belong to the user";
-                        }
-                        else
-                        {
-                            _context.Routines.Remove(routine);
-                            _genericUtils.ClearCache(_routinePrefix);
-
-                            await _context.SaveChangesAsync();
-
-                            deleteRoutineResponse.IsSuccess = true;
-                            deleteRoutineResponse.Message = "Routine deleted successfully";
-                        }
-                    }
+                    deleteRoutineResponse.IsSuccess = false;
+                    deleteRoutineResponse.Message = "Routine not found for the user";
+                    return deleteRoutineResponse;
                 }
+
+                if (!user.Routines.Contains(routine))
+                {
+                    deleteRoutineResponse.IsSuccess = false;
+                    deleteRoutineResponse.Message = "This routine does not belong to the user";
+                    return deleteRoutineResponse;
+                }
+
+                List<SplitDay> splitDays = await _context.SplitDays
+                    .Where(sd =>
+                        sd.RoutineId == routine.RoutineId)
+                    .ToListAsync();
+                foreach (SplitDay splitDay in splitDays)
+                {
+                    List<Exercise> exercises = await _context.Exercises
+                        .Where(e => 
+                            e.SplitDayId == splitDay.SplitDayId)
+                        .ToListAsync();
+                    foreach (Exercise exercise in exercises)
+                    {
+                        List<ExerciseProgress> progresses = await _context.ExerciseProgress
+                            .Where(ep => 
+                                ep.ExerciseId == exercise.ExerciseId)
+                            .ToListAsync();
+                        _context.ExerciseProgress.RemoveRange(progresses);
+                    }
+                    _context.Exercises.RemoveRange(exercises);
+                }
+
+                _context.SplitDays.RemoveRange(splitDays);
+                _context.Routines.Remove(routine);
+                await _context.SaveChangesAsync();
+
+                _genericUtils.ClearCache(_routinePrefix);
+
+                deleteRoutineResponse.IsSuccess = true;
+                deleteRoutineResponse.Message = "Routine deleted successfully";
             }
             catch (Exception ex)
             {
