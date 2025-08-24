@@ -202,7 +202,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             try
             {
                 if (addExerciseRequestJson == null ||
-                    addExerciseRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.DayName) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.UserEmail))
@@ -215,7 +215,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 {
                     AddExerciseRequest addExerciseRequest = new AddExerciseRequest
                     {
-                        RoutineId = addExerciseRequestJson.RoutineId.Value,
+                        RoutineName = addExerciseRequestJson.RoutineName,
                         ExerciseName = addExerciseRequestJson.ExerciseName,
                         DayName = addExerciseRequestJson.DayName,
                         UserEmail = addExerciseRequestJson.UserEmail,

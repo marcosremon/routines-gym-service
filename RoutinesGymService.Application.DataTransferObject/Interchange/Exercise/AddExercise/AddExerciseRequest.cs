@@ -2,7 +2,7 @@
 {
     public class AddExerciseRequest
     {
-        public long? RoutineId { get; set; }
+        public string RoutineName { get; set; } = string.Empty;
         public string ExerciseName { get; set; } = string.Empty;
         public string DayName { get; set; } = string.Empty;
         public string UserEmail { get; set; } = string.Empty;
