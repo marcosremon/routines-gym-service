@@ -142,7 +142,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             {
                 if (deleteRoutineRequestJson == null ||
                     string.IsNullOrEmpty(deleteRoutineRequestJson.UserEmail) ||
-                    deleteRoutineRequestJson.RoutineId == null)
+                    string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     deleteRoutineResponseJson.IsSuccess = false;
@@ -153,7 +153,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     DeleteRoutineRequest deleteRoutineRequest = new DeleteRoutineRequest
                     {
                         UserEmail = deleteRoutineRequestJson.UserEmail,
-                        RoutineId = deleteRoutineRequestJson.RoutineId
+                        RoutineName = deleteRoutineRequestJson.RoutineName
                     };
 
                     DeleteRoutineResponse deleteRoutineResponse = await _routineApplication.DeleteRoutine(deleteRoutineRequest);
