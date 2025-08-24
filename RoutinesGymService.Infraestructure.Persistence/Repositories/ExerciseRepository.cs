@@ -9,9 +9,9 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Upd
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -48,7 +48,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
-                        r.RoutineId == addExerciseRequest.RoutineId &&
+                        r.RoutineName == addExerciseRequest.RoutineName &&
                         r.UserId == user.UserId);
                     if (routine == null)
                     {
@@ -57,9 +57,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
+                        string day = addExerciseRequest.DayName.Split(".")[1];
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                            s.RoutineId == addExerciseRequest.RoutineId &&
-                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(addExerciseRequest.DayName)));
+                            s.RoutineId == routine.RoutineId &&
+                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(day)));
                         if (splitDay == null)
                         {
                             addExerciseResponse.IsSuccess = false;
@@ -255,8 +256,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                            .Where(p => p.ExerciseId == exercise.ExerciseId &&
                                                 p.RoutineId == splitDay.RoutineId &&
                                                 p.DayName == GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString())
-                                           .OrderByDescending(p => p.PerformedAt)
-                                           .Take(3)
+                                           .OrderByDescending(p => p.PerformedAt)  
+                                           .Take(3)  
+                                           .Reverse()
                                            .ToListAsync();
 
                                         List<string> pastProgress = last3Progress
@@ -404,6 +406,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             }
                             else
                             {
+                                string weightRaw = addExerciseAddExerciseProgressRequest.ProgressList[2];
+                                string weight = weightRaw.Any(c => c == 46) 
+                                    ? weightRaw.Replace(".", ",") 
+                                    : weightRaw;
                                 ExerciseProgress? exerciseProgress = new ExerciseProgress
                                 {
                                     ExerciseId = exercise.ExerciseId,
@@ -411,7 +417,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     DayName = GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString(),
                                     Sets = int.Parse(addExerciseAddExerciseProgressRequest.ProgressList[0]),
                                     Reps = int.Parse(addExerciseAddExerciseProgressRequest.ProgressList[1]),
-                                    Weight = float.Parse(addExerciseAddExerciseProgressRequest.ProgressList[2]),
+                                    Weight = float.Parse(weight),
                                     PerformedAt = DateTime.UtcNow,
                                 };
 

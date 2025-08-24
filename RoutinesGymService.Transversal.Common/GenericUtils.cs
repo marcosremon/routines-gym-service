@@ -30,7 +30,6 @@ namespace RoutinesGymService.Transversal.Common
                 case "Viernes": dayName = "Friday"; break;
                 case "Sábado": dayName = "Saturday"; break;
                 case "Domingo": dayName = "Sunday"; break;
-                default: dayName = "Day"; break;
             }
 
             return dayName;
@@ -71,15 +70,15 @@ namespace RoutinesGymService.Transversal.Common
         public static WeekDay ChangeStringToEnumOnDayName(string dayName)
         {
             dayName = ChangeDayLanguage(dayName);
-            switch (dayName)
+            switch (dayName.ToLower())
             {
-                case "Monday": return WeekDay.MONDAY;
-                case "Tuesday": return WeekDay.TUESDAY;
-                case "Wednesday": return WeekDay.WEDNESDAY;
-                case "Thursday": return WeekDay.THURSDAY;
-                case "Friday": return WeekDay.FRIDAY;
-                case "Saturday": return WeekDay.SATURDAY;
-                case "Sunday": return WeekDay.SUNDAY;
+                case "monday": return WeekDay.MONDAY;
+                case "tuesday": return WeekDay.TUESDAY;
+                case "wednesday": return WeekDay.WEDNESDAY;
+                case "thursday": return WeekDay.THURSDAY;
+                case "friday": return WeekDay.FRIDAY;
+                case "saturday": return WeekDay.SATURDAY;
+                case "sunday": return WeekDay.SUNDAY;
             }
 
             return WeekDay.MONDAY;
