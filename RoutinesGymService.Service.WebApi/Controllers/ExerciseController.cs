@@ -149,7 +149,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             {
                 if (deleteExerciseRequestJson == null ||
                     deleteExerciseRequestJson.RoutineId == null ||
-                    deleteExerciseRequestJson.ExerciseId == null ||
+                    string.IsNullOrEmpty(deleteExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.DayName))
                 {
@@ -164,7 +164,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         UserEmail = deleteExerciseRequestJson.UserEmail,
                         RoutineId = deleteExerciseRequestJson.RoutineId,
                         DayName = deleteExerciseRequestJson.DayName,
-                        ExerciseId = deleteExerciseRequestJson.ExerciseId
+                        ExerciseName = deleteExerciseRequestJson.ExerciseName
                     };
 
                     DeleteExerciseResponse deleteExerciseResponse = await _exerciseApplication.DeleteExercise(deleteExerciseRequest);

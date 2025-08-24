@@ -150,7 +150,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
                                 e.RoutineId == routine.RoutineId &&
                                 e.SplitDayId == splitDay.SplitDayId &&
-                                e.ExerciseId == deleteExerciseRequest.ExerciseId);
+                                e.ExerciseName == deleteExerciseRequest.ExerciseName);
                             if (exercise == null)
                             {
                                 deleteExerciseResponse.IsSuccess = false;
@@ -158,20 +158,17 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             }
                             else
                             {
-                                _context.Exercises.Remove(exercise);
-                                await _context.SaveChangesAsync();
-                            
-                                splitDay.Exercises.Remove(exercise);
-                                await _context.SaveChangesAsync();
-
                                 List<ExerciseProgress> exerciseProgresses = await _context.ExerciseProgress
                                     .Where(ep => ep.ExerciseId == exercise.ExerciseId)
-                                    .ToListAsync(); 
+                                    .ToListAsync();
+
                                 _context.ExerciseProgress.RemoveRange(exerciseProgresses);
+                                await _context.SaveChangesAsync();
+                                
+                                _context.Exercises.Remove(exercise);
                                 await _context.SaveChangesAsync();
 
                                 _genericUtils.ClearCache(_exercisePrefix);
-
                                 await dbContextTransaction.CommitAsync();
 
                                 deleteExerciseResponse.IsSuccess = true;
