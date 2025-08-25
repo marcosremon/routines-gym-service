@@ -72,7 +72,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Delete split day
+        #region Delete split day - No se usa
         [HttpPost("delete-split-day")]
         public async Task<ActionResult<DeleteSplitDayResponseJson>> DeleteSplitDay([FromBody] DeleteSplitDayRequestJson deleteSplitDayRequestJson)
         {

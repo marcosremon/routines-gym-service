@@ -180,7 +180,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Create Google user
+        #region Create google user
         [HttpPost("create-google-user")]
         public async Task<ActionResult<CreateGoogleUserResponseJson>> CreateGoogleUser([FromBody] CreateGoogleUserRequestJson createGoogleUserRequestJson)
         {
@@ -502,7 +502,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Get User Profile Details
+        #region Get user profile details
         [HttpPost("get-user-profile-details")]
         public async Task<ActionResult<GetUserProfileDetailsResponseJson>> GetUserProfileDetails([FromBody] GetUserProfileDetailsRequestJson getUserProfileDetailsRequestJson)
         {

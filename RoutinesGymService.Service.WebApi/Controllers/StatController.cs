@@ -17,7 +17,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             _statApplication = statApplication;
         }
 
-        #region GetStats
+        #region Get stats
         [HttpPost("get-stats")]
         public async Task<ActionResult<GetStatsResponseJson>> GetStats([FromBody] GetStatRequestJson getStatRequestJson)
         {
