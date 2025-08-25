@@ -27,7 +27,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             _routineApplication = routineApplication;
         }
 
-        #region Create Routine
+        #region Create routine
         [HttpPost("create-routine")]
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
@@ -79,7 +79,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Update Routine
+        #region Update routine
         [HttpPost("update-routine")]
         public async Task<ActionResult<UpdateRoutineResponseJson>> UpdateRoutine([FromBody] UpdateRoutineRequestJson updateRoutineRequestJson)
         {
@@ -131,7 +131,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Delete Routine
+        #region Delete routine
         [HttpPost("delete-routine")]
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
@@ -181,7 +181,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Get All User Routines
+        #region Get all user routine
         [HttpPost("get-all-user-routines")]
         public async Task<ActionResult<GetAllUserRoutinesResponseJson>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequestJson getAllUserRoutinesRequestJson)
         {
@@ -230,7 +230,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Get Routine Stats
+        #region Get routine stats
         [HttpPost("get-routine-stats")]
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
@@ -284,7 +284,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Get Routine By Routine Name
+        #region Get routine by routine name
         [HttpPost("get-routine-by-routine-name")]
         public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
