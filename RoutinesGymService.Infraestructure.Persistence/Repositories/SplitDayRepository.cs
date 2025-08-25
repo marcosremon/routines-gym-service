@@ -97,7 +97,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == updateSplitDayRequest.RoutineId);
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
+                        r.RoutineName == updateSplitDayRequest.RoutineName &&
+                        r.UserId == user.UserId);
                     if (routine == null)
                     {
                         updateSplitDayResponse.IsSuccess = false;
@@ -123,13 +125,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 {
                                     updateSplitDayRequest.DeleteDays.ForEach(dayName =>
                                     {
-                                        dayName = GenericUtils.ChangeDayLanguage(dayName);
+                                        dayName = GenericUtils.ChangeDayLanguage(dayName).ToLower();
 
-                                        // Buscar el SplitDay a eliminar
                                         SplitDay? splitDayToDelete = _context.SplitDays
                                             .Include(sd => sd.Exercises)
-                                            .FirstOrDefault(sd => sd.DayName.ToString() == dayName && sd.RoutineId == routine.RoutineId);
-
+                                            .FirstOrDefault(sd =>
+                                                sd.RoutineId == routine.RoutineId &&
+                                                sd.DayNameString.ToLower() == dayName);
                                         if (splitDayToDelete != null)
                                         {
                                             List<long> exerciseIds = splitDayToDelete.Exercises.Select(e => e.ExerciseId).ToList();
