@@ -29,7 +29,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             try
             {
                 if (updateSplitDayRequestJson == null ||
-                    updateSplitDayRequestJson.RoutineId == null ||
+                    string.IsNullOrEmpty(updateSplitDayRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.UserEmail))
                 {
                     updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -40,7 +40,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 {
                     UpdateSplitDayRequest actualizarSplitDayRequest = new UpdateSplitDayRequest
                     {
-                        RoutineId = updateSplitDayRequestJson.RoutineId,
+                        RoutineName = updateSplitDayRequestJson.RoutineName,
                         UserEmail = updateSplitDayRequestJson.UserEmail,
                         AddDays = updateSplitDayRequestJson.AddDays,
                         DeleteDays = updateSplitDayRequestJson.DeleteDays
