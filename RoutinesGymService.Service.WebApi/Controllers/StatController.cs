@@ -3,6 +3,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStat
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.GetStats;
+using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
@@ -62,6 +63,55 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(getStatsResponseJson);
+        }
+        #endregion
+
+        #region Save daily steps
+        [HttpPost("save-daily-steps")]
+        public async Task<ActionResult<SaveDailyStepsResponseJson>> SaveDailySteps([FromBody] SaveDailyStepsRequestJson saveDailyStepsRequestJson)
+        {
+            SaveDailyStepsResponseJson saveDailyStepsResponseJson = new SaveDailyStepsResponseJson();
+            saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+          
+            try
+            {
+                if (saveDailyStepsRequestJson == null ||
+                    saveDailyStepsRequestJson.Steps == null)
+                {
+                    saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    saveDailyStepsResponseJson.IsSuccess = false;
+                    saveDailyStepsResponseJson.Message = "invalid data";
+                }
+                else
+                {
+                    SaveDailyStepsRequest saveDailyStepsRequest = new SaveDailyStepsRequest
+                    {
+                        Steps = saveDailyStepsRequestJson.Steps,
+                        UserEmail = saveDailyStepsRequestJson.UserEmail,
+                    };
+
+                    SaveDailyStepsResponse saveDailyStepsResponse = await _statApplication.SaveDailySteps(saveDailyStepsRequest);
+                    if (saveDailyStepsResponse.IsSuccess)
+                    {
+                        saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
+                        saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
+                    }
+                    else
+                    {
+                        saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
+                        saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                saveDailyStepsResponseJson.IsSuccess = false;
+                saveDailyStepsResponseJson.Message = $"unexpected error on StatController -> save-daily-steps {ex.Message}";
+            }
+
+            return Ok(saveDailyStepsResponseJson);
         }
         #endregion
     }

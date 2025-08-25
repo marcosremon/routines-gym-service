@@ -7,6 +7,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -14,14 +15,16 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly CacheService _cache;
+        private readonly GenericUtils _genericUtils;
         private readonly string _statPrefix;
         private readonly int _expiryMinutes;
 
-        public StatRepository(ApplicationDbContext context, CacheService cache, IConfiguration configuration)
+        public StatRepository(ApplicationDbContext context, CacheService cache, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
             _cache = cache;
             _statPrefix = configuration["CacheSettings:StatPrefix"]!;
+            _genericUtils = genericUtils;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
@@ -31,7 +34,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 string cacheKey = $"{_statPrefix}_GetStats_{getStatRequest.UserEmail}";
-
+                
                 List<Stat>? cachedStats = _cache.Get<List<Stat>>(cacheKey);
                 if (cachedStats != null && cachedStats.Any())
                 {
@@ -75,6 +78,43 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 getStatsResponse.IsSuccess = false;
             }
             return getStatsResponse;
+        }
+
+        public async Task<SaveDailyStepsResponse> SaveDailySteps(SaveDailyStepsRequest saveDailyStepsRequest)
+        {
+            SaveDailyStepsResponse saveDailyStepsResponse = new SaveDailyStepsResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == saveDailyStepsRequest.UserEmail);
+                if (user == null)
+                {
+                    saveDailyStepsResponse.Message = $"user not found";
+                    saveDailyStepsResponse.IsSuccess = false;
+                }
+                else
+                {
+                    Stat stat = new Stat
+                    {
+                        Steps = saveDailyStepsRequest.Steps,
+                        UserId = user.UserId,
+                        Date = DateTime.UtcNow.AddDays(-1),
+                    };
+
+                    _context.Stats.Add(stat);
+                    _genericUtils.ClearCache(_statPrefix);
+                    await _context.SaveChangesAsync();
+
+                    saveDailyStepsResponse.IsSuccess = true;
+                    saveDailyStepsResponse.Message = "save stats successfuyly";
+                }
+            } 
+            catch (Exception ex)
+            {
+                saveDailyStepsResponse.Message = $"unexpected error on StatRepository -> SaveDailySteps: {ex.Message}";
+                saveDailyStepsResponse.IsSuccess = false;
+            }
+
+            return saveDailyStepsResponse;
         }
     }
 }

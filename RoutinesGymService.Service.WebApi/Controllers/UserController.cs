@@ -147,12 +147,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 {
                     CreateGenericUserRequest createGenericUserRequest = new CreateGenericUserRequest
                     {
-                        Dni = createUserRequestJson.Dni.Trim(),
-                        Username = createUserRequestJson.Username.Trim(),
-                        Email = createUserRequestJson.Email.Trim(),
-                        Password = createUserRequestJson.Password.Trim(),
-                        ConfirmPassword = createUserRequestJson.ConfirmPassword.Trim(),
-                        Role = Role.USER
+                        Dni = "12363415G",
+                        Username = "admin",
+                        Email = "admin",
+                        Password = "1234",
+                        ConfirmPassword = "1234",
+                        Role = Role.ADMIN
                     };
 
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);

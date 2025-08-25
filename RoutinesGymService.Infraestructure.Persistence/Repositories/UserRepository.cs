@@ -129,7 +129,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateUserResponse createUserResponse = new CreateUserResponse();
             try
             {
-                if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                if (MailUtils.IsEmailValid(createGenericUserRequest.Email!))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Invalid email format";
@@ -159,7 +159,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             }
                             else
                             {
-                                if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                                if (PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
                                 {
                                     createUserResponse.IsSuccess = false;
                                     createUserResponse.Message = "Password does not meet the required criteria";
