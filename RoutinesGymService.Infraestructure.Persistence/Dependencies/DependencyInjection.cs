@@ -29,7 +29,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
             services.AddScoped<IFriendRepository, FriendRepository>();
             services.AddScoped<IStatRepository, StatRepository>();
 
-            // Other Services
+            // Other services
             services.AddScoped<GenericUtils>();
 
             return services;

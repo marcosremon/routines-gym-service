@@ -11,10 +11,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class AuthRepository : IAuthRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly PasswordUtils _passwordUtils;
 
-        public AuthRepository(ApplicationDbContext context)
+        public AuthRepository(ApplicationDbContext context, PasswordUtils passwordUtils)
         {
             _context = context;
+            _passwordUtils = passwordUtils;
         }
 
         public async Task<LoginResponse> Login(LoginRequest loginRequest)
@@ -24,7 +26,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u =>
                         u.Email == loginRequest.UserEmail &&
-                        u.Password == PasswordUtils.PasswordEncoder(loginRequest.UserPassword));
+                        u.Password == _passwordUtils.PasswordEncoder(loginRequest.UserPassword));
                 if (user == null)
                 {
                     loginResponse.IsSuccess = false;

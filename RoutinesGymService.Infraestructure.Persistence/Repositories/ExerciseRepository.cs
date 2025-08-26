@@ -18,13 +18,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly GenericUtils _genericUtils;
-        private readonly CacheService _cache;
+        private readonly CacheUtils _cacheUtils;
         private readonly int _expiryMinutes;
         private readonly string _exercisePrefix;
 
-        public ExerciseRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration, CacheService cache)
+        public ExerciseRepository(ApplicationDbContext context, GenericUtils genericUtils, CacheUtils cacheUtils, IConfiguration configuration)
         {
-            _cache = cache;
+            _cacheUtils = cacheUtils;
             _context = context;
             _genericUtils = genericUtils;
             _exercisePrefix = configuration["CacheSettings:ExercisePrefix"]!;
@@ -195,7 +195,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_exercisePrefix}_GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
 
-                GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cache.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
+                GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cacheUtils.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
                 if (cacheExercise != null)
                 {
                     getExercisesByDayAndRoutineIdResponse.Exercises = cacheExercise.Exercises;
@@ -269,7 +269,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     getExercisesByDayAndRoutineIdResponse.IsSuccess = true;
                                     getExercisesByDayAndRoutineIdResponse.Message = "Exercises retrieved successfully.";
 
-                                    _cache.Set(cacheKey, getExercisesByDayAndRoutineIdResponse, TimeSpan.FromMinutes(_expiryMinutes));
+                                    _cacheUtils.Set(cacheKey, getExercisesByDayAndRoutineIdResponse, TimeSpan.FromMinutes(_expiryMinutes));
                                 }
                             }
                         }

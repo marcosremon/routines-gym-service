@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
@@ -14,15 +13,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class StatRepository : IStatRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly CacheService _cache;
+        private readonly CacheUtils _cacheUtils;
         private readonly GenericUtils _genericUtils;
         private readonly string _statPrefix;
         private readonly int _expiryMinutes;
 
-        public StatRepository(ApplicationDbContext context, CacheService cache, GenericUtils genericUtils, IConfiguration configuration)
+        public StatRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
-            _cache = cache;
+            _cacheUtils = cacheUtils;
             _statPrefix = configuration["CacheSettings:StatPrefix"]!;
             _genericUtils = genericUtils;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
@@ -35,7 +34,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_statPrefix}_GetStats_{getStatRequest.UserEmail}";
                 
-                List<Stat>? cachedStats = _cache.Get<List<Stat>>(cacheKey);
+                List<Stat>? cachedStats = _cacheUtils.Get<List<Stat>>(cacheKey);
                 if (cachedStats != null && cachedStats.Any())
                 {
                     getStatsResponse.IsSuccess = true;
@@ -67,7 +66,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getStatsResponse.Message = "Stats retrieved successfully.";
                             getStatsResponse.Stats = stats;
 
-                            _cache.Set(cacheKey, stats, TimeSpan.FromMinutes(_expiryMinutes));
+                            _cacheUtils.Set(cacheKey, stats, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
                 }

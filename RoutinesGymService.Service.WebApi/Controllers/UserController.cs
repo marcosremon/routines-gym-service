@@ -12,7 +12,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Domain.Model.Enums;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateAdmin;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUser;
