@@ -3,12 +3,12 @@ using System.Collections.Concurrent;
 
 namespace RoutinesGymService.Transversal.Common
 {
-    public class CacheService
+    public class CacheUtils
     {
         private readonly IMemoryCache _cache;
         private readonly ConcurrentDictionary<string, byte> _keys = new();
 
-        public CacheService(IMemoryCache cache)
+        public CacheUtils(IMemoryCache cache)
         {
             _cache = cache;
         }

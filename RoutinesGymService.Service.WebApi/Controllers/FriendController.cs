@@ -3,7 +3,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNe
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;

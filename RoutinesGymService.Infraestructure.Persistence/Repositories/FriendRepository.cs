@@ -15,13 +15,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly GenericUtils _genericUtils;
-        private readonly CacheService _cache;
+        private readonly CacheUtils _cacheUtils;
         private readonly int _expiryMinutes;
         private readonly string _friendPrefix;
 
-        public FriendRepository(ApplicationDbContext context, CacheService cache, GenericUtils genericUtils, IConfiguration configuration)
+        public FriendRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
         {
-            _cache = cache;
+            _cacheUtils = cacheUtils;
             _context = context;
             _genericUtils = genericUtils;
             _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
@@ -138,7 +138,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_friendPrefix}_GetAllUserFriends_{getAllUserFriendsRequest.UserEmail}";
 
-                List<User>? cacheFriends = _cache.Get<List<User>>(cacheKey);
+                List<User>? cacheFriends = _cacheUtils.Get<List<User>>(cacheKey);
                 if (cacheFriends != null)
                 {
                     getAllUserFriendsResponse.IsSuccess = true;
@@ -174,7 +174,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getAllUserFriendsResponse.Message = "Friends retrieved successfully";
                             getAllUserFriendsResponse.Friends = friends.Select(f => UserMapper.UserToDto(f)).ToList();
 
-                            _cache.Set(cacheKey, friends, TimeSpan.FromMinutes(_expiryMinutes));
+                            _cacheUtils.Set(cacheKey, friends, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
                 }

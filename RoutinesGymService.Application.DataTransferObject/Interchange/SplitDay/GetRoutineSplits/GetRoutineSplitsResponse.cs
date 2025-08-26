@@ -1,5 +1,5 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Interchange.SplitDay.GetRoutineSplits;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 
 namespace RoutinesGymService.Application.DataTransferObject.SplitDay.GetRoutineSplits
 {

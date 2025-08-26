@@ -1,4 +1,4 @@
-﻿using RoutinesGymService.Transversal.Common;
+﻿using RoutinesGymService.Transversal.Common.Responses;
 
 namespace RoutinesGymService.Transversal.JsonInterchange.SplitDay.DeleteSplitDay
 {

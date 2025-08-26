@@ -1,6 +1,6 @@
-﻿namespace RoutinesGymService.Transversal.Common
+﻿namespace RoutinesGymService.Transversal.Common.Responses
 {
-    public enum ResponseCodes
+    public enum ResponseCodesJson
     {
         OK = 200,
         CREATED = 201,

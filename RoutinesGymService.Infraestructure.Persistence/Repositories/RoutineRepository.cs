@@ -19,14 +19,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class RoutineRepository : IRoutineRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly CacheService _cache;
+        private readonly CacheUtils _cacheUtils;
         private readonly GenericUtils _genericUtils;
         private readonly int _expiryMinutes;
         private readonly string _routinePrefix;
 
-        public RoutineRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration, CacheService cache)
+        public RoutineRepository(ApplicationDbContext context, GenericUtils genericUtils, CacheUtils cacheUtils, IConfiguration configuration)
         {
-            _cache = cache;
+            _cacheUtils = cacheUtils;
             _context = context;
             _genericUtils = genericUtils;
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
@@ -224,7 +224,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_routinePrefix}_GetAllUserRoutines_{getAllUserRoutinesRequest.UserEmail}";
 
-                List<Routine>? cacheRoutines = _cache.Get<List<Routine>>(cacheKey);
+                List<Routine>? cacheRoutines = _cacheUtils.Get<List<Routine>>(cacheKey);
                 if (cacheRoutines != null)
                 {
                     getAllUserRoutinesResponse.IsSuccess = true;
@@ -253,7 +253,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
                             getAllUserRoutinesResponse.Routines = routines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
 
-                            _cache.Set(cacheKey, routines, TimeSpan.FromMinutes(_expiryMinutes));
+                            _cacheUtils.Set(cacheKey, routines, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
                 }
@@ -274,7 +274,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_routinePrefix}_GetRoutineByRoutineName_{getRoutineByRoutineNameRequest.RoutineName}";
                 
-                Routine? cachedRoutine = _cache.Get<Routine>(cacheKey);
+                Routine? cachedRoutine = _cacheUtils.Get<Routine>(cacheKey);
                 if (cachedRoutine != null)
                 {
                     getRoutineByIdResponse.IsSuccess = true;
@@ -306,7 +306,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getRoutineByIdResponse.IsSuccess = true;
                             getRoutineByIdResponse.Message = "Routine retrieved successfully";
 
-                            _cache.Set(cacheKey, routine, TimeSpan.FromMinutes(_expiryMinutes));
+                            _cacheUtils.Set(cacheKey, routine, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
                 }
@@ -328,7 +328,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_routinePrefix}_GetRoutineStats_{getRoutineStatsRequest.UserEmail}";
 
-                GetRoutineStatsResponse? cachedStats = _cache.Get<GetRoutineStatsResponse>(cacheKey);
+                GetRoutineStatsResponse? cachedStats = _cacheUtils.Get<GetRoutineStatsResponse>(cacheKey);
                 if (cachedStats != null)
                 {
                     getRoutineStatsResponse.IsSuccess = cachedStats.IsSuccess;
@@ -393,7 +393,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             }
                         }
 
-                        _cache.Set(cacheKey, getRoutineStatsResponse, TimeSpan.FromMinutes(_expiryMinutes));
+                        _cacheUtils.Set(cacheKey, getRoutineStatsResponse, TimeSpan.FromMinutes(_expiryMinutes));
                     }
                 }
             }

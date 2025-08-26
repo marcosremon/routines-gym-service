@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.GetStats;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
 
