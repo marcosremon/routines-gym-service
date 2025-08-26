@@ -62,10 +62,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 FriendId = friend.UserId,
                             };
 
-                            _context.UserFriends.Add(userFriend);
-
                             _genericUtils.ClearCache(_friendPrefix);
 
+                            _context.UserFriends.Add(userFriend);
                             await _context.SaveChangesAsync();
 
                             addNewUserFriendResponse.IsSuccess = true;
@@ -112,9 +111,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {   
-                            _context.UserFriends.Remove(userFriend);
                             _genericUtils.ClearCache(_friendPrefix);
 
+                            _context.UserFriends.Remove(userFriend);
                             await _context.SaveChangesAsync();
 
                             deleteFriendResponse.IsSuccess = true;

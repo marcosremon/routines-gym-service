@@ -9,7 +9,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Upd
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
-using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
 
@@ -86,13 +85,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     ExerciseName = addExerciseRequest.ExerciseName
                                 };
 
+                                _genericUtils.ClearCache(_exercisePrefix);
+
                                 _context.Exercises.Add(newExercise);
                                 await _context.SaveChangesAsync();
 
                                 splitDay.Exercises.Add(newExercise);
                                 await _context.SaveChangesAsync();
-
-                                _genericUtils.ClearCache(_exercisePrefix);
 
                                 await dbContextTransaction.CommitAsync();
 
@@ -162,13 +161,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     .Where(ep => ep.ExerciseId == exercise.ExerciseId)
                                     .ToListAsync();
 
+                                _genericUtils.ClearCache(_exercisePrefix);
+
                                 _context.ExerciseProgress.RemoveRange(exerciseProgresses);
                                 await _context.SaveChangesAsync();
                                 
                                 _context.Exercises.Remove(exercise);
                                 await _context.SaveChangesAsync();
 
-                                _genericUtils.ClearCache(_exercisePrefix);
                                 await dbContextTransaction.CommitAsync();
 
                                 deleteExerciseResponse.IsSuccess = true;
@@ -196,7 +196,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 string cacheKey = $"{_exercisePrefix}_GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
 
                 GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cache.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
-
                 if (cacheExercise != null)
                 {
                     getExercisesByDayAndRoutineIdResponse.Exercises = cacheExercise.Exercises;
@@ -418,10 +417,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     PerformedAt = DateTime.UtcNow,
                                 };
 
+                                _genericUtils.ClearCache(_exercisePrefix);
+
                                 await _context.ExerciseProgress.AddAsync(exerciseProgress);
                                 await _context.SaveChangesAsync();
-
-                                _genericUtils.ClearCache(_exercisePrefix);
 
                                 addExerciseAddExerciseProgressResponse.IsSuccess = true;
                                 addExerciseAddExerciseProgressResponse.Message = "exercise progress added successfully";

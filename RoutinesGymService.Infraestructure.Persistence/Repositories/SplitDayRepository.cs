@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
@@ -12,10 +13,16 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class SplitDayRepository : ISplitDayRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly GenericUtils _genericUtils;
+        private readonly string _userPrefix;
+        private readonly string _routinePrefix;
 
-        public SplitDayRepository(ApplicationDbContext context)
+        public SplitDayRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
+            _genericUtils = genericUtils;
+            _userPrefix = configuration["CacheSettings:UserPrefix"]!;
+            _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
         }
 
         public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest updateSplitDayRequest)
@@ -96,9 +103,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     });
                                 }
 
-                                await _context.SaveChangesAsync();
+                                _genericUtils.ClearCache(_userPrefix);
+                                _genericUtils.ClearCache(_routinePrefix);
 
-                                
+                                await _context.SaveChangesAsync();
+                                                                
                                 updateSplitDayResponse.IsSuccess = true;
                                 updateSplitDayResponse.Message = "Split day updated successfully.";
                                 updateSplitDayResponse.UserDTO = UserMapper.UserToDto(user);
