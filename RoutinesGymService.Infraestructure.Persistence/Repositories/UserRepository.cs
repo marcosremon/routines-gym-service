@@ -34,7 +34,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _context = context;
             _genericUtils = genericUtils;
             _cache = cache;
-            _userPrefix = configuration["CacheSettings:UserPrefix"] ?? "User_";
+            _userPrefix = configuration["CacheSettings:UserPrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
@@ -89,18 +89,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 string cacheKey = $"{_userPrefix}_GetUsers_All";
+
                 List<User>? cacheUsers = _cache.Get<List<User>>(cacheKey);
-
-                if (cacheUsers == null)
-                {
-                    List<User> users = await _context.Users.ToListAsync();
-                    getUsersResponse.IsSuccess = true;
-                    getUsersResponse.Message = "Users found successfully";
-                    getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
-
-                    _cache.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
-                }
-                else
+                if (cacheUsers != null)
                 {
                     if (cacheUsers.Count == 0)
                     {
@@ -113,6 +104,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         getUsersResponse.Message = "Users found successfully";
                         getUsersResponse.UsersDTO = cacheUsers.Select(UserMapper.UserToDto).ToList();
                     }
+                }
+                else
+                {
+                    List<User> users = await _context.Users.ToListAsync();
+                    getUsersResponse.IsSuccess = true;
+                    getUsersResponse.Message = "Users found successfully";
+                    getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
+
+                    _cache.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
                 }
             }
             catch (Exception ex)
@@ -188,8 +188,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         InscriptionDate = DateTime.UtcNow
                                     };
 
-                                    await _context.Users.AddAsync(newUser);
                                     _genericUtils.ClearCache(_userPrefix);
+                                    
+                                    await _context.Users.AddAsync(newUser);
                                     await _context.SaveChangesAsync();
 
                                     createUserResponse.IsSuccess = true;
@@ -233,9 +234,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     User user = new User()
                     {
-                        Dni = createGenericUserRequest.Dni ?? "",
-                        Username = createGenericUserRequest.Username ?? "no name",
-                        Surname = createGenericUserRequest.Surname ?? "",
+                        Dni = createGenericUserRequest.Dni!,
+                        Username = createGenericUserRequest.Username!,
+                        Surname = createGenericUserRequest.Surname!,
                         FriendCode = friendCode,
                         Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
                         Email = createGenericUserRequest.Email!,
@@ -244,10 +245,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         InscriptionDate = DateTime.UtcNow
                     };
 
-                    await _context.Users.AddAsync(user);
-
                     _genericUtils.ClearCache(_userPrefix);
 
+                    await _context.Users.AddAsync(user);
                     await _context.SaveChangesAsync();
 
                     MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
@@ -307,12 +307,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         _context.SplitDays.RemoveRange(splitDays);
                     }
 
-                    _context.Routines.RemoveRange(routines);
-
-                    _context.Users.Remove(user);
-
                     _genericUtils.ClearCache(_userPrefix);
-
+                    
+                    _context.Routines.RemoveRange(routines);
+                    _context.Users.Remove(user);
                     await _context.SaveChangesAsync();
 
                     deleteUserResponse.IsSuccess = true;
@@ -384,13 +382,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                         newPassword = PasswordUtils.CreatePassword(8);
                     }
-
                     user.Password = PasswordUtils.PasswordEncoder(newPassword);
+
+                    _genericUtils.ClearCache(_userPrefix);
                     await _context.SaveChangesAsync();
 
                     MailUtils.SendEmail(user.Username, user.Email, newPassword);
 
-                    _genericUtils.ClearCache(_userPrefix);
 
                     createNewPasswordResponse.IsSuccess = true;
                     createNewPasswordResponse.Message = "New password created successfully";
@@ -434,11 +432,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         {
                             user.Password = PasswordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.NewPassword!);
 
+                            _genericUtils.ClearCache(_userPrefix);
                             await _context.SaveChangesAsync();
 
                             MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
-
-                            _genericUtils.ClearCache(_userPrefix);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";
@@ -460,19 +457,35 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUserProfileDetailsResponse getUserProfileDetailsResponse = new GetUserProfileDetailsResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == GetUserProfileDetails.UserEmail);
-                if (user == null)
-                {
-                    getUserProfileDetailsResponse.IsSuccess = false;
-                    getUserProfileDetailsResponse.Message = "User not found with the provided email";
-                }
-                else
+                string cacheKey = $"{_userPrefix}_GetUserProfileDetails_{GetUserProfileDetails.UserEmail}";
+
+                User? cachedUser = _cache.Get<User>(cacheKey);
+                if (cachedUser != null)
                 {
                     getUserProfileDetailsResponse.IsSuccess = true;
                     getUserProfileDetailsResponse.Message = "User profile details retrieved successfully";
-                    getUserProfileDetailsResponse.Username = user.Username;
-                    getUserProfileDetailsResponse.InscriptionDate = user.InscriptionDate;
-                    getUserProfileDetailsResponse.RoutineCount = user.Routines.Count;
+                    getUserProfileDetailsResponse.Username = cachedUser.Username;
+                    getUserProfileDetailsResponse.InscriptionDate = cachedUser.InscriptionDate;
+                    getUserProfileDetailsResponse.RoutineCount = cachedUser.Routines.Count;
+                }
+                else 
+                { 
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == GetUserProfileDetails.UserEmail);
+                    if (user == null)
+                    {
+                        getUserProfileDetailsResponse.IsSuccess = false;
+                        getUserProfileDetailsResponse.Message = "User not found with the provided email";
+                    }
+                    else
+                    {
+                        getUserProfileDetailsResponse.IsSuccess = true;
+                        getUserProfileDetailsResponse.Message = "User profile details retrieved successfully";
+                        getUserProfileDetailsResponse.Username = user.Username;
+                        getUserProfileDetailsResponse.InscriptionDate = user.InscriptionDate;
+                        getUserProfileDetailsResponse.RoutineCount = user.Routines.Count;
+
+                        _cache.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
+                    }
                 }
             }
             catch (Exception ex)

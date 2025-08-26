@@ -182,31 +182,28 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
 
                 List<SplitDay> splitDays = await _context.SplitDays
-                    .Where(sd =>
-                        sd.RoutineId == routine.RoutineId)
+                    .Where(sd => sd.RoutineId == routine.RoutineId)
                     .ToListAsync();
                 foreach (SplitDay splitDay in splitDays)
                 {
                     List<Exercise> exercises = await _context.Exercises
-                        .Where(e => 
-                            e.SplitDayId == splitDay.SplitDayId)
+                        .Where(e => e.SplitDayId == splitDay.SplitDayId)
                         .ToListAsync();
                     foreach (Exercise exercise in exercises)
                     {
                         List<ExerciseProgress> progresses = await _context.ExerciseProgress
-                            .Where(ep => 
-                                ep.ExerciseId == exercise.ExerciseId)
+                            .Where(ep => ep.ExerciseId == exercise.ExerciseId)
                             .ToListAsync();
                         _context.ExerciseProgress.RemoveRange(progresses);
                     }
                     _context.Exercises.RemoveRange(exercises);
                 }
 
+                _genericUtils.ClearCache(_routinePrefix);
+
                 _context.SplitDays.RemoveRange(splitDays);
                 _context.Routines.Remove(routine);
                 await _context.SaveChangesAsync();
-
-                _genericUtils.ClearCache(_routinePrefix);
 
                 deleteRoutineResponse.IsSuccess = true;
                 deleteRoutineResponse.Message = "Routine deleted successfully";
@@ -276,7 +273,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 string cacheKey = $"{_routinePrefix}_GetRoutineByRoutineName_{getRoutineByRoutineNameRequest.RoutineName}";
-                _genericUtils.ClearCache(_routinePrefix);
+                
                 Routine? cachedRoutine = _cache.Get<Routine>(cacheKey);
                 if (cachedRoutine != null)
                 {
@@ -305,7 +302,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {
                             routine.SplitDays = await _context.SplitDays.Where(sd => sd.RoutineId == routine.RoutineId).ToListAsync();
-
                             getRoutineByIdResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
                             getRoutineByIdResponse.IsSuccess = true;
                             getRoutineByIdResponse.Message = "Routine retrieved successfully";
@@ -381,14 +377,19 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             else
                             {
                                 List<Exercise> exercises = splitDays.SelectMany(sd => sd.Exercises).ToList();
-
-                                getRoutineStatsResponse.RoutinesCount = routines.Count;
-                                getRoutineStatsResponse.SplitsCount = splitDays.Count;
-                                getRoutineStatsResponse.ExercisesCount = exercises.Count;
-                                getRoutineStatsResponse.IsSuccess = true;
-                                getRoutineStatsResponse.Message = exercises.Any()
-                                    ? "Routine stats retrieved successfully"
-                                    : "No exercises found for the user's split days";
+                                if (exercises.Count() == 0)
+                                {
+                                    getRoutineStatsResponse.IsSuccess = false;
+                                    getRoutineStatsResponse.Message = "No exercises found for the user's split days";
+                                }
+                                else
+                                {
+                                    getRoutineStatsResponse.IsSuccess = true;
+                                    getRoutineStatsResponse.RoutinesCount = routines.Count;
+                                    getRoutineStatsResponse.SplitsCount = splitDays.Count;
+                                    getRoutineStatsResponse.ExercisesCount = exercises.Count;
+                                    getRoutineStatsResponse.Message = "Routine stats retrieved successfully";
+                                }
                             }
                         }
 

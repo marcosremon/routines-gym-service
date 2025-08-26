@@ -100,8 +100,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         Date = DateTime.UtcNow.AddDays(-1),
                     };
 
-                    _context.Stats.Add(stat);
                     _genericUtils.ClearCache(_statPrefix);
+
+                    _context.Stats.Add(stat);
                     await _context.SaveChangesAsync();
 
                     saveDailyStepsResponse.IsSuccess = true;
