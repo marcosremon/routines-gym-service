@@ -19,7 +19,6 @@
     <ProjectReference Include="..\RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Infraestructure.Persistence\RoutinesGymService.Infraestructure.Persistence.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Transversal.JsonInterchange\RoutinesGymService.Transversal.JsonInterchange.csproj" />
-    <ProjectReference Include="..\RoutinesGymService.Transversal.Mailing\RoutinesGymService.Transversal.Mailing.csproj" />
     <ProjectReference Include="..\RoutinesGymService.Transversal.Security\RoutinesGymService.Transversal.Security.csproj" />
   </ItemGroup>
 

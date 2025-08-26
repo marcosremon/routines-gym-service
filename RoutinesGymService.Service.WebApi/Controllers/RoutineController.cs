@@ -6,7 +6,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetR
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetRoutineStats;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.CreateRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.DeleteRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;

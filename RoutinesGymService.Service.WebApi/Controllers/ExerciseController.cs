@@ -5,7 +5,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Del
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;

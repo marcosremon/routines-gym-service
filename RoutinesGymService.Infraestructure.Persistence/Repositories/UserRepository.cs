@@ -16,7 +16,6 @@ using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common;
-using RoutinesGymService.Transversal.Mailing;
 using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
@@ -25,15 +24,17 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly GenericUtils _genericUtils;
-        private readonly CacheService _cache;
+        private readonly CacheUtils _cacheUtils;
+        private readonly PasswordUtils _passwordUtils;
         private readonly string _userPrefix;
         private readonly int _expiryMinutes;
 
-        public UserRepository(ApplicationDbContext context, CacheService cache, GenericUtils genericUtils, IConfiguration configuration)
+        public UserRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, PasswordUtils passwordUtils, IConfiguration configuration)
         {
             _context = context;
             _genericUtils = genericUtils;
-            _cache = cache;
+            _cacheUtils = cacheUtils;
+            _passwordUtils = passwordUtils;
             _userPrefix = configuration["CacheSettings:UserPrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
@@ -45,7 +46,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_userPrefix}_GetUserByEmail_{getUserByEmailRequest.Email}";
 
-                User? cachedUser = _cache.Get<User>(cacheKey);
+                User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)
                 {
                     getUserByEmailResponse.IsSuccess = true;
@@ -70,7 +71,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
                         getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
 
-                        _cache.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
+                        _cacheUtils.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
                     }
                 } 
             }
@@ -90,7 +91,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_userPrefix}_GetUsers_All";
 
-                List<User>? cacheUsers = _cache.Get<List<User>>(cacheKey);
+                List<User>? cacheUsers = _cacheUtils.Get<List<User>>(cacheKey);
                 if (cacheUsers != null)
                 {
                     if (cacheUsers.Count == 0)
@@ -112,7 +113,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     getUsersResponse.Message = "Users found successfully";
                     getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
 
-                    _cache.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
+                    _cacheUtils.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
                 }
             }
             catch (Exception ex)
@@ -129,7 +130,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateUserResponse createUserResponse = new CreateUserResponse();
             try
             {
-                if (MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                if (GenericUtils.IsEmailValid(createGenericUserRequest.Email!))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Invalid email format";
@@ -182,7 +183,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         Surname = createGenericUserRequest.Surname ?? "",
                                         Email = createGenericUserRequest.Email!,
                                         FriendCode = friendCode,
-                                        Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
                                         Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
                                         RoleString = createGenericUserRequest.Role.ToString().ToLower(),
                                         InscriptionDate = DateTime.UtcNow
@@ -215,7 +216,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateGoogleUserResponse createGoogleUserResponse = new CreateGoogleUserResponse();
             try
             {
-                if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                if (!GenericUtils.IsEmailValid(createGenericUserRequest.Email!))
                 {
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "Invalid email format";
@@ -238,7 +239,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         Username = createGenericUserRequest.Username!,
                         Surname = createGenericUserRequest.Surname!,
                         FriendCode = friendCode,
-                        Password = PasswordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
                         Email = createGenericUserRequest.Email!,
                         Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
                         RoleString = createGenericUserRequest.Role.ToString().ToLower(),
@@ -250,7 +251,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.Users.AddAsync(user);
                     await _context.SaveChangesAsync();
 
-                    MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
+                    GenericUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
 
                     createGoogleUserResponse.IsSuccess = true;
                     createGoogleUserResponse.Message = "Usuario creado correctametne";
@@ -377,17 +378,17 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     string newPassword = PasswordUtils.CreatePassword(8);
                     while (true)
                     {
-                        if (PasswordUtils.PasswordEncoder(newPassword) != user.Password)
+                        if (_passwordUtils.PasswordEncoder(newPassword) != user.Password)
                             break;
 
                         newPassword = PasswordUtils.CreatePassword(8);
                     }
-                    user.Password = PasswordUtils.PasswordEncoder(newPassword);
+                    user.Password = _passwordUtils.PasswordEncoder(newPassword);
 
                     _genericUtils.ClearCache(_userPrefix);
                     await _context.SaveChangesAsync();
 
-                    MailUtils.SendEmail(user.Username, user.Email, newPassword);
+                    GenericUtils.SendEmail(user.Username, user.Email, newPassword);
 
 
                     createNewPasswordResponse.IsSuccess = true;
@@ -416,7 +417,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (PasswordUtils.PasswordDecoder(user.Password!) != changePasswordWithPasswordAndEmailRequest.OldPassword)
+                    if (_passwordUtils.PasswordDecoder(user.Password!) != changePasswordWithPasswordAndEmailRequest.OldPassword)
                     {
                         changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
                         changePasswordWithPasswordAndEmailResponse.Message = "Old password does not match";
@@ -430,12 +431,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {
-                            user.Password = PasswordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.NewPassword!);
+                            user.Password = _passwordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.NewPassword!);
 
                             _genericUtils.ClearCache(_userPrefix);
                             await _context.SaveChangesAsync();
 
-                            MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
+                            GenericUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";
@@ -459,7 +460,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 string cacheKey = $"{_userPrefix}_GetUserProfileDetails_{GetUserProfileDetails.UserEmail}";
 
-                User? cachedUser = _cache.Get<User>(cacheKey);
+                User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)
                 {
                     getUserProfileDetailsResponse.IsSuccess = true;
@@ -484,7 +485,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         getUserProfileDetailsResponse.InscriptionDate = user.InscriptionDate;
                         getUserProfileDetailsResponse.RoutineCount = user.Routines.Count;
 
-                        _cache.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
+                        _cacheUtils.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
                     }
                 }
             }

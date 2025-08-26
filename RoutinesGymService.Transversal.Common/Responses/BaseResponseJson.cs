@@ -1,4 +1,4 @@
-﻿namespace RoutinesGymService.Transversal.Common
+﻿namespace RoutinesGymService.Transversal.Common.Responses
 {
     public class BaseResponseJson
     {

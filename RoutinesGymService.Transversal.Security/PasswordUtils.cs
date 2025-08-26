@@ -1,27 +1,35 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace RoutinesGymService.Transversal.Security
 {
     public class PasswordUtils
     {
-        public static string publicKey = "1234567812345678"; 
-        public static string secretKey = "8765432187654321"; 
-        public static byte[] secretkeyByte = Encoding.UTF8.GetBytes(secretKey);
-        public static byte[] publickeybyte = Encoding.UTF8.GetBytes(publicKey);
-        public static byte[]? result;
+        private readonly byte[] _secretkeyByte;
+        private readonly byte[] _publickeybyte;
 
-        public static byte[] PasswordEncoder(string password)
+        public PasswordUtils(IConfiguration configuration)
+        {
+            string publicKey = configuration["Password:publicKey"]!;
+            string secretKey = configuration["Password:secretKey"]!;
+
+            _secretkeyByte = Encoding.UTF8.GetBytes(secretKey);
+            _publickeybyte = Encoding.UTF8.GetBytes(publicKey);
+        }
+
+        public byte[] PasswordEncoder(string password)
         {
             try
             {
                 string textToEncrypt = password;
                 byte[] inputbyteArray = Encoding.UTF8.GetBytes(textToEncrypt);
+                byte[] result;
 
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = publickeybyte;
-                    aes.IV = secretkeyByte;
+                    aes.Key = _publickeybyte;
+                    aes.IV = _secretkeyByte;
                     using (MemoryStream ms = new MemoryStream())
                     {
                         using (CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
@@ -40,14 +48,15 @@ namespace RoutinesGymService.Transversal.Security
             }
         }
 
-        public static string PasswordDecoder(byte[] encryptedPassword)
+        public string PasswordDecoder(byte[] encryptedPassword)
         {
             try
             {
+                byte[] result;
                 using (Aes aes = Aes.Create())
                 {
-                    aes.Key = publickeybyte;
-                    aes.IV = secretkeyByte;
+                    aes.Key = _publickeybyte;
+                    aes.IV = _secretkeyByte;
                     using (MemoryStream ms = new MemoryStream())
                     {
                         using (CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write))

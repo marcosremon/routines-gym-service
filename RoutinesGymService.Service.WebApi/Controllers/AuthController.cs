@@ -2,7 +2,7 @@
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.Login;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.LoginWeb;
