@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common;
-using RoutinesGymService.Transversal.JsonInterchange.SplitDay.DeleteSplitDay;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
@@ -69,57 +67,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(updateSplitDayResponseJson);
-        }
-        #endregion
-
-        #region Delete split day - No se usa
-        [HttpPost("delete-split-day")]
-        public async Task<ActionResult<DeleteSplitDayResponseJson>> DeleteSplitDay([FromBody] DeleteSplitDayRequestJson deleteSplitDayRequestJson)
-        {
-            DeleteSplitDayResponseJson deleteSplitDayResponseJson = new DeleteSplitDayResponseJson();
-            deleteSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                if (deleteSplitDayRequestJson == null ||
-                    deleteSplitDayRequestJson.RoutineId == null ||
-                    deleteSplitDayRequestJson.UserId == null)
-                {
-                    deleteSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    deleteSplitDayResponseJson.IsSuccess = false;
-                    deleteSplitDayResponseJson.Message = "invalid data, the routine id or user id is null";
-                }
-                else
-                {
-                    DeleteSplitDayRequest deleteSplitDayRequest = new DeleteSplitDayRequest
-                    {
-                        DayName = deleteSplitDayRequestJson.DayName,
-                        RoutineId = deleteSplitDayRequestJson.RoutineId,
-                        UserId = deleteSplitDayRequestJson.UserId
-                    };
-
-                    DeleteSplitDayResponse deleteSplitDayResponse = await _splitDayApplication.DeleteSplitDay(deleteSplitDayRequest);
-                    if (deleteSplitDayResponse.IsSuccess)
-                    {
-                        deleteSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        deleteSplitDayResponseJson.IsSuccess = deleteSplitDayResponse.IsSuccess;
-                        deleteSplitDayResponseJson.Message = deleteSplitDayResponse.Message;
-                    }
-                    else
-                    {
-                        deleteSplitDayResponseJson.IsSuccess = deleteSplitDayResponse.IsSuccess;
-                        deleteSplitDayResponseJson.Message = deleteSplitDayResponse.Message;
-                    }
-                }        
-            }
-            catch (Exception ex)
-            {
-                deleteSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                deleteSplitDayResponseJson.IsSuccess = false;
-                deleteSplitDayResponseJson.Message = $"unexpected error on SplitDayController -> delete-split-day: {ex.Message}";
-            }
-
-            return Ok(deleteSplitDayResponseJson);
         }
         #endregion
     }
