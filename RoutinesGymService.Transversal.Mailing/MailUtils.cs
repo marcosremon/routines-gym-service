@@ -18,7 +18,7 @@ namespace RoutinesGymService.Transversal.Mailing
         {
             var emailSettings = _configuration.GetSection("EmailSettings");
             string? smtpHost = emailSettings["SmtpHost"];
-            int smtpPort = int.Parse(emailSettings["SmtpPort"]);
+            int smtpPort = int.Parse(emailSettings["SmtpPort"]!);
             string? senderEmail = emailSettings["SenderEmail"];
             string? appPassword = emailSettings["AppPassword"];
             string? senderName = emailSettings["SenderName"];
