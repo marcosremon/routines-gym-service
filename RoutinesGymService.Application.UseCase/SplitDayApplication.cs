@@ -1,5 +1,4 @@
-﻿using RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplitDay;
-using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
+﻿using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 
@@ -12,11 +11,6 @@ namespace RoutinesGymService.Application.UseCase
         public SplitDayApplication(ISplitDayRepository splitDayRepository)
         {
             _splitDayRepository = splitDayRepository;
-        }
-
-        public async Task<DeleteSplitDayResponse> DeleteSplitDay(DeleteSplitDayRequest deleteSplitDayRequest)
-        {
-            return await _splitDayRepository.DeleteSplitDay(deleteSplitDayRequest);
         }
 
         public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest updateSplitDayRequest)
