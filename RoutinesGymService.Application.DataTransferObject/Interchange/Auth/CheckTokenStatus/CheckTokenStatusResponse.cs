@@ -4,6 +4,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Che
 {
     public class CheckTokenStatusResponse : BaseResponse
     {
-        public bool IsValid { get; set; } = false;
+        public bool IsValid { get; set; }
     }
 }

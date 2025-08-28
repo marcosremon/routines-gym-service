@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.CheckTokenStatus;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 
@@ -11,6 +12,11 @@ namespace RoutinesGymService.Application.UseCase
         public AuthApplication(IAuthRepository authRepository)
         {
             _authRepository = authRepository;
+        }
+
+        public async Task<CheckTokenStatusResponse> CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
+        {
+            return await _authRepository.CheckTokenStatus(checkTokenStatusRequest);
         }
 
         public async Task<LoginResponse> Login(LoginRequest loginRequest)

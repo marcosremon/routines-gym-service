@@ -61,17 +61,17 @@ namespace RoutinesGymService.Transversal.Security
             return GenerateJwtToken(claims);
         }
 
-        public static CheckTokenStatusResponse IsValidToken(string token)
+        public static bool IsValidToken(CheckTokenStatusRequest checkTokenStatusRequest)
         {
             if (_configuration == null) throw new InvalidOperationException("JwtUtils not initialized.");
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             byte[] key = Encoding.UTF8.GetBytes(_configuration["jwt:Key"]!);
 
-            CheckTokenStatusResponse checkTokenStatusResponse = new CheckTokenStatusResponse();
+            bool isValid = false;
             try
             {
-                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                tokenHandler.ValidateToken(checkTokenStatusRequest.Token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(key),
@@ -83,14 +83,14 @@ namespace RoutinesGymService.Transversal.Security
                     ClockSkew = TimeSpan.Zero
                 }, out SecurityToken validatedToken);
 
-                checkTokenStatusResponse.IsValid = true;
+                isValid = true;
             }
             catch
             {
-                checkTokenStatusResponse.IsValid = false;
+                isValid = false;
             }
 
-            return checkTokenStatusResponse;
+            return isValid;
         }
     }
 }

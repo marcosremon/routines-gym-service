@@ -52,6 +52,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         loginResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         loginResponseJson.IsSuccess = loginResponse.IsSuccess;
                         loginResponseJson.Message = loginResponse.Message;
+                        loginResponseJson.IsAdmin = loginResponse.IsAdmin;
                         loginResponseJson.BearerToken = loginResponse.IsAdmin 
                             ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail) 
                             : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
@@ -149,11 +150,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         Token = checkTokenStatusRequestJson.Token
                     };
-
-                    CheckTokenStatusResponse checkTokenStatusResponse = JwtUtils.IsValidToken(checkTokenStatusRequest.Token);
+                    CheckTokenStatusResponse checkTokenStatusResponse = await _authApplication.CheckTokenStatus(checkTokenStatusRequest);
 
                     checkTokenStatusResponseJson.IsValid = checkTokenStatusResponse.IsValid;
                     checkTokenStatusResponseJson.ResponseCodeJson = checkTokenStatusResponse.IsValid ? ResponseCodesJson.OK : ResponseCodesJson.UNAUTHORIZED;
+                    checkTokenStatusResponseJson.IsSuccess = checkTokenStatusResponse.IsSuccess;
+                    checkTokenStatusResponseJson.Message = checkTokenStatusResponse.Message;
                 }
             }
             catch (Exception ex)

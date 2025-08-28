@@ -22,8 +22,7 @@ namespace RoutinesGymService.Transversal.Security
         {
             try
             {
-                string textToEncrypt = password;
-                byte[] inputbyteArray = Encoding.UTF8.GetBytes(textToEncrypt);
+                byte[] inputByteArray = Encoding.UTF8.GetBytes(password);
                 byte[] result;
 
                 using (Aes aes = Aes.Create())
@@ -34,7 +33,7 @@ namespace RoutinesGymService.Transversal.Security
                     {
                         using (CryptoStream cs = new CryptoStream(ms, aes.CreateEncryptor(), CryptoStreamMode.Write))
                         {
-                            cs.Write(inputbyteArray, 0, inputbyteArray.Length);
+                            cs.Write(inputByteArray, 0, inputByteArray.Length);
                             cs.FlushFinalBlock();
                             result = ms.ToArray();
                         }
@@ -95,13 +94,13 @@ namespace RoutinesGymService.Transversal.Security
         public static string CreatePassword(int length)
         {
             const string valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            StringBuilder res = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             Random rnd = new Random();
             while (0 < length--)
             {
-                res.Append(valid[rnd.Next(valid.Length)]);
+                sb.Append(valid[rnd.Next(valid.Length)]);
             }
-            return res.ToString();
+            return sb.ToString();
         }
 
         public static bool IsPasswordValid(string password)
