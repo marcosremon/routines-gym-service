@@ -2,6 +2,6 @@
 {
     public class GetAllUserSplitsRequestJson
     {
-        public long? UserId { get; set; }
+        public long UserId { get; set; }
     }
 }

@@ -5,7 +5,7 @@ namespace RoutinesGymService.Application.DataTransferObject.SplitDay.DeleteSplit
     public class DeleteSplitDayRequest
     {
         public WeekDay DayName { get; set; }
-        public long? RoutineId { get; set; }
-        public long? UserId { get; set; }
+        public long RoutineId { get; set; }
+        public long UserId { get; set; }
     }
 }
