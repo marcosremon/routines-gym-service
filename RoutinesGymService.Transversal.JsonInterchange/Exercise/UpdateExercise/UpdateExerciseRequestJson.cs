@@ -4,8 +4,8 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Exercise.UpdateExercise
 {
     public class UpdateExerciseRequestJson
     {
-        public long? UserId { get; set; }
-        public long? RoutineId { get; set; }
+        public long UserId { get; set; }
+        public long RoutineId { get; set; }
         public WeekDay DayName { get; set; } = 0;
         public string? ExerciseName { get; set; }
         public int? Sets { get; set; }
