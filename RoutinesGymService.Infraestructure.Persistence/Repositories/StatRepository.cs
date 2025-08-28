@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetDailyStepsInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
@@ -25,6 +26,44 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _statPrefix = configuration["CacheSettings:StatPrefix"]!;
             _genericUtils = genericUtils;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
+        }
+
+        public async Task<GetDailyStepsInfoResponse> GetDailyStepsInfo(GetDailyStepsInfoRequest getDailyStepsInfoRequest)
+        {
+            GetDailyStepsInfoResponse getDailyStepsInfoResponse = new GetDailyStepsInfoResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getDailyStepsInfoRequest.UserEmail);
+                if (user == null)
+                {
+                    getDailyStepsInfoResponse.IsSuccess = false;
+                    getDailyStepsInfoResponse.Message = "user not found";
+                }
+                else
+                {
+                    Stat? stat = await _context.Stats.FirstOrDefaultAsync(st => st.Date == getDailyStepsInfoRequest.Day &&
+                                                                                st.Steps == getDailyStepsInfoRequest.DailySteps);
+                    if (stat == null)
+                    {
+                        getDailyStepsInfoResponse.IsSuccess = false;
+                        getDailyStepsInfoResponse.Message = "steps stats not found";
+                    }
+                    else
+                    {
+                        getDailyStepsInfoResponse.IsSuccess = true;
+                        getDailyStepsInfoResponse.Message = "steps stats found successfully";
+                        getDailyStepsInfoResponse.DailyStepsGoal = stat.DailyStepsGoal;
+                        getDailyStepsInfoResponse.DailySteps = stat.Steps;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getDailyStepsInfoResponse .Message = $"unexpected error on StatRepository -> GetDailyStepsInfo: {ex.Message}";
+                getDailyStepsInfoResponse.IsSuccess = false;
+            }
+
+            return getDailyStepsInfoResponse;
         }
 
         public async Task<GetStatsResponse> GetStats(GetStatRequest getStatRequest)
@@ -96,6 +135,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         Steps = saveDailyStepsRequest.Steps,
                         UserId = user.UserId,
+                        DailyStepsGoal = saveDailyStepsRequest.DailyStepsGoal,
                         Date = DateTime.UtcNow.AddDays(-1),
                     };
 

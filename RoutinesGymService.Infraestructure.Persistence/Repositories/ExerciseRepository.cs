@@ -42,39 +42,37 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 if (user == null)
                 {
                     addExerciseResponse.IsSuccess = false;
-                    addExerciseResponse.Message = "User not found.";
+                    addExerciseResponse.Message = "User not found";
                 }
                 else
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
-                        r.RoutineName == addExerciseRequest.RoutineName &&
-                        r.UserId == user.UserId);
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineName == addExerciseRequest.RoutineName &&
+                                                                                        r.UserId == user.UserId);
                     if (routine == null)
                     {
                         addExerciseResponse.IsSuccess = false;
-                        addExerciseResponse.Message = "Routine not found.";
+                        addExerciseResponse.Message = "Routine not found";
                     }
                     else
                     {
                         string day = addExerciseRequest.DayName.Split(".")[1];
-                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                            s.RoutineId == routine.RoutineId &&
-                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(day)));
+                        int dayToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(day));
+                        SplitDay ? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
+                                                                                                s.DayName == dayToInt);
                         if (splitDay == null)
                         {
                             addExerciseResponse.IsSuccess = false;
-                            addExerciseResponse.Message = "Split day not found.";
+                            addExerciseResponse.Message = "Split day not found";
                         }
                         else
                         {
-                            Exercise? exercise = _context.Exercises.FirstOrDefault(e =>
-                                e.RoutineId == routine.RoutineId &&
-                                e.SplitDayId == splitDay.SplitDayId &&
-                                e.ExerciseName == addExerciseRequest.ExerciseName);
+                            Exercise? exercise = _context.Exercises.FirstOrDefault(e => e.RoutineId == routine.RoutineId &&
+                                                                                        e.SplitDayId == splitDay.SplitDayId &&
+                                                                                        e.ExerciseName == addExerciseRequest.ExerciseName);
                             if (exercise != null)
                             {
                                 addExerciseResponse.IsSuccess = false;
-                                addExerciseResponse.Message = "Exercise already exists for this routine and day.";
+                                addExerciseResponse.Message = "Exercise already exists for this routine and day";
                             }
                             else
                             {
@@ -96,7 +94,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 await dbContextTransaction.CommitAsync();
 
                                 addExerciseResponse.IsSuccess = true;
-                                addExerciseResponse.Message = "Exercise added successfully.";
+                                addExerciseResponse.Message = "Exercise added successfully";
                             }
                         }
                     }
@@ -122,38 +120,36 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 if (user == null)
                 {
                     deleteExerciseResponse.IsSuccess = false;
-                    deleteExerciseResponse.Message = "User not found.";
+                    deleteExerciseResponse.Message = "User not found";
                 }
                 else
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
-                        r.RoutineId == deleteExerciseRequest.RoutineId &&
-                        r.UserId == user.UserId);
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == deleteExerciseRequest.RoutineId &&
+                                                                                        r.UserId == user.UserId);
                     if (routine == null)
                     {
                         deleteExerciseResponse.IsSuccess = false;
-                        deleteExerciseResponse.Message = "Routine not found.";
+                        deleteExerciseResponse.Message = "Routine not found";
                     }
                     else
                     {
-                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                            s.RoutineId == deleteExerciseRequest.RoutineId &&
-                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(deleteExerciseRequest.DayName!)));
+                        int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(deleteExerciseRequest.DayName!));
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == deleteExerciseRequest.RoutineId &&
+                                                                                               s.DayName == dayNameToInt);
                         if (splitDay == null)
                         {
                             deleteExerciseResponse.IsSuccess = false;
-                            deleteExerciseResponse.Message = "Split day not found.";
+                            deleteExerciseResponse.Message = "Split day not found";
                         }
                         else
                         {
-                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
-                                e.RoutineId == routine.RoutineId &&
-                                e.SplitDayId == splitDay.SplitDayId &&
-                                e.ExerciseName == deleteExerciseRequest.ExerciseName);
+                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e => e.RoutineId == routine.RoutineId &&
+                                                                                                   e.SplitDayId == splitDay.SplitDayId &&
+                                                                                                   e.ExerciseName == deleteExerciseRequest.ExerciseName);
                             if (exercise == null)
                             {
                                 deleteExerciseResponse.IsSuccess = false;
-                                deleteExerciseResponse.Message = "Exercise not found.";
+                                deleteExerciseResponse.Message = "Exercise not found";
                             }
                             else
                             {
@@ -209,7 +205,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     if (user == null)
                     {
                         getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
-                        getExercisesByDayAndRoutineIdResponse.Message = "User not found.";
+                        getExercisesByDayAndRoutineIdResponse.Message = "User not found";
                     }
                     else
                     {
@@ -218,14 +214,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         if (routine == null)
                         {
                             getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
-                            getExercisesByDayAndRoutineIdResponse.Message = "Routine not found.";
+                            getExercisesByDayAndRoutineIdResponse.Message = "Routine not found";
                         }
                         else
                         {
-                            SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                                s.RoutineId == routine.RoutineId &&
-                                s.DayName == GenericUtils.ChangeEnumToIntOnDayName(
-                                    GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName!)));
+                            int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(
+                                               GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName!));
+                            SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
+                                                                                                   s.DayName == dayNameToInt);
                             if (splitDay == null)
                             {
                                 getExercisesByDayAndRoutineIdResponse.IsSuccess = false;

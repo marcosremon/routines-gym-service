@@ -5,7 +5,7 @@ namespace RoutinesGymService.Application.Interface.Application
 {
     public interface IAuthApplication
     {
-        Task<CheckTokenStatusResponse> CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest);
+        CheckTokenStatusResponse CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest);
         Task<LoginResponse> Login(LoginRequest loginRequest);
     }
 }

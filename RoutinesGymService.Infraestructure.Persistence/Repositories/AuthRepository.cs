@@ -20,7 +20,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _passwordUtils = passwordUtils;
         }
 
-        public async Task<CheckTokenStatusResponse> CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
+        public CheckTokenStatusResponse CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
         {
             CheckTokenStatusResponse checkTokenStatusResponse = new CheckTokenStatusResponse();
             try

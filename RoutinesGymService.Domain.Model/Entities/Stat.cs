@@ -21,6 +21,9 @@ namespace RoutinesGymApp.Domain.Entities
         [Column("steps")]
         public int? Steps { get; set; } = 0;
 
+        [Column("daily_steps_goal")]
+        public int? DailyStepsGoal { get; set; }
+
         public virtual User? User { get; set; }
     }
 }

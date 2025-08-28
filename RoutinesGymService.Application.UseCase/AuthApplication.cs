@@ -14,9 +14,9 @@ namespace RoutinesGymService.Application.UseCase
             _authRepository = authRepository;
         }
 
-        public async Task<CheckTokenStatusResponse> CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
+        public CheckTokenStatusResponse CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
         {
-            return await _authRepository.CheckTokenStatus(checkTokenStatusRequest);
+            return _authRepository.CheckTokenStatus(checkTokenStatusRequest);
         }
 
         public async Task<LoginResponse> Login(LoginRequest loginRequest)
