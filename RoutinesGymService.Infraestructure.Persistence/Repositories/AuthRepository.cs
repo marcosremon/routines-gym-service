@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
@@ -17,6 +18,34 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         {
             _context = context;
             _passwordUtils = passwordUtils;
+        }
+
+        public async Task<CheckTokenStatusResponse> CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
+        {
+            CheckTokenStatusResponse checkTokenStatusResponse = new CheckTokenStatusResponse();
+            try
+            {
+                if (JwtUtils.IsValidToken(checkTokenStatusRequest))
+                {
+                    checkTokenStatusResponse.IsValid = true;
+                    checkTokenStatusResponse.IsSuccess = true;
+                    checkTokenStatusResponse.Message = "the token is valid";
+                }
+                else 
+                {
+                    checkTokenStatusResponse.IsValid = true;
+                    checkTokenStatusResponse.IsSuccess = false;
+                    checkTokenStatusResponse.Message = "the token is not valid";
+                }
+            } 
+            catch (Exception ex)
+            {
+                checkTokenStatusResponse.IsValid = false;
+                checkTokenStatusResponse.IsSuccess = false;
+                checkTokenStatusResponse.Message = $"unexpected error on AuthRepository -> CheckTokenStatus: {ex.Message}";
+            }
+
+            return checkTokenStatusResponse;
         }
 
         public async Task<LoginResponse> Login(LoginRequest loginRequest)
