@@ -130,7 +130,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Check token status
         [HttpPost("check-token-status")]
-        public async Task<ActionResult<CheckTokenStatusResponseJson>> CheckTokenStatus([FromBody] CheckTokenStatusRequestJson checkTokenStatusRequestJson)
+        public ActionResult<CheckTokenStatusResponseJson> CheckTokenStatus([FromBody] CheckTokenStatusRequestJson checkTokenStatusRequestJson)
         {
             CheckTokenStatusResponseJson checkTokenStatusResponseJson = new CheckTokenStatusResponseJson();
             checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
@@ -150,10 +150,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         Token = checkTokenStatusRequestJson.Token
                     };
-                    CheckTokenStatusResponse checkTokenStatusResponse = await _authApplication.CheckTokenStatus(checkTokenStatusRequest);
+                    CheckTokenStatusResponse checkTokenStatusResponse = _authApplication.CheckTokenStatus(checkTokenStatusRequest);
+                    if (checkTokenStatusResponse.IsValid)
+                        checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                    else
+                        checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
 
                     checkTokenStatusResponseJson.IsValid = checkTokenStatusResponse.IsValid;
-                    checkTokenStatusResponseJson.ResponseCodeJson = checkTokenStatusResponse.IsValid ? ResponseCodesJson.OK : ResponseCodesJson.UNAUTHORIZED;
                     checkTokenStatusResponseJson.IsSuccess = checkTokenStatusResponse.IsSuccess;
                     checkTokenStatusResponseJson.Message = checkTokenStatusResponse.Message;
                 }
