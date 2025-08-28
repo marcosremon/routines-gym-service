@@ -136,7 +136,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetAllUserFriendsResponse getAllUserFriendsResponse = new GetAllUserFriendsResponse();
             try
             {
-                string cacheKey = $"{_friendPrefix}_GetAllUserFriends_{getAllUserFriendsRequest.UserEmail}";
+                string cacheKey = $"{_friendPrefix}GetAllUserFriends_{getAllUserFriendsRequest.UserEmail}";
 
                 List<User>? cacheFriends = _cacheUtils.Get<List<User>>(cacheKey);
                 if (cacheFriends != null)

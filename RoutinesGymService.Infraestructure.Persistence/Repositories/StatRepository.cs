@@ -32,7 +32,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetStatsResponse getStatsResponse = new GetStatsResponse();
             try
             {
-                string cacheKey = $"{_statPrefix}_GetStats_{getStatRequest.UserEmail}";
+                string cacheKey = $"{_statPrefix}GetStats_{getStatRequest.UserEmail}";
                 
                 List<Stat>? cachedStats = _cacheUtils.Get<List<Stat>>(cacheKey);
                 if (cachedStats != null && cachedStats.Any())
