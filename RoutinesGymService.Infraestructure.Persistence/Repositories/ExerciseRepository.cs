@@ -193,7 +193,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetExercisesByDayAndRoutineNameResponse getExercisesByDayAndRoutineIdResponse = new GetExercisesByDayAndRoutineNameResponse();
             try
             {
-                string cacheKey = $"{_exercisePrefix}_GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
+                string cacheKey = $"{_exercisePrefix}GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
 
                 GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cacheUtils.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
                 if (cacheExercise != null)
