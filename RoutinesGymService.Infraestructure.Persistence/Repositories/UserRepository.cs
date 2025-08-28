@@ -44,7 +44,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUserByEmailResponse getUserByEmailResponse = new GetUserByEmailResponse();
             try
             {
-                string cacheKey = $"{_userPrefix}_GetUserByEmail_{getUserByEmailRequest.Email}";
+                string cacheKey = $"{_userPrefix}GetUserByEmail_{getUserByEmailRequest.Email}";
 
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)
@@ -89,7 +89,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUsersResponse getUsersResponse = new GetUsersResponse();
             try
             {
-                string cacheKey = $"{_userPrefix}_GetUsers_All";
+                string cacheKey = $"{_userPrefix}GetUsers_All";
 
                 List<User>? cacheUsers = _cacheUtils.Get<List<User>>(cacheKey);
                 if (cacheUsers != null)
@@ -458,7 +458,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUserProfileDetailsResponse getUserProfileDetailsResponse = new GetUserProfileDetailsResponse();
             try
             {
-                string cacheKey = $"{_userPrefix}_GetUserProfileDetails_{GetUserProfileDetails.UserEmail}";
+                string cacheKey = $"{_userPrefix}GetUserProfileDetails_{GetUserProfileDetails.UserEmail}";
 
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)

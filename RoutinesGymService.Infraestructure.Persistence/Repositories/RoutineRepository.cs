@@ -222,7 +222,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetAllUserRoutinesResponse getAllUserRoutinesResponse = new GetAllUserRoutinesResponse();
             try
             {
-                string cacheKey = $"{_routinePrefix}_GetAllUserRoutines_{getAllUserRoutinesRequest.UserEmail}";
+                string cacheKey = $"{_routinePrefix}GetAllUserRoutines_{getAllUserRoutinesRequest.UserEmail}";
 
                 List<Routine>? cacheRoutines = _cacheUtils.Get<List<Routine>>(cacheKey);
                 if (cacheRoutines != null)
@@ -272,7 +272,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetRoutineByRoutineNameResponse getRoutineByIdResponse = new GetRoutineByRoutineNameResponse();
             try
             {
-                string cacheKey = $"{_routinePrefix}_GetRoutineByRoutineName_{getRoutineByRoutineNameRequest.RoutineName}";
+                string cacheKey = $"{_routinePrefix}GetRoutineByRoutineName_{getRoutineByRoutineNameRequest.RoutineName}";
                 
                 Routine? cachedRoutine = _cacheUtils.Get<Routine>(cacheKey);
                 if (cachedRoutine != null)
@@ -326,7 +326,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             try
             {
-                string cacheKey = $"{_routinePrefix}_GetRoutineStats_{getRoutineStatsRequest.UserEmail}";
+                string cacheKey = $"{_routinePrefix}GetRoutineStats_{getRoutineStatsRequest.UserEmail}";
 
                 GetRoutineStatsResponse? cachedStats = _cacheUtils.Get<GetRoutineStatsResponse>(cacheKey);
                 if (cachedStats != null)
