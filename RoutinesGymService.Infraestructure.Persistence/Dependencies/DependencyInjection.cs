@@ -4,6 +4,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Infraestructure.Persistence.Repositories;
 using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
 {
@@ -31,6 +32,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
 
             // Other services
             services.AddScoped<GenericUtils>();
+            services.AddScoped<PasswordUtils>();
 
             return services;
         }

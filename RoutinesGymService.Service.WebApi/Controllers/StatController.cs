@@ -76,7 +76,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             try
             {
                 if (saveDailyStepsRequestJson == null ||
-                    saveDailyStepsRequestJson.Steps == null)
+                    saveDailyStepsRequestJson.Steps == null ||
+                    string.IsNullOrEmpty(saveDailyStepsRequestJson.UserEmail))
                 {
                     saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     saveDailyStepsResponseJson.IsSuccess = false;
