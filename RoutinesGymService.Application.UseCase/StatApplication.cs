@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetDailyStepsInfo;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
@@ -12,6 +13,11 @@ namespace RoutinesGymService.Application.UseCase
         public StatApplication(IStatRepository statRepository)
         {
             _statRepository = statRepository;
+        }
+
+        public async Task<GetDailyStepsInfoResponse> GetDailyStepsInfo(GetDailyStepsInfoRequest getDailyStepsInfoRequest)
+        {
+            return await _statRepository.GetDailyStepsInfo(getDailyStepsInfoRequest);
         }
 
         public async Task<GetStatsResponse> GetStats(GetStatRequest getStatRequest)
