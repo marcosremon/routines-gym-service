@@ -117,7 +117,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             await _context.SaveChangesAsync();
 
                             deleteFriendResponse.IsSuccess = true;
-                            deleteFriendResponse.Message = "Friend added successfully";
+                            deleteFriendResponse.Message = "Friend deleted successfully";
                         }
                     }
                 }

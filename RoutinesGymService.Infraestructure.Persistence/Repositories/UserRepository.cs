@@ -130,72 +130,80 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateUserResponse createUserResponse = new CreateUserResponse();
             try
             {
-                if (GenericUtils.IsEmailValid(createGenericUserRequest.Email!))
+                if (!GenericUtils.IsDniValid(createGenericUserRequest.Dni!))
                 {
                     createUserResponse.IsSuccess = false;
-                    createUserResponse.Message = "Invalid email format";
+                    createUserResponse.Message = "The dni is not valid";
                 }
                 else
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createGenericUserRequest.Email);
-                    if (user != null)
+                    if (!GenericUtils.IsEmailValid(createGenericUserRequest.Email!))
                     {
                         createUserResponse.IsSuccess = false;
-                        createUserResponse.Message = "User already exists with the provided email";
+                        createUserResponse.Message = "Invalid email format";
                     }
                     else
                     {
-                        user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni);
+                        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createGenericUserRequest.Email);
                         if (user != null)
                         {
                             createUserResponse.IsSuccess = false;
-                            createUserResponse.Message = "User already exists with the provided DNI";
+                            createUserResponse.Message = "User already exists with the provided email";
                         }
                         else
                         {
-                            if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
+                            user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni);
+                            if (user != null)
                             {
                                 createUserResponse.IsSuccess = false;
-                                createUserResponse.Message = "Password and Confirm Password do not match";
+                                createUserResponse.Message = "User already exists with the provided DNI";
                             }
                             else
                             {
-                                if (PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                                if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
                                 {
                                     createUserResponse.IsSuccess = false;
-                                    createUserResponse.Message = "Password does not meet the required criteria";
+                                    createUserResponse.Message = "Password and Confirm Password do not match";
                                 }
                                 else
                                 {
-                                    string friendCode = GenericUtils.CreateFriendCode(8);
-                                    while (true)
+                                    if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
                                     {
-                                        if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
-                                            break;
-
-                                        friendCode = GenericUtils.CreateFriendCode(8);
+                                        createUserResponse.IsSuccess = false;
+                                        createUserResponse.Message = "Password does not meet the required criteria";
                                     }
-
-                                    User newUser = new User
+                                    else
                                     {
-                                        Dni = createGenericUserRequest.Dni!,
-                                        Username = createGenericUserRequest.Username!,
-                                        Surname = createGenericUserRequest.Surname ?? "",
-                                        Email = createGenericUserRequest.Email!,
-                                        FriendCode = friendCode,
-                                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
-                                        Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
-                                        RoleString = createGenericUserRequest.Role.ToString().ToLower(),
-                                        InscriptionDate = DateTime.UtcNow
-                                    };
+                                        string friendCode = GenericUtils.CreateFriendCode(8);
+                                        while (true)
+                                        {
+                                            if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
+                                                break;
 
-                                    _genericUtils.ClearCache(_userPrefix);
-                                    
-                                    await _context.Users.AddAsync(newUser);
-                                    await _context.SaveChangesAsync();
+                                            friendCode = GenericUtils.CreateFriendCode(8);
+                                        }
 
-                                    createUserResponse.IsSuccess = true;
-                                    createUserResponse.Message = "User created successfully";
+                                        User newUser = new User
+                                        {
+                                            Dni = createGenericUserRequest.Dni!,
+                                            Username = createGenericUserRequest.Username!,
+                                            Surname = createGenericUserRequest.Surname ?? "",
+                                            Email = createGenericUserRequest.Email!,
+                                            FriendCode = friendCode,
+                                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                                            Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
+                                            RoleString = createGenericUserRequest.Role.ToString().ToLower(),
+                                            InscriptionDate = DateTime.UtcNow
+                                        };
+
+                                        _genericUtils.ClearCache(_userPrefix);
+
+                                        await _context.Users.AddAsync(newUser);
+                                        await _context.SaveChangesAsync();
+
+                                        createUserResponse.IsSuccess = true;
+                                        createUserResponse.Message = "User created successfully";
+                                    }
                                 }
                             }
                         }
@@ -459,7 +467,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 string cacheKey = $"{_userPrefix}GetUserProfileDetails_{GetUserProfileDetails.UserEmail}";
-
+                _genericUtils.ClearCache(_userPrefix);
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)
                 {

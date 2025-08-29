@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using MailKit.Security;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 using RoutinesGymService.Domain.Model.Enums;
 using System.Net.Mail;
 using System.Text;
-using MailKit.Security;
+using System.Text.RegularExpressions;
 
 namespace RoutinesGymService.Transversal.Common
 {
@@ -184,6 +185,13 @@ namespace RoutinesGymService.Transversal.Common
             {
                 return false;
             }
+        }
+        #endregion
+
+        #region Is dni valid
+        public static bool IsDniValid(string dni)
+        {
+            return !string.IsNullOrEmpty(dni) && Regex.IsMatch(dni, @"^\d{8}[A-Z]$");
         }
         #endregion
 

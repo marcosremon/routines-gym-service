@@ -6,6 +6,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Exercise
     public class GetExercisesByDayAndRoutineNameResponse : BaseResponse
     {
         public List<ExerciseDTO> Exercises { get; set; } = new List<ExerciseDTO>();
-        public Dictionary<long, List<string>> PastProgress { get; set; } = new();
+        public Dictionary<string, List<string>> PastProgress { get; set; } = new();
     }
 }
