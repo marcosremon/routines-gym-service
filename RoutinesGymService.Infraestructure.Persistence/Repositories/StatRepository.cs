@@ -42,7 +42,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     Stat? stat = await _context.Stats.FirstOrDefaultAsync(st => st.Date == getDailyStepsInfoRequest.Day &&
-                                                                                st.Steps == getDailyStepsInfoRequest.DailySteps);
+                                                                                st.Steps == getDailyStepsInfoRequest.DailySteps &&
+                                                                                st.UserId == user.UserId);
                     if (stat == null)
                     {
                         getDailyStepsInfoResponse.IsSuccess = false;
