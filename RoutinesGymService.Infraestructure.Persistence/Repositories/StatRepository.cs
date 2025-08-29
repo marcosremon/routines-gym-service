@@ -41,7 +41,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    Stat? stat = await _context.Stats.FirstOrDefaultAsync(st => st.Date == getDailyStepsInfoRequest.Day &&
+                    DateTime? day = getDailyStepsInfoRequest.Day!.Value.Date; 
+                    Stat? stat = await _context.Stats.FirstOrDefaultAsync(st => st.Date!.Value.Date == day && 
                                                                                 st.Steps == getDailyStepsInfoRequest.DailySteps &&
                                                                                 st.UserId == user.UserId);
                     if (stat == null)
@@ -93,8 +94,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         List<Stat> stats = await _context.Stats
                             .Where(s => s.UserId == user.UserId)
+                            .OrderBy(s => s.Date) 
                             .ToListAsync();
-
                         if (!stats.Any())
                         {
                             getStatsResponse.IsSuccess = false;
@@ -105,7 +106,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getStatsResponse.IsSuccess = true;
                             getStatsResponse.Message = "Stats retrieved successfully.";
                             getStatsResponse.Stats = stats;
-
                             _cacheUtils.Set(cacheKey, stats, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
