@@ -102,33 +102,19 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                                 foreach (ExerciseDTO exerciseRequest in requestSplitDay.Exercises)
                                 {
-                                    splitDay.Exercises.Add(new Exercise
+                                    Exercise exercise = new Exercise
                                     {
                                         ExerciseName = exerciseRequest.ExerciseName,
                                         RoutineId = routine.RoutineId,
-                                    });
+                                    };
+
+                                    splitDay.Exercises.Add(exercise);
                                 }
 
                                 routine.SplitDays.Add(splitDay);
                             }
 
                             await _context.SaveChangesAsync();
-
-                            foreach (SplitDay splitDay in routine.SplitDays)
-                            {
-                                foreach (Exercise exercise in splitDay.Exercises)
-                                {
-                                    ExerciseProgress progress = new ExerciseProgress
-                                    {
-                                        ExerciseId = exercise.ExerciseId,
-                                        RoutineId = routine.RoutineId,
-                                        DayName = splitDay.DayNameString,
-                                        PerformedAt = DateTime.UtcNow
-                                    };
-
-                                    _context.ExerciseProgress.Add(progress);
-                                }
-                            }
 
                             _genericUtils.ClearCache(_routinePrefix);
 

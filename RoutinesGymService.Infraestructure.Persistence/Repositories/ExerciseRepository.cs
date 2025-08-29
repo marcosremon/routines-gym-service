@@ -55,9 +55,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        string day = addExerciseRequest.DayName.Split(".")[1];
+                        string day = addExerciseRequest.DayName.Contains(".") 
+                            ? addExerciseRequest.DayName.Split(".")[1]
+                            : addExerciseRequest.DayName;
                         int dayToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(day));
-                        SplitDay ? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
                                                                                                 s.DayName == dayToInt);
                         if (splitDay == null)
                         {
@@ -190,7 +192,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 string cacheKey = $"{_exercisePrefix}GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
-
+                
                 GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cacheUtils.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
                 if (cacheExercise != null)
                 {
@@ -241,7 +243,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 }
                                 else
                                 {
-                                    Dictionary<long, List<string>> pastProgressDict = new Dictionary<long, List<string>>();
+                                    Dictionary<string, List<string>> pastProgressDict = new Dictionary<string, List<string>>();
                                     foreach (Exercise exercise in exercises)
                                     {
                                         List<ExerciseProgress> last3Progress = await _context.ExerciseProgress
@@ -257,7 +259,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                             .Select(p => $"{p.Sets}x{p.Reps}@{p.Weight}kg")
                                             .ToList();
 
-                                        pastProgressDict[exercise.ExerciseId] = pastProgress;
+                                        pastProgressDict[exercise.ExerciseName] = pastProgress;
                                     }
 
                                     getExercisesByDayAndRoutineIdResponse.Exercises = exercises.Select(e => ExerciseMapper.ExerciseToDto(e)).ToList();

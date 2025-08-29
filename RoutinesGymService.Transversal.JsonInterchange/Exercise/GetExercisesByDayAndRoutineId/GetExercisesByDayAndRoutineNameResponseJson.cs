@@ -6,6 +6,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesBy
     public class GetExercisesByDayAndRoutineNameResponseJson : BaseResponseJson
     {
         public List<ExerciseDTO> Exercises { get; set; } = new List<ExerciseDTO>();
-        public Dictionary<long, List<string>> PastProgress { get; set; } = new();
+        public Dictionary<string, List<string>> PastProgress { get; set; } = new();
     }
 }
