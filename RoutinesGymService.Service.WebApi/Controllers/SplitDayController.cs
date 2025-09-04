@@ -48,15 +48,11 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (updateSplitDayResponse.IsSuccess)
                     {
                         updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
-                        updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
                         updateSplitDayResponseJson.UserDTO = updateSplitDayResponse.UserDTO;
                     }
-                    else
-                    {
-                        updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
-                        updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
-                    }
+
+                    updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
+                    updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
                 }
             }
             catch (Exception ex)
