@@ -67,7 +67,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 {
                                     updateSplitDayRequest.DeleteDays.ForEach(dayName =>
                                     {
-                                        dayName = GenericUtils.ChangeDayLanguage(dayName).ToLower();
+                                        dayName = GenericUtils.ChangeDayLanguage_sp_to_eng(dayName).ToLower();
 
                                         var splitDayToDelete = _context.SplitDays
                                             .Where(sd => sd.RoutineId == routine.RoutineId && sd.DayNameString.ToLower() == dayName)
@@ -98,7 +98,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 {
                                     updateSplitDayRequest.AddDays.ForEach(dayName =>
                                     {
-                                        dayName = GenericUtils.ChangeDayLanguage(dayName);
+                                        dayName = GenericUtils.ChangeDayLanguage_sp_to_eng(dayName);
 
                                         WeekDay weekDay = Enum.Parse<WeekDay>(dayName, true);
                                         SplitDay newSplitDay = new SplitDay
