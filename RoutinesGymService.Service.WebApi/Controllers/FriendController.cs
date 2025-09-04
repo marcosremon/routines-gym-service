@@ -48,15 +48,11 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (getAllUserFriendsResponse.IsSuccess)
                     {
                         getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getAllUserFriendsResponseJson.IsSuccess = getAllUserFriendsResponse.IsSuccess;
-                        getAllUserFriendsResponseJson.Message = getAllUserFriendsResponse.Message;
                         getAllUserFriendsResponseJson.Friends = getAllUserFriendsResponse.Friends;
                     }
-                    else
-                    {
-                        getAllUserFriendsResponseJson.IsSuccess = getAllUserFriendsResponse.IsSuccess;
-                        getAllUserFriendsResponseJson.Message = getAllUserFriendsResponse.Message;
-                    }
+                     
+                    getAllUserFriendsResponseJson.IsSuccess = getAllUserFriendsResponse.IsSuccess;
+                    getAllUserFriendsResponseJson.Message = getAllUserFriendsResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -97,16 +93,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     AddNewUserFriendResponse addNewUserFriendResponse = await _friendApplication.AddNewUserFriend(addNewUserFriendRequest);
                     if (addNewUserFriendResponse.IsSuccess)
-                    {
                         addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
-                        addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
-                    }
-                    else
-                    {
-                        addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
-                        addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
-                    }
+                 
+                    addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
+                    addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -147,16 +137,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     DeleteFriendResponse deleteFriendResponse = await _friendApplication.DeleteFriend(deleteFriendRequest);
                     if (deleteFriendResponse.IsSuccess)
-                    {
                         deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        deleteFriendResponseJson.IsSuccess = deleteFriendResponse.IsSuccess;
-                        deleteFriendResponseJson.Message = deleteFriendResponse.Message;
-                    }
-                    else
-                    {
-                        deleteFriendResponseJson.IsSuccess = deleteFriendResponse.IsSuccess;
-                        deleteFriendResponseJson.Message = deleteFriendResponse.Message;
-                    }
+                 
+                    deleteFriendResponseJson.IsSuccess = deleteFriendResponse.IsSuccess;
+                    deleteFriendResponseJson.Message = deleteFriendResponse.Message;
                 }
             }
             catch (Exception ex)
