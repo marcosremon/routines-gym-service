@@ -46,15 +46,11 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (getStatsResponse.IsSuccess)
                     {
                         getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                        getStatsResponseJson.Message = getStatsResponse.Message;
                         getStatsResponseJson.Stats = getStatsResponse.Stats;
                     }
-                    else
-                    {
-                        getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                        getStatsResponseJson.Message = getStatsResponse.Message;
-                    }
+
+                    getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
+                    getStatsResponseJson.Message = getStatsResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -98,16 +94,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (getDailyStepsInfoResponse.IsSuccess)
                     {
                         getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getDailyStepsInfoResponseJson.IsSuccess = getDailyStepsInfoResponse.IsSuccess;
-                        getDailyStepsInfoResponseJson.Message = getDailyStepsInfoResponse.Message;
                         getDailyStepsInfoResponseJson.DailyStepsGoal = getDailyStepsInfoResponse.DailyStepsGoal;
                         getDailyStepsInfoResponseJson.DailySteps = getDailyStepsInfoResponse.DailySteps;
                     }
-                    else
-                    {
-                        getDailyStepsInfoResponseJson.IsSuccess = getDailyStepsInfoResponse.IsSuccess;
-                        getDailyStepsInfoResponseJson.Message = getDailyStepsInfoResponse.Message;
-                    }
+
+                    getDailyStepsInfoResponseJson.IsSuccess = getDailyStepsInfoResponse.IsSuccess;
+                    getDailyStepsInfoResponseJson.Message = getDailyStepsInfoResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -150,16 +142,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     SaveDailyStepsResponse saveDailyStepsResponse = await _statApplication.SaveDailySteps(saveDailyStepsRequest);
                     if (saveDailyStepsResponse.IsSuccess)
-                    {
                         saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
-                        saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
-                    }
-                    else
-                    {
-                        saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
-                        saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
-                    }
+
+                    saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
+                    saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
                 }
             }
             catch (Exception ex)
