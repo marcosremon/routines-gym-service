@@ -14,7 +14,9 @@ namespace RoutinesGymService.Transversal.Common.Utils
         }
 
         #region Week day interchanges
-        public static string ChangeDayLanguage(string dayName)
+
+        #region ChangeDayLanguage_sp_to_eng
+        public static string ChangeDayLanguage_sp_to_eng(string dayName)
         {
             switch (dayName)
             {
@@ -29,7 +31,27 @@ namespace RoutinesGymService.Transversal.Common.Utils
 
             return dayName;
         }
+        #endregion
 
+        #region ChangeDayLanguage_eng_to_sp
+        public static string ChangeDayLanguage_eng_to_sp(string dayName)
+        {
+            switch (dayName)
+            {
+                case "Monday": dayName = "Lunes"; break;
+                case "Tuesday": dayName = "Martes"; break;
+                case "Wednesday": dayName = "Miércoles"; break;
+                case "Thursday": dayName = "Jueves"; break;
+                case "Friday": dayName = "Viernes"; break;
+                case "Saturday": dayName = "Sábado"; break;
+                case "Sunday": dayName = "Domingo"; break;
+            }
+
+            return dayName;
+        }
+        #endregion
+
+        #region ChangeIntToEnumOnDayName
         public static WeekDay ChangeIntToEnumOnDayName(int day)
         {
             switch (day)
@@ -45,7 +67,9 @@ namespace RoutinesGymService.Transversal.Common.Utils
 
             return WeekDay.MONDAY;
         }
+        #endregion
 
+        #region ChangeEnumToIntOnDayName
         public static int ChangeEnumToIntOnDayName(WeekDay day)
         {
             switch (day)
@@ -61,10 +85,12 @@ namespace RoutinesGymService.Transversal.Common.Utils
 
             return 0;
         }
+        #endregion
 
+        #region ChangeStringToEnumOnDayName
         public static WeekDay ChangeStringToEnumOnDayName(string dayName)
         {
-            dayName = ChangeDayLanguage(dayName);
+            dayName = ChangeDayLanguage_sp_to_eng(dayName);
             switch (dayName.ToLower())
             {
                 case "monday": return WeekDay.MONDAY;
@@ -80,28 +106,34 @@ namespace RoutinesGymService.Transversal.Common.Utils
         }
         #endregion
 
+        #endregion
+
         #region Role interchanges
+
+        #region ChangeIntToEnumOnRole
         public static Role ChangeIntToEnumOnRole(int role)
         {
             switch (role)
             {
                 case 0: return Role.USER;
                 case 1: return Role.ADMIN;
+                default: return Role.USER;
             }
-
-            return Role.USER;
         }
+        #endregion
 
+        #region ChangeEnumToIntOnRole
         public static int ChangeEnumToIntOnRole(Role role)
         {
             switch (role)
             {
                 case Role.USER: return 0;
                 case Role.ADMIN: return 1;
+                default: return -1;
             }
-
-            return 0;
         }
+        #endregion
+
         #endregion
 
         #region Is dni valid
@@ -136,7 +168,6 @@ namespace RoutinesGymService.Transversal.Common.Utils
                _cacheUtils.Remove(key); 
             }
         }
-
         #endregion
     }
 }
