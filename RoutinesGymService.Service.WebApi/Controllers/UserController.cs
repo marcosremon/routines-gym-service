@@ -51,15 +51,11 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 if (getUsersResponse.IsSuccess)
                 {
                     getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
-                    getUsersResponseJson.Message = getUsersResponse.Message;
                     getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
                 }
-                else
-                {
-                    getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
-                    getUsersResponseJson.Message = getUsersResponse.Message;
-                }
+
+                getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
+                getUsersResponseJson.Message = getUsersResponse.Message;
             }
             catch (Exception ex)
             {
@@ -99,17 +95,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (getUserByEmailResponse.IsSuccess)
                     {
                         getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
-                        getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
                         getUserByEmailResponseJson.UserDTO = getUserByEmailResponse.UserDTO;
                         getUserByEmailResponseJson.FriendsCount = getUserByEmailResponse.FriendsCount;
                         getUserByEmailResponseJson.RoutinesCount = getUserByEmailResponse.RoutinesCount;
                     }
-                    else
-                    {
-                        getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
-                        getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
-                    }
+
+                    getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
+                    getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -157,16 +149,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
                     if (createUserResponse.IsSuccess)
-                    {
                         createUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                        createUserResponseJson.Message = createUserResponse.Message;
-                    }
-                    else
-                    {
-                        createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                        createUserResponseJson.Message = createUserResponse.Message;
-                    }
+
+                    createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
+                    createUserResponseJson.Message = createUserResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -214,16 +200,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateGoogleUserResponse createGoogleUserResponse = await _userApplication.CreateGoogleUser(createGenericUserRequest);
                     if (createGoogleUserResponse.IsSuccess)
-                    {
                         createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
-                        createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
-                    }
-                    else
-                    {
-                        createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
-                        createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
-                    }
+
+                    createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
+                    createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -273,16 +253,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
                     if (createUserResponse.IsSuccess)
-                    {
                         createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                        createAdminResponseJson.Message = createUserResponse.Message;
-                    }
-                    else
-                    {
-                        createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                        createAdminResponseJson.Message = createUserResponse.Message;
-                    }
+
+                    createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
+                    createAdminResponseJson.Message = createUserResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -330,20 +304,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (updateUserResponse.IsSuccess)
                     {
                         updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
-                        updateUserResponseJson.Message = updateUserResponse.Message;
                         updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
                     }
-                    else
-                    {
-                        updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                        updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
-                        updateUserResponseJson.Message = updateUserResponse.Message;
-                    }
+
+                    updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
+                    updateUserResponseJson.Message = updateUserResponse.Message;
                 }
             }
             catch (Exception ex)
             {
+                updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
                 updateUserResponseJson.IsSuccess = false;
                 updateUserResponseJson.Message = $"unexpected error on UserController -> update-user: {ex.Message}";
             }
@@ -377,16 +347,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     DeleteUserResponse deleteUserResponse = await _userApplication.DeleteUser(deleteUserRequest);
                     if (deleteUserResponse.IsSuccess)
-                    {
                         deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
-                        deleteUserResponseJson.Message = deleteUserResponse.Message;
-                    }
-                    else
-                    {
-                        deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
-                        deleteUserResponseJson.Message = deleteUserResponse.Message;
-                    }
+
+                    deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
+                    deleteUserResponseJson.Message = deleteUserResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -425,16 +389,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateNewPasswordResponse createNewPasswordResponse = await _userApplication.CreateNewPassword(createNewPasswordRequest);
                     if (createNewPasswordResponse.IsSuccess)
-                    {
                         createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
-                        createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
-                    }
-                    else
-                    {
-                        createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
-                        createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
-                    }
+
+                    createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
+                    createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -479,16 +437,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     ChangePasswordWithPasswordAndEmailResponse changePasswordWithPasswordAndEmailResponse = await _userApplication.ChangePasswordWithPasswordAndEmail(changePasswordWithPasswordAndEmailRequest);
                     if (changePasswordWithPasswordAndEmailResponse.IsSuccess)
-                    {
                         changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
-                        changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
-                    }
-                    else
-                    {
-                        changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
-                        changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
-                    }
+
+                    changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
+                    changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -529,17 +481,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (getUserProfileDetailsResponse.IsSuccess)
                     {
                         getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
-                        getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
                         getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username ;
                         getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate ;
                         getUserProfileDetailsResponseJson.RoutineCount = getUserProfileDetailsResponse.RoutineCount;
                     }
-                    else
-                    {
-                        getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
-                        getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
-                    }
+
+                    getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
+                    getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
                 }
             }
             catch (Exception ex)
