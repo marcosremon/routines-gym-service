@@ -57,16 +57,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     
                     AddExerciseAddExerciseProgressResponse addExerciseAddExerciseProgressResponse = await _exerciseApplication.AddExerciseProgress(addExerciseRequest);
                     if (addExerciseAddExerciseProgressResponse.IsSuccess)
-                    {
                         addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
-                        addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
-                    }
-                    else
-                    {
-                        addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
-                        addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
-                    }
+                     
+                    addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
+                    addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -116,15 +110,11 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (updateExerciseResponse.IsSuccess)
                     {
                         updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
-                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
                         updateExerciseResponseJson.UserDTO = updateExerciseResponse.UserDTO;
                     }
-                    else
-                    {
-                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
-                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
-                    }
+                 
+                    updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
+                    updateExerciseResponseJson.Message = updateExerciseResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -169,16 +159,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     DeleteExerciseResponse deleteExerciseResponse = await _exerciseApplication.DeleteExercise(deleteExerciseRequest);
                     if (deleteExerciseResponse.IsSuccess)
-                    {
                         deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
-                        deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
-                    }
-                    else
-                    {
-                        deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
-                        deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
-                    }
+                 
+                    deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
+                    deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -223,16 +207,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     AddExerciseResponse addExerciseResponse = await _exerciseApplication.AddExercise(addExerciseRequest);
                     if (addExerciseResponse.IsSuccess)
-                    {
                         addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
-                        addExerciseResponseJson.Message = addExerciseResponse.Message;
-                    }
-                    else
-                    {
-                        addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
-                        addExerciseResponseJson.Message = addExerciseResponse.Message;
-                    }
+                 
+                    addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
+                    addExerciseResponseJson.Message = addExerciseResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -277,16 +255,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (getExercisesByDayAndRoutineNameResponse.IsSuccess)
                     {
                         getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
-                        getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
                         getExercisesByDayAndRoutineNameResponseJson.Exercises = getExercisesByDayAndRoutineNameResponse.Exercises;
                         getExercisesByDayAndRoutineNameResponseJson.PastProgress = getExercisesByDayAndRoutineNameResponse.PastProgress;
                     }
-                    else
-                    {
-                        getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
-                        getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
-                    }
+                 
+                    getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
+                    getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
                 }
             }
             catch (Exception ex)

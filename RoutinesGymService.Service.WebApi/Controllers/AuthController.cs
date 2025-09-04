@@ -50,18 +50,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (loginResponse.IsSuccess)
                     {
                         loginResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        loginResponseJson.IsSuccess = loginResponse.IsSuccess;
-                        loginResponseJson.Message = loginResponse.Message;
                         loginResponseJson.IsAdmin = loginResponse.IsAdmin;
                         loginResponseJson.BearerToken = loginResponse.IsAdmin 
                             ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail) 
                             : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
                     }
-                    else
-                    {
-                        loginResponseJson.IsSuccess = loginResponse.IsSuccess;
-                        loginResponseJson.Message = loginResponse.Message;
-                    }
+                 
+                    loginResponseJson.IsSuccess = loginResponse.IsSuccess;
+                    loginResponseJson.Message = loginResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -104,17 +100,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (loginResponse.IsSuccess)
                     {
                         loginWebResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        loginWebResponseJson.IsSuccess = loginResponse.IsSuccess;
-                        loginWebResponseJson.Message = loginResponse.Message;
                         loginWebResponseJson.BearerToken = loginResponse.IsAdmin
                             ? JwtUtils.GenerateAdminJwtToken(loginWebRequest.UserEmail)
                             : JwtUtils.GenerateUserJwtToken(loginWebRequest.UserEmail);
                     }
-                    else
-                    {
-                        loginWebResponseJson.IsSuccess = loginResponse.IsSuccess;
-                        loginWebResponseJson.Message = loginResponse.Message;
-                    }
+                     
+                    loginWebResponseJson.IsSuccess = loginResponse.IsSuccess;
+                    loginWebResponseJson.Message = loginResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -150,6 +142,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         Token = checkTokenStatusRequestJson.Token
                     };
+
                     CheckTokenStatusResponse checkTokenStatusResponse = _authApplication.CheckTokenStatus(checkTokenStatusRequest);
                     if (checkTokenStatusResponse.IsValid)
                         checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
