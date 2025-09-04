@@ -28,6 +28,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<UpdateSplitDayResponse> UpdateSplitDay(UpdateSplitDayRequest updateSplitDayRequest)
         {
             UpdateSplitDayResponse updateSplitDayResponse = new UpdateSplitDayResponse();
+
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == updateSplitDayRequest.UserEmail);
@@ -38,7 +39,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r =>
                         r.RoutineName == updateSplitDayRequest.RoutineName &&
                         r.UserId == user.UserId);
                     if (routine == null)
@@ -68,19 +69,27 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     {
                                         dayName = GenericUtils.ChangeDayLanguage(dayName).ToLower();
 
-                                        SplitDay? splitDayToDelete = _context.SplitDays
-                                            .Include(sd => sd.Exercises)
-                                            .FirstOrDefault(sd =>
-                                                sd.RoutineId == routine.RoutineId &&
-                                                sd.DayNameString.ToLower() == dayName);
+                                        var splitDayToDelete = _context.SplitDays
+                                            .Where(sd => sd.RoutineId == routine.RoutineId && sd.DayNameString.ToLower() == dayName)
+                                            .Join(_context.Exercises, sd => sd.SplitDayId, e => e.SplitDayId, (sd, e) => new { SplitDay = sd, Exercise = e })
+                                            .GroupBy(x => x.SplitDay)
+                                            .Select(g => new
+                                            {
+                                                SplitDay = g.Key,
+                                                Exercises = g.Select(x => x.Exercise).ToList()
+                                            })
+                                            .FirstOrDefault();
+
                                         if (splitDayToDelete != null)
                                         {
                                             List<long> exerciseIds = splitDayToDelete.Exercises.Select(e => e.ExerciseId).ToList();
 
-                                            IQueryable<ExerciseProgress> progressToDelete = _context.ExerciseProgress.Where(ep => exerciseIds.Contains(ep.ExerciseId));
+                                            IQueryable<ExerciseProgress> progressToDelete = _context.ExerciseProgress
+                                                .Where(ep => exerciseIds.Contains(ep.ExerciseId));
+
                                             _context.ExerciseProgress.RemoveRange(progressToDelete);
                                             _context.Exercises.RemoveRange(splitDayToDelete.Exercises);
-                                            _context.SplitDays.Remove(splitDayToDelete);
+                                            _context.SplitDays.Remove(splitDayToDelete.SplitDay);
                                         }
                                     });
                                 }
@@ -107,7 +116,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 _genericUtils.ClearCache(_routinePrefix);
 
                                 await _context.SaveChangesAsync();
-                                                                
+
                                 updateSplitDayResponse.IsSuccess = true;
                                 updateSplitDayResponse.Message = "Split day updated successfully.";
                                 updateSplitDayResponse.UserDTO = UserMapper.UserToDto(user);
