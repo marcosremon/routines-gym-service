@@ -12,7 +12,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Utils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
