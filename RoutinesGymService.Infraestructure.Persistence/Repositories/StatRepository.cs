@@ -6,7 +6,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStat
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories

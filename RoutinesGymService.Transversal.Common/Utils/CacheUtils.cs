@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
-namespace RoutinesGymService.Transversal.Common
+namespace RoutinesGymService.Transversal.Common.Utils
 {
     public class CacheUtils
     {

@@ -15,7 +15,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
@@ -137,7 +137,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (!GenericUtils.IsEmailValid(createGenericUserRequest.Email!))
+                    if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
                     {
                         createUserResponse.IsSuccess = false;
                         createUserResponse.Message = "Invalid email format";
@@ -224,7 +224,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateGoogleUserResponse createGoogleUserResponse = new CreateGoogleUserResponse();
             try
             {
-                if (!GenericUtils.IsEmailValid(createGenericUserRequest.Email!))
+                if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
                 {
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "Invalid email format";
@@ -259,7 +259,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.Users.AddAsync(user);
                     await _context.SaveChangesAsync();
 
-                    GenericUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
+                    MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
 
                     createGoogleUserResponse.IsSuccess = true;
                     createGoogleUserResponse.Message = "Usuario creado correctametne";
@@ -396,7 +396,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     _genericUtils.ClearCache(_userPrefix);
                     await _context.SaveChangesAsync();
 
-                    GenericUtils.SendEmail(user.Username, user.Email, newPassword);
+                    MailUtils.SendEmail(user.Username, user.Email, newPassword);
 
 
                     createNewPasswordResponse.IsSuccess = true;
@@ -444,7 +444,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             _genericUtils.ClearCache(_userPrefix);
                             await _context.SaveChangesAsync();
 
-                            GenericUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
+                            MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";

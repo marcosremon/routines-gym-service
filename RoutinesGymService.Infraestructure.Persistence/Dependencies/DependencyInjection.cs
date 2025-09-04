@@ -3,7 +3,7 @@ using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Infraestructure.Persistence.Repositories;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Dependencies

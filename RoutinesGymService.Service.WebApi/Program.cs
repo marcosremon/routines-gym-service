@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Infraestructure.Persistence.Dependencies;
-using RoutinesGymService.Transversal.Common;
+using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
 using System.Text;
 
@@ -23,7 +23,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configuración de Mails
-GenericUtils.Initialize(builder.Configuration);
+MailUtils.Initialize(builder.Configuration);
 
 // Configuración de PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));

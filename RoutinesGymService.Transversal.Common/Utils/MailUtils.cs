@@ -1,10 +1,10 @@
-﻿using System.Net.Mail;
-using MailKit.Security;
+﻿using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using System.Net.Mail;
 
-namespace RoutinesGymService.Transversal.Mailing 
-{ 
+namespace RoutinesGymService.Transversal.Common.Utils
+{
     public static class MailUtils
     {
         private static IConfiguration? _configuration;
@@ -16,7 +16,7 @@ namespace RoutinesGymService.Transversal.Mailing
 
         public static void SendEmail(string recipientName, string recipientEmail, string newPassword)
         {
-            var emailSettings = _configuration.GetSection("EmailSettings");
+            var emailSettings = _configuration!.GetSection("EmailSettings");
             string? smtpHost = emailSettings["SmtpHost"];
             int smtpPort = int.Parse(emailSettings["SmtpPort"]!);
             string? senderEmail = emailSettings["SenderEmail"];
@@ -85,5 +85,5 @@ namespace RoutinesGymService.Transversal.Mailing
                 return false;
             }
         }
-    } 
+    }
 }
