@@ -51,9 +51,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         loginResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         loginResponseJson.IsAdmin = loginResponse.IsAdmin;
-                        loginResponseJson.BearerToken = loginResponse.IsAdmin 
-                            ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail) 
-                            : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
+                        loginResponseJson.BearerToken = loginResponse.BearerToken;
                     }
                  
                     loginResponseJson.IsSuccess = loginResponse.IsSuccess;
