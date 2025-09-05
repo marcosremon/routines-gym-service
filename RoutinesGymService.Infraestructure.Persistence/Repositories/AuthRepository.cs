@@ -66,6 +66,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     loginResponse.IsSuccess = true;
                     loginResponse.Message = "Login successful.";
                     loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();
+                    loginResponse.BearerToken = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower()
+                            ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail)
+                            : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
                 }
             }
             catch (Exception ex)
