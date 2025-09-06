@@ -176,7 +176,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             try
             {
                 if (createGoogleUserRequestJson == null ||
-                   string.IsNullOrEmpty(createGoogleUserRequestJson.Dni) ||
                    string.IsNullOrEmpty(createGoogleUserRequestJson.Username) ||
                    string.IsNullOrEmpty(createGoogleUserRequestJson.Email) ||
                    string.IsNullOrEmpty(createGoogleUserRequestJson.Password) ||

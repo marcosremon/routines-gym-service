@@ -1,4 +1,6 @@
-﻿namespace RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUser
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
+
+namespace RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUser
 {
     public class CreateGoogleUserRequestJson
     {
