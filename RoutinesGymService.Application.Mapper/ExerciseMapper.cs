@@ -1,5 +1,6 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Transversal.Common.Utils;
 
 namespace RoutinesGymService.Application.Mapper
 {
@@ -20,6 +21,20 @@ namespace RoutinesGymService.Application.Mapper
             return new Exercise
             {
                 ExerciseName = exerciseDto.ExerciseName,
+            };
+        }
+    
+        public static ExerciseProgressDTO ExerciseProgressToDto(ExerciseProgress exerciseProgress)
+        {
+            return new ExerciseProgressDTO
+            {
+                ExerciseId = exerciseProgress.ExerciseId,
+                RoutineId = exerciseProgress.RoutineId,
+                DayName = GenericUtils.ChangeStringToEnumOnDayName(exerciseProgress.DayName),
+                Sets = exerciseProgress.Sets,
+                Reps = exerciseProgress.Reps,
+                Weight = exerciseProgress.Weight,
+                PerformedAt = exerciseProgress.PerformedAt
             };
         }
     }
