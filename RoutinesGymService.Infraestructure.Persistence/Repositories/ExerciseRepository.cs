@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Repository;
@@ -434,6 +435,91 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
         
             return addExerciseAddExerciseProgressResponse;
+        }
+
+        public async Task<GetAllExerciseProgressResponse> GetAllExerciseProgress(GetAllExerciseProgressRequest getAllExerciseProgressRequest)
+        {
+            GetAllExerciseProgressResponse getAllExerciseProgressResponse = new GetAllExerciseProgressResponse();
+            try 
+            {
+                string cacheKey = $"{_exercisePrefix}GetAllExerciseProgress{getAllExerciseProgressRequest.UserEmail}_{getAllExerciseProgressRequest.ExerciseName}_{getAllExerciseProgressRequest.RoutineName}_{getAllExerciseProgressRequest.DayName}";
+
+                GetAllExerciseProgressResponse? cacheExercise = _cacheUtils.Get<GetAllExerciseProgressResponse>(cacheKey);
+                if (cacheExercise != null)
+                {
+                    getAllExerciseProgressResponse.ExerciseProgressList = cacheExercise.ExerciseProgressList;
+                    getAllExerciseProgressResponse.IsSuccess = cacheExercise.IsSuccess;
+                    getAllExerciseProgressResponse.Message = cacheExercise.Message;
+                }
+                else
+                {
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllExerciseProgressRequest.UserEmail);
+                    if (user == null)
+                    {
+                        getAllExerciseProgressResponse.IsSuccess = false;
+                        getAllExerciseProgressResponse.Message = "User not found";
+                    }
+                    else
+                    {
+                        Routine? routine = await _context.Routines.FirstOrDefaultAsync(r =>
+                            r.RoutineName == getAllExerciseProgressRequest.RoutineName &&
+                            r.UserId == user.UserId);
+                        if (routine == null)
+                        {
+                            getAllExerciseProgressResponse.IsSuccess = false;
+                            getAllExerciseProgressResponse.Message = "Routine not found";
+                        }
+                        else
+                        {
+                            int dayIndex = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(getAllExerciseProgressRequest.DayName!));
+                            SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
+                                s.RoutineId == routine.RoutineId &&
+                                s.DayName == dayIndex);
+                            if (splitDay == null)
+                            {
+                                getAllExerciseProgressResponse.IsSuccess = false;
+                                getAllExerciseProgressResponse.Message = "Split day not found";
+                            }
+                            else
+                            {
+                                Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
+                                    e.ExerciseName == getAllExerciseProgressRequest.ExerciseName &&
+                                    e.RoutineId == routine.RoutineId &&
+                                    e.SplitDayId == splitDay.SplitDayId);
+                                if (exercise == null)
+                                {
+                                    getAllExerciseProgressResponse.IsSuccess = false;
+                                    getAllExerciseProgressResponse.Message = "Exercise not found";
+                                }
+                                else
+                                {
+                                    List<ExerciseProgress> exerciseProgressList = await _context.ExerciseProgress
+                                        .Where(ep => ep.ExerciseId == exercise.ExerciseId &&
+                                                     ep.RoutineId == routine.RoutineId &&
+                                                     ep.DayName == GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString())
+                                        .OrderByDescending(ep => ep.PerformedAt)
+                                        .ToListAsync();
+
+                                    getAllExerciseProgressResponse.IsSuccess = true;
+                                    getAllExerciseProgressResponse.Message = "Exercise progress retrieved successfully.";
+                                    getAllExerciseProgressResponse.ExerciseProgressList = exerciseProgressList
+                                        .Select(ep => ExerciseMapper.ExerciseProgressToDto(ep))
+                                        .ToList();
+
+                                    _cacheUtils.Set(cacheKey, getAllExerciseProgressResponse, TimeSpan.FromMinutes(_expiryMinutes));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getAllExerciseProgressResponse.IsSuccess = false;
+                getAllExerciseProgressResponse.Message = $"unexpected error on ExerciseRepository -> GetAllExerciseProgress: {ex.Message}";
+            }
+
+            return getAllExerciseProgressResponse;
         }
     }
 }

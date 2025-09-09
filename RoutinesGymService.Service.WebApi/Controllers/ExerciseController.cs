@@ -2,6 +2,7 @@
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Application;
@@ -9,6 +10,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
+using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.UpdateExercise;
 
@@ -273,5 +275,57 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             return Ok(getExercisesByDayAndRoutineNameResponseJson);
         }
         #endregion
+
+        #region Get all exercise progress
+        [HttpPost("get-all-exercise-progress")]
+        public async Task<ActionResult<GetAllExerciseProgressResponseJson>> GetAllExerciseProgress([FromBody] GetAllExerciseProgressRequestJson getAllExerciseProgressRequestJson)
+        {
+            GetAllExerciseProgressResponseJson getAllExerciseProgressResponseJson = new GetAllExerciseProgressResponseJson();
+            getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
+            try
+            {
+                if (getAllExerciseProgressRequestJson == null ||
+                    string.IsNullOrEmpty(getAllExerciseProgressRequestJson.RoutineName) ||
+                    string.IsNullOrEmpty(getAllExerciseProgressRequestJson.ExerciseName) ||
+                    string.IsNullOrEmpty(getAllExerciseProgressRequestJson.DayName) ||
+                    string.IsNullOrEmpty(getAllExerciseProgressRequestJson.UserEmail))
+                {
+                    getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getAllExerciseProgressResponseJson.IsSuccess = false;
+                    getAllExerciseProgressResponseJson.Message = "invalid data, entry parameters are null or empty";
+                }
+                else
+                {
+                    GetAllExerciseProgressRequest getAllExerciseProgressRequest = new GetAllExerciseProgressRequest
+                    {
+                        RoutineName = getAllExerciseProgressRequestJson.RoutineName,
+                        DayName = getAllExerciseProgressRequestJson.DayName,
+                        UserEmail = getAllExerciseProgressRequestJson.UserEmail,
+                        ExerciseName = getAllExerciseProgressRequestJson.ExerciseName,
+                    };
+
+                    GetAllExerciseProgressResponse getAllExerciseProgressResponse = await _exerciseApplication.GetAllExerciseProgress(getAllExerciseProgressRequest);
+                    if (getAllExerciseProgressResponse.IsSuccess)
+                    {
+                        getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getAllExerciseProgressResponseJson.ExerciseProgressList = getAllExerciseProgressResponse.ExerciseProgressList;
+                    }
+
+                    getAllExerciseProgressResponseJson.IsSuccess = getAllExerciseProgressResponse.IsSuccess;
+                    getAllExerciseProgressResponseJson.Message = getAllExerciseProgressResponse.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getAllExerciseProgressResponseJson.IsSuccess = false;
+                getAllExerciseProgressResponseJson.Message = $"unexpected error on ExerciseController -> get-all-exercise-progress {ex.Message}";
+            }
+
+            return Ok(getAllExerciseProgressResponseJson);
+        }
+        #endregion
+
     }
 }
