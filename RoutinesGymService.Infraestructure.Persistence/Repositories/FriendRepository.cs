@@ -67,6 +67,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             _context.UserFriends.Add(userFriend);
                             await _context.SaveChangesAsync();
 
+                            userFriend = new UserFriend
+                            {
+                                UserId = friend.UserId,
+                                FriendId = user.UserId,
+                            };
+
+                            _context.UserFriends.Add(userFriend);
+                            await _context.SaveChangesAsync();
+
                             addNewUserFriendResponse.IsSuccess = true;
                             addNewUserFriendResponse.Message = "Friend added successfully";
                         }
