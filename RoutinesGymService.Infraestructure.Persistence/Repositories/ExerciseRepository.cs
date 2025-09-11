@@ -495,8 +495,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 {
                                     List<ExerciseProgress> exerciseProgressList = await _context.ExerciseProgress
                                         .Where(ep => ep.ExerciseId == exercise.ExerciseId &&
-                                                     ep.RoutineId == routine.RoutineId &&
-                                                     ep.DayName == GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString())
+                                                     ep.RoutineId == routine.RoutineId)
                                         .OrderByDescending(ep => ep.PerformedAt)
                                         .ToListAsync();
 
