@@ -23,6 +23,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly GenericUtils _genericUtils;
         private readonly int _expiryMinutes;
         private readonly string _routinePrefix;
+        private readonly string _exercisePrefix;
 
         public RoutineRepository(ApplicationDbContext context, GenericUtils genericUtils, CacheUtils cacheUtils, IConfiguration configuration)
         {
@@ -30,6 +31,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _context = context;
             _genericUtils = genericUtils;
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
+            _routinePrefix = configuration["CacheSettings:ExercisePrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
@@ -186,6 +188,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
 
                 _genericUtils.ClearCache(_routinePrefix);
+                _genericUtils.ClearCache(_exercisePrefix);
 
                 _context.SplitDays.RemoveRange(splitDays);
                 _context.Routines.Remove(routine);
