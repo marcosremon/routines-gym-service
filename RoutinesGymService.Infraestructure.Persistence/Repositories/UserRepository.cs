@@ -27,7 +27,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly CacheUtils _cacheUtils;
         private readonly PasswordUtils _passwordUtils;
         private readonly string _userPrefix;
-        private readonly string _statsPrefix;
+        private readonly string _stepPrefix;
         private readonly string _routinePrefix;
         private readonly string _friendPrefix;
         private readonly string _authPrefix;
@@ -41,7 +41,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _cacheUtils = cacheUtils;
             _passwordUtils = passwordUtils;
             _userPrefix = configuration["CacheSettings:UserPrefix"]!;
-            _statsPrefix = configuration["CacheSettings:StatPrefix"]!;
+            _stepPrefix = configuration["CacheSettings:StepPrefix"]!;
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
             _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
             _authPrefix = configuration["CacheSettings:AuthPrefix"]!;
@@ -298,8 +298,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    List<Stat> stats = await _context.Stats.Where(s => s.UserId == user.UserId).ToListAsync();
-                    _context.Stats.RemoveRange(stats);
+                    List<Step> steps = await _context.Stats.Where(s => s.UserId == user.UserId).ToListAsync();
+                    _context.Stats.RemoveRange(steps);
 
                     List<UserFriend> userFriends = await _context.UserFriends
                         .Where(uf => uf.UserId == user.UserId || uf.FriendId == user.UserId)
@@ -327,7 +327,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
 
                     _genericUtils.ClearCache(_userPrefix);
-                    _genericUtils.ClearCache(_statsPrefix);
+                    _genericUtils.ClearCache(_stepPrefix);
                     _genericUtils.ClearCache(_routinePrefix);
                     _genericUtils.ClearCache(_friendPrefix);
                     _genericUtils.ClearCache(_authPrefix);
