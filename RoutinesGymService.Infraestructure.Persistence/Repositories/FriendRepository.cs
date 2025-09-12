@@ -125,6 +125,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             _context.UserFriends.Remove(userFriend);
                             await _context.SaveChangesAsync();
 
+                            userFriend = _context.UserFriends.FirstOrDefault(f => f.UserId == friend.UserId && f.FriendId == user.UserId);
+                            
+                            _context.UserFriends.Remove(userFriend);
+                            await _context.SaveChangesAsync();
+
                             deleteFriendResponse.IsSuccess = true;
                             deleteFriendResponse.Message = "Friend deleted successfully";
                         }

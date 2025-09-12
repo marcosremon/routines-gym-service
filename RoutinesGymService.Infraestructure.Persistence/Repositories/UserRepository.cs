@@ -27,6 +27,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly CacheUtils _cacheUtils;
         private readonly PasswordUtils _passwordUtils;
         private readonly string _userPrefix;
+        private readonly string _statsPrefix;
+        private readonly string _routinePrefix;
+        private readonly string _friendPrefix;
+        private readonly string _authPrefix;
+        private readonly string _exercisePrefix;
         private readonly int _expiryMinutes;
 
         public UserRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, PasswordUtils passwordUtils, IConfiguration configuration)
@@ -36,6 +41,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _cacheUtils = cacheUtils;
             _passwordUtils = passwordUtils;
             _userPrefix = configuration["CacheSettings:UserPrefix"]!;
+            _statsPrefix = configuration["CacheSettings:StatPrefix"]!;
+            _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
+            _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
+            _authPrefix = configuration["CacheSettings:AuthPrefix"]!;
+            _exercisePrefix  = configuration["CacheSettings:ExercisePrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
@@ -317,6 +327,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
 
                     _genericUtils.ClearCache(_userPrefix);
+                    _genericUtils.ClearCache(_statsPrefix);
+                    _genericUtils.ClearCache(_routinePrefix);
+                    _genericUtils.ClearCache(_friendPrefix);
+                    _genericUtils.ClearCache(_authPrefix);
+                    _genericUtils.ClearCache(_exercisePrefix);
                     
                     _context.Routines.RemoveRange(routines);
                     _context.Users.Remove(user);
