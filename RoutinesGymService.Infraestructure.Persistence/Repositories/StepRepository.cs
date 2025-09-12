@@ -1,29 +1,29 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetDailyStepsInfo;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetDailyStepsInfo;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetStats;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
+using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
-    public class StatRepository : IStatRepository
+    public class StepRepository : IStepRepository
     {
         private readonly ApplicationDbContext _context;
         private readonly CacheUtils _cacheUtils;
         private readonly GenericUtils _genericUtils;
-        private readonly string _statPrefix;
+        private readonly string _stepPrefix;
         private readonly int _expiryMinutes;
 
-        public StatRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
+        public StepRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
             _cacheUtils = cacheUtils;
-            _statPrefix = configuration["CacheSettings:StatPrefix"]!;
+            _stepPrefix = configuration["CacheSettings:StepPrefix"]!;
             _genericUtils = genericUtils;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
@@ -42,10 +42,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     DateTime? day = getDailyStepsInfoRequest.Day!.Value.Date; 
-                    Stat? stat = await _context.Stats.FirstOrDefaultAsync(st => st.Date!.Value.Date == day && 
+                    Step? step = await _context.Stats.FirstOrDefaultAsync(st => st.Date!.Value.Date == day && 
                                                                                 st.Steps == getDailyStepsInfoRequest.DailySteps &&
                                                                                 st.UserId == user.UserId);
-                    if (stat == null)
+                    if (step == null)
                     {
                         getDailyStepsInfoResponse.IsSuccess = false;
                         getDailyStepsInfoResponse.Message = "steps stats not found";
@@ -54,8 +54,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         getDailyStepsInfoResponse.IsSuccess = true;
                         getDailyStepsInfoResponse.Message = "steps stats found successfully";
-                        getDailyStepsInfoResponse.DailyStepsGoal = stat.DailyStepsGoal;
-                        getDailyStepsInfoResponse.DailySteps = stat.Steps;
+                        getDailyStepsInfoResponse.DailyStepsGoal = step.DailyStepsGoal;
+                        getDailyStepsInfoResponse.DailySteps = step.Steps;
                     }
                 }
             }
@@ -68,55 +68,55 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             return getDailyStepsInfoResponse;
         }
 
-        public async Task<GetStatsResponse> GetStats(GetStatRequest getStatRequest)
+        public async Task<GetStepResponse> GetStpes(GetStepRequest getStepRequest)
         {
-            GetStatsResponse getStatsResponse = new GetStatsResponse();
+            GetStepResponse getStepResponse = new GetStepResponse();
             try
             {
-                string cacheKey = $"{_statPrefix}GetStats_{getStatRequest.UserEmail}";
+                string cacheKey = $"{_stepPrefix}GetStats_{getStepRequest.UserEmail}";
                 
-                List<Stat>? cachedStats = _cacheUtils.Get<List<Stat>>(cacheKey);
+                List<Step>? cachedStats = _cacheUtils.Get<List<Step>>(cacheKey);
                 if (cachedStats != null && cachedStats.Any())
                 {
-                    getStatsResponse.IsSuccess = true;
-                    getStatsResponse.Message = "Stats retrieved successfully from cache.";
-                    getStatsResponse.Stats = cachedStats;
+                    getStepResponse.IsSuccess = true;
+                    getStepResponse.Message = "Stats retrieved successfully from cache.";
+                    getStepResponse.Stats = cachedStats;
                 }
                 else
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getStatRequest.UserEmail);
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getStepRequest.UserEmail);
                     if (user == null)
                     {
-                        getStatsResponse.IsSuccess = false;
-                        getStatsResponse.Message = "User not found";
+                        getStepResponse.IsSuccess = false;
+                        getStepResponse.Message = "User not found";
                     }
                     else
                     {
-                        List<Stat> stats = await _context.Stats
+                        List<Step> steps = await _context.Stats
                             .Where(s => s.UserId == user.UserId)
                             .OrderBy(s => s.Date) 
                             .ToListAsync();
-                        if (!stats.Any())
+                        if (!steps.Any())
                         {
-                            getStatsResponse.IsSuccess = false;
-                            getStatsResponse.Message = "No stats found.";
+                            getStepResponse.IsSuccess = false;
+                            getStepResponse.Message = "No steps found.";
                         }
                         else
                         {
-                            getStatsResponse.IsSuccess = true;
-                            getStatsResponse.Message = "Stats retrieved successfully.";
-                            getStatsResponse.Stats = stats;
-                            _cacheUtils.Set(cacheKey, stats, TimeSpan.FromMinutes(_expiryMinutes));
+                            getStepResponse.IsSuccess = true;
+                            getStepResponse.Message = "Stats retrieved successfully.";
+                            getStepResponse.Stats = steps;
+                            _cacheUtils.Set(cacheKey, steps, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                getStatsResponse.Message = $"unexpected error on StatRepository -> GetStats: {ex.Message}";
-                getStatsResponse.IsSuccess = false;
+                getStepResponse.Message = $"unexpected error on StatRepository -> GetStats: {ex.Message}";
+                getStepResponse.IsSuccess = false;
             }
-            return getStatsResponse;
+            return getStepResponse;
         }
 
         public async Task<SaveDailyStepsResponse> SaveDailySteps(SaveDailyStepsRequest saveDailyStepsRequest)
@@ -132,7 +132,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    Stat stat = new Stat
+                    Step step = new Step
                     {
                         Steps = saveDailyStepsRequest.Steps,
                         UserId = user.UserId,
@@ -140,13 +140,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         Date = DateTime.UtcNow.AddDays(-1),
                     };
 
-                    _genericUtils.ClearCache(_statPrefix);
+                    _genericUtils.ClearCache(_stepPrefix);
 
-                    _context.Stats.Add(stat);
+                    _context.Stats.Add(step);
                     await _context.SaveChangesAsync();
 
                     saveDailyStepsResponse.IsSuccess = true;
-                    saveDailyStepsResponse.Message = "save stats successfuyly";
+                    saveDailyStepsResponse.Message = "save steps successfuyly";
                 }
             } 
             catch (Exception ex)

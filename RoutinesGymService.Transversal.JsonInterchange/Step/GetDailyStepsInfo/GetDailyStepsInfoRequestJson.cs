@@ -1,4 +1,4 @@
-﻿namespace RoutinesGymService.Transversal.JsonInterchange.Stat.GetDailyStepsInfo
+﻿namespace RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo
 {
     public class GetDailyStepsInfoRequestJson
     {

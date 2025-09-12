@@ -1,6 +1,6 @@
 ﻿using RoutinesGymService.Transversal.Common.Responses;
 
-namespace RoutinesGymService.Transversal.JsonInterchange.Stat.GetDailyStepsInfo
+namespace RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo
 {
     public class GetDailyStepsInfoResponseJson : BaseResponseJson
     {
