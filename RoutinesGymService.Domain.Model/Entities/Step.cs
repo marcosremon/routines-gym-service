@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace RoutinesGymApp.Domain.Entities
 {
     [Table("stats")]
-    public class Stat
+    public class Step
     {
         [Key]
         [Column("stats_id")]

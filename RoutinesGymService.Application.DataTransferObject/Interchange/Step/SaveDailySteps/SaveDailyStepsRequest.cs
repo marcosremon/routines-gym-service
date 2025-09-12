@@ -1,4 +1,4 @@
-﻿namespace RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps
+﻿namespace RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps
 {
     public class SaveDailyStepsRequest
     {

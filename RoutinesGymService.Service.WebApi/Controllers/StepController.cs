@@ -1,66 +1,66 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetDailyStepsInfo;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Stat.GetStats;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetDailyStepsInfo;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetStats;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
-using RoutinesGymService.Transversal.JsonInterchange.Stat.GetDailyStepsInfo;
-using RoutinesGymService.Transversal.JsonInterchange.Stat.GetStats;
-using RoutinesGymService.Transversal.JsonInterchange.Stat.SaveDailySteps;
+using RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo;
+using RoutinesGymService.Transversal.JsonInterchange.Step.GetStats;
+using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
     [ApiController]
-    [Route("stat")]
-    public class StatController : ControllerBase
+    [Route("step")]
+    public class StepController : ControllerBase
     {
-        private readonly IStatApplication _statApplication;
+        private readonly IStepApplication _stepApplication;
 
-        public StatController(IStatApplication statApplication)
+        public StepController(IStepApplication stepApplication)
         {
-            _statApplication = statApplication;
+            _stepApplication = stepApplication;
         }
 
-        #region Get stats
-        [HttpPost("get-stats")]
-        public async Task<ActionResult<GetStatsResponseJson>> GetStats([FromBody] GetStatRequestJson getStatRequestJson)
+        #region Get steps
+        [HttpPost("get-steps")]
+        public async Task<ActionResult<GetStepResponseJson>> GetStats([FromBody] GetStepRequestJson getStepRequestJson)
         {
-            GetStatsResponseJson getStatsResponseJson = new GetStatsResponseJson();
-            getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+            GetStepResponseJson getStepResponseJson = new GetStepResponseJson();
+            getStepResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
 
             try
             {
-                if (string.IsNullOrEmpty(getStatRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(getStepRequestJson.UserEmail))
                 {
-                    getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getStatsResponseJson.IsSuccess = false;
-                    getStatsResponseJson.Message = "invalid data the user email is null or empty";
+                    getStepResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getStepResponseJson.IsSuccess = false;
+                    getStepResponseJson.Message = "invalid data the user email is null or empty";
                 }
                 else
                 {
-                    GetStatRequest getStatRequest = new GetStatRequest
+                    GetStepRequest getStatRequest = new GetStepRequest
                     {
-                        UserEmail = getStatRequestJson.UserEmail
+                        UserEmail = getStepRequestJson.UserEmail
                     };
 
-                    GetStatsResponse getStatsResponse = await _statApplication.GetStats(getStatRequest);
+                    GetStepResponse getStatsResponse = await _stepApplication.GetSteps(getStatRequest);
                     if (getStatsResponse.IsSuccess)
                     {
-                        getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getStatsResponseJson.Stats = getStatsResponse.Stats;
+                        getStepResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getStepResponseJson.Steps = getStatsResponse.Stats;
                     }
 
-                    getStatsResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                    getStatsResponseJson.Message = getStatsResponse.Message;
+                    getStepResponseJson.IsSuccess = getStatsResponse.IsSuccess;
+                    getStepResponseJson.Message = getStatsResponse.Message;
                 }
             }
             catch (Exception ex)
             {
-                getStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getStatsResponseJson.IsSuccess = false;
-                getStatsResponseJson.Message = $"unexpected error on StatController -> get-stats {ex.Message}";
+                getStepResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getStepResponseJson.IsSuccess = false;
+                getStepResponseJson.Message = $"unexpected error on StatController -> get-steps {ex.Message}";
             }
 
-            return Ok(getStatsResponseJson);
+            return Ok(getStepResponseJson);
         }
         #endregion
 
@@ -90,7 +90,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         Day = getDailyStepsInfoRequestJson.Day,
                     };
 
-                    GetDailyStepsInfoResponse getDailyStepsInfoResponse = await _statApplication.GetDailyStepsInfo(getDailyStepsInfoRequest);
+                    GetDailyStepsInfoResponse getDailyStepsInfoResponse = await _stepApplication.GetDailyStepsInfo(getDailyStepsInfoRequest);
                     if (getDailyStepsInfoResponse.IsSuccess)
                     {
                         getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
@@ -140,7 +140,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         DailyStepsGoal = saveDailyStepsRequestJson.DailyStepsGoal,
                     };
 
-                    SaveDailyStepsResponse saveDailyStepsResponse = await _statApplication.SaveDailySteps(saveDailyStepsRequest);
+                    SaveDailyStepsResponse saveDailyStepsResponse = await _stepApplication.SaveDailySteps(saveDailyStepsRequest);
                     if (saveDailyStepsResponse.IsSuccess)
                         saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
 
