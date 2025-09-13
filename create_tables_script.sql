@@ -25,14 +25,14 @@ CREATE TABLE user_friends (
         REFERENCES users(user_id)
 );
 
-CREATE TABLE stats (
-    stats_id BIGSERIAL PRIMARY KEY,
+CREATE TABLE steps (
+    steps_id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
     date TIMESTAMP NOT NULL DEFAULT '0001-01-01 00:00:00'::timestamp,
     steps INTEGER NOT NULL DEFAULT 0,
     daily_steps_goal INTEGER NOT NULL DEFAULT 10000,
 
-    CONSTRAINT fk_stats_user
+    CONSTRAINT fk_steps_user
         FOREIGN KEY (user_id)
         REFERENCES users(user_id)
 );

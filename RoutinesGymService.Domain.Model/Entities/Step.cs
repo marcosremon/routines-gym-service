@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RoutinesGymApp.Domain.Entities
 {
-    [Table("stats")]
+    [Table("steps")]
     public class Step
     {
         [Key]
-        [Column("stats_id")]
-        public long StatsId { get; set; }
+        [Column("steps_id ")]
+        public long StepsId { get; set; }
 
         [Column("user_id")]
         [ForeignKey("User")]
