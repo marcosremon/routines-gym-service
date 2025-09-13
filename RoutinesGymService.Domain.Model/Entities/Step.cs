@@ -8,7 +8,7 @@ namespace RoutinesGymApp.Domain.Entities
     public class Step
     {
         [Key]
-        [Column("steps_id ")]
+        [Column("steps_id")]
         public long StepsId { get; set; }
 
         [Column("user_id")]
