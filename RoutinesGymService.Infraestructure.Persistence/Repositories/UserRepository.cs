@@ -363,17 +363,25 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    user.Dni = updateUserRequest.NewDni ?? user.Dni;
-                    user.Username = updateUserRequest.NewUsername ?? user.Username;
-                    user.Surname = updateUserRequest.NewSurname ?? user.Surname;
-                    user.Email = updateUserRequest.NewEmail ?? user.Email;
+                    if (!GenericUtils.IsDniValid(updateUserRequest.NewDni!))
+                    {
+                        updateUserResponse.IsSuccess = false;
+                        updateUserResponse.Message = "The dni is not valid";
+                    }
+                    else
+                    {
+                        user.Dni = updateUserRequest.NewDni ?? user.Dni;
+                        user.Username = updateUserRequest.NewUsername ?? user.Username;
+                        user.Surname = updateUserRequest.NewSurname ?? user.Surname;
+                        user.Email = updateUserRequest.NewEmail ?? user.Email;
                     
-                    _genericUtils.ClearCache(_userPrefix);
-                    await _context.SaveChangesAsync();
+                        _genericUtils.ClearCache(_userPrefix);
+                        await _context.SaveChangesAsync();
 
-                    updateUserResponse.IsSuccess = true;
-                    updateUserResponse.UserDTO = UserMapper.UserToDto(user);
-                    updateUserResponse.Message = "User updated successfully";
+                        updateUserResponse.IsSuccess = true;
+                        updateUserResponse.UserDTO = UserMapper.UserToDto(user);
+                        updateUserResponse.Message = "User updated successfully";
+                    }
                 }
             }
             catch (Exception ex)
