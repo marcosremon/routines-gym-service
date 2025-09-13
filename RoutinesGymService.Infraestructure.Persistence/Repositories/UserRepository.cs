@@ -241,14 +241,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    string friendCode = PasswordUtils.CreatePassword(8);
+                    string friendCode = GenericUtils.CreateFriendCode(8);
                     while (true)
                     {
                         if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
                         {
                             break;
                         }
-                        friendCode = PasswordUtils.CreatePassword(8);
+                        friendCode = GenericUtils.CreateFriendCode(8);
                     }
 
                     User user = new User()
@@ -406,13 +406,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    string newPassword = PasswordUtils.CreatePassword(8);
+                    string newPassword = PasswordUtils.GenerateSecurePassword();
                     while (true)
                     {
                         if (_passwordUtils.PasswordEncoder(newPassword) != user.Password)
                             break;
 
-                        newPassword = PasswordUtils.CreatePassword(8);
+                        newPassword = PasswordUtils.GenerateSecurePassword();
                     }
                     user.Password = _passwordUtils.PasswordEncoder(newPassword);
 
@@ -448,7 +448,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (_passwordUtils.PasswordDecoder(user.Password!) != changePasswordWithPasswordAndEmailRequest.OldPassword)
+                    if (!_passwordUtils.VerifyPassword(user.Password, changePasswordWithPasswordAndEmailRequest.OldPassword))
                     {
                         changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
                         changePasswordWithPasswordAndEmailResponse.Message = "Old password does not match";

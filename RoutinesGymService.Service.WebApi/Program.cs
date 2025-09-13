@@ -34,7 +34,6 @@ builder.Services.AddInfrastructureServices();
 // Configuración JWT
 var jwtSettings = builder.Configuration.GetSection("JWT");
 var keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key no está configurado");
-Console.WriteLine($"JWT Key: {keyString}"); // Debug
 var key = Encoding.ASCII.GetBytes(keyString);
 JwtUtils.Initialize(builder.Configuration);
 
