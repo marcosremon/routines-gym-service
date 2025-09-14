@@ -26,7 +26,8 @@ builder.Services.AddSwaggerGen();
 MailUtils.Initialize(builder.Configuration);
 
 // Configuración de PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 
 // Registrar servicios de infraestructura
 builder.Services.AddInfrastructureServices();
@@ -73,15 +74,33 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Habilitar CORS (¡Importante que esté antes de UseAuthentication/UseAuthorization!)
+// Habilitar CORS (antes de autenticación)
 app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-app.Run();
+// ===== Crear usuario admin al iniciar =====
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var configuration = services.GetRequiredService<IConfiguration>();
 
+    try
+    {
+        var seeder = new DatabaseSeeder(configuration);
+        await seeder.SeedAdminUserAsync();
+        Console.WriteLine("Usuario admin creado o ya existente.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error creando usuario admin: {ex.Message}");
+    }
+}
+// ==========================================
+
+app.Run();
 
 // Clase para aplicar el prefijo /api a todas las rutas
 public class RoutePrefixConvention : IApplicationModelConvention
