@@ -53,13 +53,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             LoginResponse loginResponse = new LoginResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u =>
-                        u.Email == loginRequest.UserEmail &&
-                        u.Password == _passwordUtils.PasswordEncoder(loginRequest.UserPassword));
-                if (user == null)
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.UserEmail);
+                bool isPasswordValid = _passwordUtils.VerifyPassword(user?.Password!, loginRequest.UserPassword);
+                if (user == null || !isPasswordValid)
                 {
                     loginResponse.IsSuccess = false;
-                    loginResponse.Message = "User not found";
+                    loginResponse.Message = "User not found or incorrect password";
                 }
                 else
                 {

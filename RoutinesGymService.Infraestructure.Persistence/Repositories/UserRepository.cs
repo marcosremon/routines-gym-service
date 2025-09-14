@@ -407,11 +407,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     string newPassword = PasswordUtils.GenerateSecurePassword();
-                    while (true)
+                    while (_passwordUtils.VerifyPassword(user.Password!, newPassword))
                     {
-                        if (_passwordUtils.PasswordEncoder(newPassword) != user.Password)
-                            break;
-
                         newPassword = PasswordUtils.GenerateSecurePassword();
                     }
                     user.Password = _passwordUtils.PasswordEncoder(newPassword);
