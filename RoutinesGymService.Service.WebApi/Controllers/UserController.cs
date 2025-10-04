@@ -39,7 +39,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get users
         [HttpGet("get-users")]
-        //[Authorize(Roles = nameof(Role.ADMIN))]
+        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
         {
             GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
