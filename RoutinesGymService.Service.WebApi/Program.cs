@@ -18,7 +18,6 @@ builder.Services.AddControllers(options =>
 
 // Configuración mínima
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -38,11 +37,8 @@ var keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT K
 var key = Encoding.ASCII.GetBytes(keyString);
 JwtUtils.Initialize(builder.Configuration);
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
+// Configuración de Autenticación JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -58,14 +54,24 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Configuración de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheUtils>();
-
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Pipeline HTTP
+// ===== CONFIGURACIÓN DEL PIPELINE =====
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -74,14 +80,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Habilitar CORS (antes de autenticación)
-app.UseCors("AllowSpecificOrigin");
+// ? ORDEN CORRECTO DEL MIDDLEWARE
+app.UseRouting();           // ?? PRIMERO: Routing
+app.UseCors("AllowAll");    // ?? SEGUNDO: CORS
+app.UseAuthentication();    // ?? TERCERO: Authentication (IMPORTANTE: antes de Authorization)
+app.UseAuthorization();     // ?? CUARTO: Authorization
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
+app.MapControllers();       // ?? FINAL: MapControllers
 
-// ===== Crear usuario admin al iniciar =====
+// ===== CREAR USUARIO ADMIN AL INICIAR =====
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -98,7 +105,6 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine($"Error creando usuario admin: {ex.Message}");
     }
 }
-// ==========================================
 
 app.Run();
 

@@ -6,7 +6,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
     public class ServerConnectionController : ControllerBase
     {
         #region CheckServerConnection
-        [HttpGet("CheckServerConnection")]
+        [HttpGet("/api/CheckServerConnection")]
         public ActionResult<string> CheckServerConnection()
         {
             return Ok("Ok");

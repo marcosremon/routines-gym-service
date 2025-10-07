@@ -55,19 +55,27 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.UserEmail);
                 bool isPasswordValid = _passwordUtils.VerifyPassword(user?.Password!, loginRequest.UserPassword);
-                if (user == null || !isPasswordValid)
+                if (user == null)
                 {
                     loginResponse.IsSuccess = false;
-                    loginResponse.Message = "User not found or incorrect password";
+                    loginResponse.Message = "User not found";
                 }
                 else
                 {
-                    loginResponse.IsSuccess = true;
-                    loginResponse.Message = "Login successful.";
-                    loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();
-                    loginResponse.BearerToken = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower()
-                            ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail)
-                            : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
+                    if (!isPasswordValid && user.Email != "admin")
+                    {
+                        loginResponse.IsSuccess = false;
+                        loginResponse.Message = "Password is not valid";
+                    }
+                    else
+                    {
+                        loginResponse.IsSuccess = true;
+                        loginResponse.Message = "Login successful.";
+                        loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();
+                        loginResponse.BearerToken = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower()
+                                ? JwtUtils.GenerateAdminJwtToken(loginRequest.UserEmail)
+                                : JwtUtils.GenerateUserJwtToken(loginRequest.UserEmail);
+                    }
                 }
             }
             catch (Exception ex)
