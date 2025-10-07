@@ -37,25 +37,27 @@ namespace RoutinesGymService.Transversal.Security
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public static string GenerateUserJwtToken(string username)
+        public static string GenerateUserJwtToken(string email)
         {
             Claim[] claims = new Claim[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Sub, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Role, Role.USER.ToString())
             };
 
             return GenerateJwtToken(claims);
         }
 
-        public static string GenerateAdminJwtToken(string username)
+        public static string GenerateAdminJwtToken(string email)
         {
             var claims = new Claim[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Sub, email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("role", Role.ADMIN.ToString())
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.Role, Role.ADMIN.ToString())
             };
 
             return GenerateJwtToken(claims);

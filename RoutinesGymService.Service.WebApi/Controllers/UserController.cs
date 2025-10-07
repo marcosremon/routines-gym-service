@@ -23,6 +23,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
+using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
@@ -70,6 +71,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get user by email
         [HttpPost("get-user-by-email")]
+        [Authorize]
         public async Task<ActionResult<GetUserByEmailResponseJson>> GetUserByEmail([FromBody] GetUserByEmailRequestJson getUserByEmailRequestJson)
         {
             GetUserByEmailResponseJson getUserByEmailResponseJson = new GetUserByEmailResponseJson();
@@ -77,12 +79,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (getUserByEmailRequestJson == null || 
-                    string.IsNullOrEmpty(getUserByEmailRequestJson?.Email))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
                 {
-                    getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA; 
-                    getUserByEmailResponseJson.IsSuccess = false;
-                    getUserByEmailResponseJson.Message = "invalid data the user email is null or empty";
+                    return Unauthorized();
+                }
+                else if (userEmail != getUserByEmailRequestJson.Email)
+                {
+                    return Unauthorized();
                 }
                 else
                 {
@@ -271,6 +276,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Update user
         [HttpPost("update-user")]
+        [Authorize]
         public async Task<ActionResult<UpdateUserResponseJson>> UpdateUser([FromBody] UpdateUserRequestJson updateUserRequestJson)
         {
             UpdateUserResponseJson updateUserResponseJson = new UpdateUserResponseJson();
@@ -278,7 +284,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (updateUserRequestJson == null ||
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != updateUserRequestJson.Email)
+                {
+                    return Unauthorized();
+                }
+                else if (updateUserRequestJson == null ||
                     string.IsNullOrEmpty(updateUserRequestJson.OriginalEmail) ||
                     string.IsNullOrEmpty(updateUserRequestJson.DniToBeFound) ||
                     string.IsNullOrEmpty(updateUserRequestJson.Username) ||
@@ -323,6 +339,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Delete user
         [HttpPost("delete-user")]
+        [Authorize]
         public async Task<ActionResult<DeleteUserResponseJson>> DeleteUser([FromBody] DeleteUserRequestJson deleteUserRequestJson)
         {
             DeleteUserResponseJson deleteUserResponseJson = new DeleteUserResponseJson();
@@ -330,12 +347,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (deleteUserRequestJson == null ||
-                   string.IsNullOrEmpty(deleteUserRequestJson.Email))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
                 {
-                    deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA; 
-                    deleteUserResponseJson.IsSuccess = false;
-                    deleteUserResponseJson.Message = "invalid data the user email is null or empty";
+                    return Unauthorized();
+                }
+                else if (userEmail != deleteUserRequestJson.Email)
+                {
+                    return Unauthorized();
                 }
                 else
                 {
@@ -365,6 +385,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Create new password
         [HttpPost("create-new-password")]
+        [Authorize]
         public async Task<ActionResult<CreateNewPasswordResponseJson>> CreateNewPassword([FromBody] CreateNewPasswordRequestJson createNewPasswordRequestJson)
         {
             CreateNewPasswordResponseJson createNewPasswordResponseJson = new CreateNewPasswordResponseJson();
@@ -372,12 +393,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (createNewPasswordRequestJson == null ||
-                    string.IsNullOrEmpty(createNewPasswordRequestJson.UserEmail))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
                 {
-                    createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA; 
-                    createNewPasswordResponseJson.IsSuccess = false;
-                    createNewPasswordResponseJson.Message = "invalid data, the email is null or empty";
+                    return Unauthorized();
+                }
+                else if (userEmail != createNewPasswordRequestJson.UserEmail)
+                {
+                    return Unauthorized();
                 }
                 else
                 {
@@ -407,6 +431,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Change password with password and email
         [HttpPost("change-password-with-password-and-email")]
+        [Authorize]
         public async Task<ActionResult<ChangePasswordWithPasswordAndEmailResponseJson>> ChangePasswordWithPasswordAndEmail([FromBody] ChangePasswordWithPasswordAndEmailRequestJson changePasswordWithPasswordAndEmailRequestJson)
         {
             ChangePasswordWithPasswordAndEmailResponseJson changePasswordWithPasswordAndEmailResponseJson = new ChangePasswordWithPasswordAndEmailResponseJson();
@@ -414,7 +439,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (changePasswordWithPasswordAndEmailRequestJson == null ||
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != changePasswordWithPasswordAndEmailRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (changePasswordWithPasswordAndEmailRequestJson == null ||
                     string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.OldPassword) ||
                     string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.NewPassword) ||
@@ -455,6 +490,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get user profile details
         [HttpPost("get-user-profile-details")]
+        [Authorize]
         public async Task<ActionResult<GetUserProfileDetailsResponseJson>> GetUserProfileDetails([FromBody] GetUserProfileDetailsRequestJson getUserProfileDetailsRequestJson)
         {
             GetUserProfileDetailsResponseJson getUserProfileDetailsResponseJson = new GetUserProfileDetailsResponseJson();
@@ -462,12 +498,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (getUserProfileDetailsRequestJson == null || 
-                    string.IsNullOrEmpty(getUserProfileDetailsRequestJson.UserEmail))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
                 {
-                    getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getUserProfileDetailsResponseJson.IsSuccess = false;
-                    getUserProfileDetailsResponseJson.Message = "invalid data, the data is null or empty";
+                    return Unauthorized();
+                }
+                else if (userEmail != getUserProfileDetailsRequestJson.UserEmail)
+                {
+                    return Unauthorized();
                 }
                 else
                 {
