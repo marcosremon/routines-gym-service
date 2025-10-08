@@ -358,18 +358,21 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         .Select(u => new
                         {
                             User = u,
+
                             Routines = u.Routines.ToList(), 
+
                             SplitDays = u.Routines
                                 .SelectMany(r => r.SplitDays) 
                                 .Distinct()
                                 .ToList(),
+
                             Exercises = u.Routines
                                 .SelectMany(r => r.SplitDays)
-                                .SelectMany(sd => sd.Exercises)
+                                .SelectMany(sd => sd.Exercises) 
                                 .Distinct()
                                 .ToList()
                         })
-                        .FirstOrDefaultAsync();
+                        .FirstOrDefaultAsync(); 
 
                     if (userData == null)
                     {
