@@ -6,5 +6,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser
     public class UpdateUserResponseJson : BaseResponseJson
     {
         public UserDTO? userDTO { get; set; }
+        public string NewToken { get; set; } = string.Empty;
     }
 }
