@@ -42,19 +42,20 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != addExerciseRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
                 else if (addExerciseRequestJson == null ||
-                    addExerciseRequestJson.RoutineId == null ||
-                    addExerciseRequestJson.splitDayId == null ||
+                    addExerciseRequestJson?.RoutineId == null ||
+                    addExerciseRequestJson?.splitDayId == null ||
                     string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName))
                 {
                     addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -101,8 +102,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             try
             {
                 if (updateExerciseRequestJson == null ||
-                    updateExerciseRequestJson.UserId == null ||
-                    updateExerciseRequestJson.RoutineId == null ||
+                    updateExerciseRequestJson?.UserId == null ||
+                    updateExerciseRequestJson?.RoutineId == null ||
                     updateExerciseRequestJson.DayName == 0 ||
                     string.IsNullOrEmpty(updateExerciseRequestJson.ExerciseName))
                 {
@@ -155,18 +156,19 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != deleteExerciseRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != deleteExerciseRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
                 else if (deleteExerciseRequestJson == null ||
-                    deleteExerciseRequestJson.RoutineId == null ||
+                    deleteExerciseRequestJson?.RoutineId == null ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.DayName))
                 {
@@ -213,13 +215,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != addExerciseRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -271,14 +274,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(currentUserEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-
-                if (getExercisesByDayNameAndRoutineNameRequestJson == null ||
+                else if (getExercisesByDayNameAndRoutineNameRequestJson == null ||
                     string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.DayName) ||
                     string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.UserEmail)) 
@@ -290,17 +292,18 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 else
                 {
                     string requestedEmail = getExercisesByDayNameAndRoutineNameRequestJson.UserEmail;
-                    bool isOwnProfile = requestedEmail == currentUserEmail;
+                    bool isOwnProfile = requestedEmail == tokenEmail;
 
                     GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
                     {
-                        UserEmail = currentUserEmail
+                        UserEmail = tokenEmail
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;               
+                    bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                    if (!isOwnProfile && !areFriends)
+                    if (!isOwnProfile && !areFriends && !isAdmin)
                     {
                         return Unauthorized("No puedes ver las rutinas de este usuario");
                     }
@@ -346,13 +349,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getAllExerciseProgressRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != getAllExerciseProgressRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
