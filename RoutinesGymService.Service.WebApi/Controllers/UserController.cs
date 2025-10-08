@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -11,6 +12,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
+using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -32,10 +34,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserApplication _userApplication;
+        private readonly IFriendApplication _friendApplication;
 
-        public UserController(IUserApplication userApplication)
+        public UserController(IUserApplication userApplication, IFriendApplication friendApplication)
         {
             _userApplication = userApplication;
+            _friendApplication = friendApplication;
         }
 
         #region Get users
@@ -79,21 +83,40 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(currentUserEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getUserByEmailRequestJson.Email)
+                else if (getUserByEmailRequestJson == null ||
+                    string.IsNullOrEmpty(getUserByEmailRequestJson?.Email))
                 {
-                    return Unauthorized();
+                    getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getUserByEmailResponseJson.IsSuccess = false;
+                    getUserByEmailResponseJson.Message = "invalid data the user email is null or empty";
                 }
                 else
                 {
+                    string requestedEmail = getUserByEmailRequestJson.Email;
+                    bool isOwnProfile = requestedEmail == currentUserEmail;
+
+                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
+                    {
+                        UserEmail = currentUserEmail
+                    };
+
+                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
+                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+
+                    if (!isOwnProfile && !areFriends)
+                    {
+                        return Unauthorized("No puedes ver el perfil de este usuario");
+                    }
+
                     GetUserByEmailRequest getUserByEmailRequest = new GetUserByEmailRequest
                     {
-                        Email = getUserByEmailRequestJson.Email,
+                        Email = requestedEmail,
                     };
 
                     GetUserByEmailResponse getUserByEmailResponse = await _userApplication.GetUserByEmail(getUserByEmailRequest);
@@ -498,29 +521,48 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(currentUserEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getUserProfileDetailsRequestJson.UserEmail)
+                else if (getUserProfileDetailsRequestJson == null ||
+                    string.IsNullOrEmpty(getUserProfileDetailsRequestJson?.UserEmail))
                 {
-                    return Unauthorized();
+                    getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getUserProfileDetailsResponseJson.IsSuccess = false;
+                    getUserProfileDetailsResponseJson.Message = "invalid data, the data is null or empty";
                 }
                 else
                 {
+                    string requestedEmail = getUserProfileDetailsRequestJson.UserEmail;
+                    bool isOwnProfile = requestedEmail == currentUserEmail;
+
+                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
+                    {
+                        UserEmail = currentUserEmail
+                    };
+
+                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
+                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+
+                    if (!isOwnProfile && !areFriends)
+                    {
+                        return Unauthorized("No puedes ver el perfil de este usuario");
+                    }
+
                     GetUserProfileDetailsRequest getUserProfileDetailsRequest = new GetUserProfileDetailsRequest
                     {
-                        UserEmail = getUserProfileDetailsRequestJson.UserEmail,
+                        UserEmail = requestedEmail,
                     };
 
                     GetUserProfileDetailsResponse getUserProfileDetailsResponse = await _userApplication.GetUserProfileDetails(getUserProfileDetailsRequest);
                     if (getUserProfileDetailsResponse.IsSuccess)
                     {
                         getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username ;
-                        getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate ;
+                        getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username;
+                        getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate;
                         getUserProfileDetailsResponseJson.RoutineCount = getUserProfileDetailsResponse.RoutineCount;
                     }
 

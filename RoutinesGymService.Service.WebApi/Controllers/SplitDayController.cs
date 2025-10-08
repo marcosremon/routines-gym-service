@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
+using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
@@ -19,6 +21,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Update split day
         [HttpPost("update-split-day")]
+        [Authorize]
         public async Task<ActionResult<UpdateSplitDayResponseJson>> UpdateSplitDay([FromBody] UpdateSplitDayRequestJson updateSplitDayRequestJson)
         {
             UpdateSplitDayResponseJson updateSplitDayResponseJson = new UpdateSplitDayResponseJson();
@@ -26,7 +29,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (updateSplitDayRequestJson == null ||
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != updateSplitDayRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (updateSplitDayRequestJson == null ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.UserEmail))
                 {

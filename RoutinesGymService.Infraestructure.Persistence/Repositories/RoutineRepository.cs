@@ -31,7 +31,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _context = context;
             _genericUtils = genericUtils;
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
-            _routinePrefix = configuration["CacheSettings:ExercisePrefix"]!;
+            _exercisePrefix = configuration["CacheSettings:ExercisePrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
@@ -283,15 +283,28 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         Routine? routine = await _context.Routines
                             .Where(r => r.RoutineName == getRoutineByRoutineNameRequest.RoutineName && r.UserId == user.UserId)
-                            .Join(_context.SplitDays, r => r.RoutineId, sd => sd.RoutineId, (r, sd) => new { r, sd })
-                            .GroupBy(rs => rs.r)
-                            .Select(g => new Routine
+                            .GroupJoin(
+                                _context.SplitDays,
+                                r => r.RoutineId,
+                                sd => sd.RoutineId,
+                                (routine, splitDaysGroup) => new
+                                {
+                                    Routine = routine,
+                                    SplitDaysGroup = splitDaysGroup
+                                }
+                            )
+                            .SelectMany(
+                                x => x.SplitDaysGroup.DefaultIfEmpty(), // Mantiene la rutina si SplitDaysGroup está vacío
+                                (parent, child) => new { parent.Routine, SplitDay = child } // Aplana los resultados
+                            )
+                            .GroupBy(x => x.Routine)
+                            .Select(g => new Routine 
                             {
                                 RoutineId = g.Key.RoutineId,
                                 RoutineName = g.Key.RoutineName,
                                 RoutineDescription = g.Key.RoutineDescription,
                                 UserId = g.Key.UserId,
-                                SplitDays = g.Select(x => x.sd).ToList()
+                                SplitDays = g.Select(x => x.SplitDay).Where(sd => sd != null).ToList()
                             })
                             .FirstOrDefaultAsync();
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetStats;
 using RoutinesGymService.Application.Interface.Application;
@@ -6,6 +7,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetStats;
 using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
+using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
@@ -22,6 +24,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get steps
         [HttpPost("get-steps")]
+        [Authorize]
         public async Task<ActionResult<GetStepResponseJson>> GetStats([FromBody] GetStepRequestJson getStepRequestJson)
         {
             GetStepResponseJson getStepResponseJson = new GetStepResponseJson();
@@ -29,11 +32,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (string.IsNullOrEmpty(getStepRequestJson.UserEmail))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
                 {
-                    getStepResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getStepResponseJson.IsSuccess = false;
-                    getStepResponseJson.Message = "invalid data the user email is null or empty";
+                    return Unauthorized();
+                }
+                else if (userEmail != getStepRequestJson.UserEmail)
+                {
+                    return Unauthorized();
                 }
                 else
                 {
@@ -66,6 +73,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get daily steps info
         [HttpPost("get-daily-steps-info")]
+        [Authorize]
         public async Task<ActionResult<GetDailyStepsInfoResponseJson>> GetDailyStepsInfo([FromBody] GetDailyStepsInfoRequestJson getDailyStepsInfoRequestJson)
         {
             GetDailyStepsInfoResponseJson getDailyStepsInfoResponseJson = new GetDailyStepsInfoResponseJson();
@@ -73,9 +81,18 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (getDailyStepsInfoRequestJson.DailySteps == null || 
-                    getDailyStepsInfoRequestJson.Day == null ||
-                    string.IsNullOrEmpty(getDailyStepsInfoRequestJson.UserEmail))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != getDailyStepsInfoRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (getDailyStepsInfoRequestJson.DailySteps == null || 
+                    getDailyStepsInfoRequestJson.Day == null)
                 {
                     getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getDailyStepsInfoResponseJson.IsSuccess = false;
@@ -115,6 +132,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Save daily steps
         [HttpPost("save-daily-steps")]
+        [Authorize]
         public async Task<ActionResult<SaveDailyStepsResponseJson>> SaveDailySteps([FromBody] SaveDailyStepsRequestJson saveDailyStepsRequestJson)
         {
             SaveDailyStepsResponseJson saveDailyStepsResponseJson = new SaveDailyStepsResponseJson();
@@ -122,10 +140,19 @@ namespace RoutinesGymService.Service.WebApi.Controllers
           
             try
             {
-                if (saveDailyStepsRequestJson == null ||
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != saveDailyStepsRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (saveDailyStepsRequestJson == null ||
                     saveDailyStepsRequestJson.Steps == null ||
-                    saveDailyStepsRequestJson.DailyStepsGoal == null ||
-                    string.IsNullOrEmpty(saveDailyStepsRequestJson.UserEmail))
+                    saveDailyStepsRequestJson.DailyStepsGoal == null)
                 {
                     saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     saveDailyStepsResponseJson.IsSuccess = false;
