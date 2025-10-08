@@ -355,16 +355,19 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     var userData = await _context.Users
                         .Where(u => u.Email == getRoutineStatsRequest.UserEmail)
-                        .Join(_context.Routines, u => u.UserId, r => r.UserId, (u, r) => new { User = u, Routine = r })
-                        .Join(_context.SplitDays, ur => ur.Routine.RoutineId, sd => sd.RoutineId, (ur, sd) => new { ur.User, ur.Routine, SplitDay = sd })
-                        .Join(_context.Exercises, ursd => ursd.SplitDay.SplitDayId, e => e.SplitDayId, (ursd, e) => new { ursd.User, ursd.Routine, ursd.SplitDay, Exercise = e })
-                        .GroupBy(x => x.User.UserId)
-                        .Select(g => new
+                        .Select(u => new
                         {
-                            User = g.First().User,
-                            Routines = g.Select(x => x.Routine).Distinct().ToList(),
-                            SplitDays = g.Select(x => x.SplitDay).Distinct().ToList(),
-                            Exercises = g.Select(x => x.Exercise).Distinct().ToList()
+                            User = u,
+                            Routines = u.Routines.ToList(), 
+                            SplitDays = u.Routines
+                                .SelectMany(r => r.SplitDays) 
+                                .Distinct()
+                                .ToList(),
+                            Exercises = u.Routines
+                                .SelectMany(r => r.SplitDays)
+                                .SelectMany(sd => sd.Exercises)
+                                .Distinct()
+                                .ToList()
                         })
                         .FirstOrDefaultAsync();
 
