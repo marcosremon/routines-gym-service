@@ -83,40 +83,21 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(currentUserEmail))
+                if (string.IsNullOrEmpty(userEmail))
                 {
                     return Unauthorized();
                 }
-                else if (getUserByEmailRequestJson == null ||
-                    string.IsNullOrEmpty(getUserByEmailRequestJson?.Email))
+                else if (userEmail != getUserByEmailRequestJson.Email)
                 {
-                    getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getUserByEmailResponseJson.IsSuccess = false;
-                    getUserByEmailResponseJson.Message = "invalid data the user email is null or empty";
+                    return Unauthorized();
                 }
                 else
                 {
-                    string requestedEmail = getUserByEmailRequestJson.Email;
-                    bool isOwnProfile = requestedEmail == currentUserEmail;
-
-                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
-                    {
-                        UserEmail = currentUserEmail
-                    };
-
-                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
-
-                    if (!isOwnProfile && !areFriends)
-                    {
-                        return Unauthorized("No puedes ver el perfil de este usuario");
-                    }
-
                     GetUserByEmailRequest getUserByEmailRequest = new GetUserByEmailRequest
                     {
-                        Email = requestedEmail,
+                        Email = getUserByEmailRequestJson.Email,
                     };
 
                     GetUserByEmailResponse getUserByEmailResponse = await _userApplication.GetUserByEmail(getUserByEmailRequest);
@@ -313,7 +294,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != updateUserRequestJson.Email)
+                else if (userEmail != updateUserRequestJson.OriginalEmail)
                 {
                     return Unauthorized();
                 }
