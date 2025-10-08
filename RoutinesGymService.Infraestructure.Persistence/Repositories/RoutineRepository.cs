@@ -385,26 +385,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         List<SplitDay> splitDays = userData.SplitDays;
                         List<Exercise> exercises = userData.Exercises;
 
-                        if (!routines.Any())
+                        if (!routines.Any() && !splitDays.Any() && !exercises.Any())
                         {
                             getRoutineStatsResponse.RoutinesCount = 0;
                             getRoutineStatsResponse.SplitsCount = 0;
                             getRoutineStatsResponse.ExercisesCount = 0;
                             getRoutineStatsResponse.IsSuccess = true;
-                            getRoutineStatsResponse.Message = "No routines found for the user";
-                        }
-                        else if (!splitDays.Any())
-                        {
-                            getRoutineStatsResponse.RoutinesCount = routines.Count;
-                            getRoutineStatsResponse.SplitsCount = 0;
-                            getRoutineStatsResponse.ExercisesCount = 0;
-                            getRoutineStatsResponse.IsSuccess = true;
-                            getRoutineStatsResponse.Message = "No split days found for the user's routines";
-                        }
-                        else if (!exercises.Any())
-                        {
-                            getRoutineStatsResponse.IsSuccess = false;
-                            getRoutineStatsResponse.Message = "No exercises found for the user's split days";
+                            getRoutineStatsResponse.Message = "No found for the user";
                         }
                         else
                         {
