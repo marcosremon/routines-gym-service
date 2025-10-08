@@ -32,13 +32,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getStepRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != getStepRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -81,13 +82,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getDailyStepsInfoRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != getDailyStepsInfoRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -140,13 +142,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
           
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != saveDailyStepsRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != saveDailyStepsRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }

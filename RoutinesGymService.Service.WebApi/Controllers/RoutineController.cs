@@ -42,13 +42,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != createRoutineRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != createRoutineRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -146,13 +147,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != deleteRoutineRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != deleteRoutineRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -200,14 +202,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(currentUserEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-
-                if (getAllUserRoutinesRequestJson == null ||
+                else if (getAllUserRoutinesRequestJson == null ||
                     string.IsNullOrEmpty(getAllUserRoutinesRequestJson?.UserEmail))
                 {
                     getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -217,17 +218,18 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 else
                 {
                     string requestedEmail = getAllUserRoutinesRequestJson.UserEmail;
-                    bool isOwnProfile = requestedEmail == currentUserEmail;
+                    bool isOwnProfile = requestedEmail == tokenEmail;
 
                     GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
                     {
-                        UserEmail = currentUserEmail
+                        UserEmail = tokenEmail
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
                     bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                    if (!isOwnProfile && !areFriends)
+                    if (!isOwnProfile && !areFriends && !isAdmin)
                     {
                         return Unauthorized("No puedes ver las rutinas de este usuario");
                     }
@@ -269,13 +271,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getRoutineStatsRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != getRoutineStatsRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -324,14 +327,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(currentUserEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-
-                if (getRoutineByRoutineNameRequestJson == null ||
+                else if (getRoutineByRoutineNameRequestJson == null ||
                     string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.UserEmail))
                 {
@@ -342,17 +344,18 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 else
                 {
                     string requestedEmail = getRoutineByRoutineNameRequestJson.UserEmail;
-                    bool isOwnProfile = requestedEmail == currentUserEmail;
+                    bool isOwnProfile = requestedEmail == tokenEmail;
 
                     GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
                     {
-                        UserEmail = currentUserEmail
+                        UserEmail = tokenEmail
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
                     bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                    if (!isOwnProfile && !areFriends)
+                    if (!isOwnProfile && !areFriends && !isAdmin)
                     {
                         return Unauthorized("No puedes ver las rutinas de este usuario");
                     }
