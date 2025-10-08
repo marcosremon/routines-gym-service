@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -14,6 +15,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateU
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
+using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
@@ -378,6 +380,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         _genericUtils.ClearCache(_userPrefix);
                         await _context.SaveChangesAsync();
 
+                        string newToken = string.Empty;
+                        if (user.Email != updateUserRequest.OldEmail)
+                        {
+                            newToken = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower()
+                                ? JwtUtils.GenerateAdminJwtToken(user.Email)
+                                : JwtUtils.GenerateUserJwtToken(user.Email);
+                        }
+
+                        updateUserResponse.Token = newToken;
                         updateUserResponse.IsSuccess = true;
                         updateUserResponse.UserDTO = UserMapper.UserToDto(user);
                         updateUserResponse.Message = "User updated successfully";
