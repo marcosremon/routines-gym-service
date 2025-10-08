@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.CreateRoutine;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.DeleteRoutine;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetAllUserRoutines;
@@ -13,6 +15,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
+using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
@@ -21,14 +24,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
     public class RoutineController : ControllerBase
     {
         private readonly IRoutineApplication _routineApplication;
+        private readonly IFriendApplication _friendApplication;
 
-        public RoutineController(IRoutineApplication routineApplication)
+        public RoutineController(IRoutineApplication routineApplication, IFriendApplication friendApplication)
         {
             _routineApplication = routineApplication;
+            _friendApplication = friendApplication;
         }
 
         #region Create routine
         [HttpPost("create-routine")]
+        [Authorize]
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
             CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
@@ -36,8 +42,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (createRoutineRequestJson == null ||
-                    string.IsNullOrEmpty(createRoutineRequestJson.UserEmail) ||
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != createRoutineRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (createRoutineRequestJson == null ||
                     string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
                 {
                     createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -123,6 +138,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Delete routine
         [HttpPost("delete-routine")]
+        [Authorize]
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
             DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
@@ -130,8 +146,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (deleteRoutineRequestJson == null ||
-                    string.IsNullOrEmpty(deleteRoutineRequestJson.UserEmail) ||
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != deleteRoutineRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (deleteRoutineRequestJson == null ||
                     string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -167,6 +192,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get all user routine
         [HttpPost("get-all-user-routines")]
+        [Authorize]
         public async Task<ActionResult<GetAllUserRoutinesResponseJson>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequestJson getAllUserRoutinesRequestJson)
         {
             GetAllUserRoutinesResponseJson getAllUserRoutinesResponseJson = new GetAllUserRoutinesResponseJson();
@@ -174,8 +200,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
+                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(currentUserEmail))
+                {
+                    return Unauthorized();
+                }
+
                 if (getAllUserRoutinesRequestJson == null ||
-                    string.IsNullOrEmpty(getAllUserRoutinesRequestJson.UserEmail))
+                    string.IsNullOrEmpty(getAllUserRoutinesRequestJson?.UserEmail))
                 {
                     getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getAllUserRoutinesResponseJson.IsSuccess = false;
@@ -183,9 +216,25 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 }
                 else
                 {
+                    string requestedEmail = getAllUserRoutinesRequestJson.UserEmail;
+                    bool isOwnProfile = requestedEmail == currentUserEmail;
+
+                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
+                    {
+                        UserEmail = currentUserEmail
+                    };
+
+                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
+                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+
+                    if (!isOwnProfile && !areFriends)
+                    {
+                        return Unauthorized("No puedes ver las rutinas de este usuario");
+                    }
+
                     GetAllUserRoutinesRequest getAllUserRoutinesRequest = new GetAllUserRoutinesRequest
                     {
-                        UserEmail = getAllUserRoutinesRequestJson.UserEmail
+                        UserEmail = requestedEmail, 
                     };
 
                     GetAllUserRoutinesResponse getAllUserRoutinesResponse = await _routineApplication.GetAllUserRoutines(getAllUserRoutinesRequest);
@@ -194,7 +243,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getAllUserRoutinesResponseJson.Routines = getAllUserRoutinesResponse.Routines;
                     }
-                     
+
                     getAllUserRoutinesResponseJson.IsSuccess = getAllUserRoutinesResponse.IsSuccess;
                     getAllUserRoutinesResponseJson.Message = getAllUserRoutinesResponse.Message;
                 }
@@ -212,6 +261,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get routine stats
         [HttpPost("get-routine-stats")]
+        [Authorize]
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
             GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();
@@ -219,8 +269,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                if (getRoutineStatsRequestJson == null ||
-                    string.IsNullOrEmpty(getRoutineStatsRequestJson.UserEmail))
+                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(userEmail))
+                {
+                    return Unauthorized();
+                }
+                else if (userEmail != getRoutineStatsRequestJson.UserEmail)
+                {
+                    return Unauthorized();
+                }
+                else if (getRoutineStatsRequestJson == null)
                 {
                     getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getRoutineStatsResponseJson.IsSuccess = false;
@@ -257,6 +316,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
         #region Get routine by routine name
         [HttpPost("get-routine-by-routine-name")]
+        [Authorize]
         public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
             GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
@@ -264,6 +324,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
+                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(currentUserEmail))
+                {
+                    return Unauthorized();
+                }
+
                 if (getRoutineByRoutineNameRequestJson == null ||
                     string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.UserEmail))
@@ -274,10 +341,26 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 }
                 else
                 {
+                    string requestedEmail = getRoutineByRoutineNameRequestJson.UserEmail;
+                    bool isOwnProfile = requestedEmail == currentUserEmail;
+
+                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
+                    {
+                        UserEmail = currentUserEmail
+                    };
+
+                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
+                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+
+                    if (!isOwnProfile && !areFriends)
+                    {
+                        return Unauthorized("No puedes ver las rutinas de este usuario");
+                    }
+
                     GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest = new GetRoutineByRoutineNameRequest
                     {
                         RoutineName = getRoutineByRoutineNameRequestJson.RoutineName,
-                        UserEmail = getRoutineByRoutineNameRequestJson.UserEmail
+                        UserEmail = requestedEmail 
                     };
 
                     GetRoutineByRoutineNameResponse getRoutineByRoutineNameResponse = await _routineApplication.GetRoutineByRoutineName(getRoutineByRoutineNameRequest);
@@ -286,7 +369,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
                     }
-                 
+
                     getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
                     getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
                 }
