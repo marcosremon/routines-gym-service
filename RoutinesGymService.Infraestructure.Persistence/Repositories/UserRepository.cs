@@ -388,7 +388,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 : JwtUtils.GenerateUserJwtToken(user.Email);
                         }
 
-                        updateUserResponse.Token = newToken;
+                        updateUserResponse.NewToken = newToken;
                         updateUserResponse.IsSuccess = true;
                         updateUserResponse.UserDTO = UserMapper.UserToDto(user);
                         updateUserResponse.Message = "User updated successfully";

@@ -335,6 +335,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
                     }
 
+                    updateUserResponseJson.NewToken = updateUserResponse.NewToken;
                     updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
                     updateUserResponseJson.Message = updateUserResponse.Message;
                 }
