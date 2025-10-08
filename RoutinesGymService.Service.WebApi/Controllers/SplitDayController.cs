@@ -29,13 +29,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != updateSplitDayRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != updateSplitDayRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }

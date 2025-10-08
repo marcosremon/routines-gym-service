@@ -34,13 +34,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getAllUserFriendsRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != getAllUserFriendsRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -89,13 +90,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != addNewUserFriendRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != addNewUserFriendRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -143,13 +145,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != deleteFriendRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != deleteFriendRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }

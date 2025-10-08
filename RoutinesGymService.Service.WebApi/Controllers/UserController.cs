@@ -83,15 +83,23 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != getUserByEmailRequestJson.Email)
+                else if (!isAdmin && tokenEmail != getUserByEmailRequestJson.Email)
                 {
                     return Unauthorized();
+                }
+                else if (getUserByEmailRequestJson == null ||
+                    string.IsNullOrEmpty(getUserByEmailRequestJson.Email))
+                {
+                    getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getUserByEmailResponseJson.IsSuccess = false;
+                    getUserByEmailResponseJson.Message = "invalid data, the email is null or empty";
                 }
                 else
                 {
@@ -288,13 +296,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != updateUserRequestJson.OriginalEmail)
+                else if (!isAdmin && tokenEmail != updateUserRequestJson.OriginalEmail)
                 {
                     return Unauthorized();
                 }
@@ -351,13 +360,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != deleteUserRequestJson.Email)
+                else if (!isAdmin && tokenEmail != deleteUserRequestJson.Email)
                 {
                     return Unauthorized();
                 }
@@ -397,13 +407,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != createNewPasswordRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != createNewPasswordRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -443,13 +454,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(userEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
-                else if (userEmail != changePasswordWithPasswordAndEmailRequestJson.UserEmail)
+                else if (!isAdmin && tokenEmail != changePasswordWithPasswordAndEmailRequestJson.UserEmail)
                 {
                     return Unauthorized();
                 }
@@ -502,9 +514,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
             try
             {
-                string? currentUserEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
-                if (string.IsNullOrEmpty(currentUserEmail))
+                if (string.IsNullOrEmpty(tokenEmail))
                 {
                     return Unauthorized();
                 }
@@ -518,17 +530,18 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 else
                 {
                     string requestedEmail = getUserProfileDetailsRequestJson.UserEmail;
-                    bool isOwnProfile = requestedEmail == currentUserEmail;
+                    bool isOwnProfile = requestedEmail == tokenEmail;
 
                     GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
                     {
-                        UserEmail = currentUserEmail
+                        UserEmail = tokenEmail
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
                     bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                    if (!isOwnProfile && !areFriends)
+                    if (!isOwnProfile && !areFriends && !isAdmin)
                     {
                         return Unauthorized("No puedes ver el perfil de este usuario");
                     }
