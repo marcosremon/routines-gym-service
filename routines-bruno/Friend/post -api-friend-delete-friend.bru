@@ -1,0 +1,18 @@
+meta {
+  name: post -api-friend-delete-friend
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/friend/delete-friend
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userEmail": "",
+    "friendEmail": ""
+  }
+}

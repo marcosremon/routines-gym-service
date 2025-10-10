@@ -1,0 +1,19 @@
+meta {
+  name: post -api-step-get-daily-steps-info
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/step/get-daily-steps-info
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userEmail": "",
+    "dailySteps": "",
+    "day": ""
+  }
+}

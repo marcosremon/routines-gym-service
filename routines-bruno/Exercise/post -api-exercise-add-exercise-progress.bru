@@ -1,0 +1,21 @@
+meta {
+  name: post -api-exercise-add-exercise-progress
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/exercise/add-exercise-progress
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "progressList": [],
+    "userEmail": "",
+    "routineId": "",
+    "splitDayId": "",
+    "exerciseName": ""
+  }
+}

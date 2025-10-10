@@ -1,0 +1,17 @@
+meta {
+  name: post -api-user-get-user-profile-details
+  type: http
+  seq: 10
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/user/get-user-profile-details
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userEmail": ""
+  }
+}

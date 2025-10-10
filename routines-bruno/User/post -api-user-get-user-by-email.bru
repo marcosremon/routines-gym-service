@@ -1,0 +1,17 @@
+meta {
+  name: post -api-user-get-user-by-email
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/user/get-user-by-email
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": ""
+  }
+}

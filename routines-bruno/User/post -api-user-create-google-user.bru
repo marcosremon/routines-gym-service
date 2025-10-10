@@ -1,0 +1,22 @@
+meta {
+  name: post -api-user-create-google-user
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/user/create-google-user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "dni": "",
+    "username": "",
+    "surname": "",
+    "email": "",
+    "password": "",
+    "confirmPassword": ""
+  }
+}
