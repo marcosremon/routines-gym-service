@@ -1,0 +1,21 @@
+meta {
+  name: post -api-user-update-user
+  type: http
+  seq: 6
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/user/update-user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "originalEmail": "",
+    "dniToBeFound": "",
+    "username": "",
+    "surname": "",
+    "email": ""
+  }
+}

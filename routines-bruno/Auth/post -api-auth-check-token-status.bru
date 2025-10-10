@@ -1,0 +1,17 @@
+meta {
+  name: post -api-auth-check-token-status
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/auth/check-token-status
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "token": ""
+  }
+}

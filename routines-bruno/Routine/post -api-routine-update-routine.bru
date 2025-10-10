@@ -1,0 +1,33 @@
+meta {
+  name: post -api-routine-update-routine
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/routine/update-routine
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "routineId": "",
+    "routineName": "",
+    "routineDescription": "",
+    "splitDays": [
+      {
+        "dayName": "",
+        "routineId": "",
+        "dayExercisesDescription": "",
+        "exercises": [
+          {
+            "exerciseName": "",
+            "routineId": "",
+            "splitDayId": ""
+          }
+        ]
+      }
+    ]
+  }
+}
