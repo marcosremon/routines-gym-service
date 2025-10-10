@@ -1,0 +1,21 @@
+meta {
+  name: post -api-user-create-user
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/user/create-user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "dni": "",
+    "username": "",
+    "email": "",
+    "password": "",
+    "confirmPassword": ""
+  }
+}

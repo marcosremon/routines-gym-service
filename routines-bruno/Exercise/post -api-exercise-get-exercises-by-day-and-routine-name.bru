@@ -1,0 +1,19 @@
+meta {
+  name: post -api-exercise-get-exercises-by-day-and-routine-name
+  type: http
+  seq: 5
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/exercise/get-exercises-by-day-and-routine-name
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "routineName": "",
+    "dayName": "",
+    "userEmail": ""
+  }
+}
