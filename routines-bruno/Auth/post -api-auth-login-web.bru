@@ -1,0 +1,18 @@
+meta {
+  name: post -api-auth-login-web
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/auth/login-web
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "",
+    "password": ""
+  }
+}

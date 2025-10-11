@@ -1,0 +1,20 @@
+meta {
+  name: post -api-exercise-get-all-exercise-progress
+  type: http
+  seq: 6
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/exercise/get-all-exercise-progress
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userEmail": "",
+    "exerciseName": "",
+    "routineName": "",
+    "dayName": ""
+  }
+}
