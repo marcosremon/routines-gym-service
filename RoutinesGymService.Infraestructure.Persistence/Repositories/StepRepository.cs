@@ -14,18 +14,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class StepRepository : IStepRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly CacheUtils _cacheUtils;
         private readonly GenericUtils _genericUtils;
         private readonly string _stepPrefix;
-        private readonly int _expiryMinutes;
 
         public StepRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
-            _cacheUtils = cacheUtils;
-            _stepPrefix = configuration["CacheSettings:StepPrefix"]!;
             _genericUtils = genericUtils;
-            _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
         public async Task<GetDailyStepsInfoResponse> GetDailyStepsInfo(GetDailyStepsInfoRequest getDailyStepsInfoRequest)
@@ -73,41 +68,28 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetStepResponse getStepResponse = new GetStepResponse();
             try
             {
-                string cacheKey = $"{_stepPrefix}GetStats_{getStepRequest.UserEmail}";
-                
-                List<Step>? cachedStats = _cacheUtils.Get<List<Step>>(cacheKey);
-                if (cachedStats != null && cachedStats.Any())
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getStepRequest.UserEmail);
+                if (user == null)
                 {
-                    getStepResponse.IsSuccess = true;
-                    getStepResponse.Message = "Stats retrieved successfully from cache.";
-                    getStepResponse.Stats = cachedStats;
+                    getStepResponse.IsSuccess = false;
+                    getStepResponse.Message = "User not found";
                 }
                 else
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getStepRequest.UserEmail);
-                    if (user == null)
+                    List<Step> steps = await _context.Stats
+                        .Where(s => s.UserId == user.UserId)
+                        .OrderBy(s => s.Date)
+                        .ToListAsync();
+                    if (!steps.Any())
                     {
                         getStepResponse.IsSuccess = false;
-                        getStepResponse.Message = "User not found";
+                        getStepResponse.Message = "No steps found.";
                     }
                     else
                     {
-                        List<Step> steps = await _context.Stats
-                            .Where(s => s.UserId == user.UserId)
-                            .OrderBy(s => s.Date) 
-                            .ToListAsync();
-                        if (!steps.Any())
-                        {
-                            getStepResponse.IsSuccess = false;
-                            getStepResponse.Message = "No steps found.";
-                        }
-                        else
-                        {
-                            getStepResponse.IsSuccess = true;
-                            getStepResponse.Message = "Stats retrieved successfully.";
-                            getStepResponse.Stats = steps;
-                            _cacheUtils.Set(cacheKey, steps, TimeSpan.FromMinutes(_expiryMinutes));
-                        }
+                        getStepResponse.IsSuccess = true;
+                        getStepResponse.Message = "Stats retrieved successfully.";
+                        getStepResponse.Stats = steps;
                     }
                 }
             }

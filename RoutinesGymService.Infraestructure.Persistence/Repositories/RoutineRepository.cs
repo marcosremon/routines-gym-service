@@ -211,39 +211,25 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetAllUserRoutinesResponse getAllUserRoutinesResponse = new GetAllUserRoutinesResponse();
             try
             {
-                string cacheKey = $"{_routinePrefix}GetAllUserRoutines_{getAllUserRoutinesRequest.UserEmail}";
-
-                List<Routine>? cacheRoutines = _cacheUtils.Get<List<Routine>>(cacheKey);
-                if (cacheRoutines != null)
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllUserRoutinesRequest.UserEmail);
+                if (user == null)
                 {
-                    getAllUserRoutinesResponse.IsSuccess = true;
-                    getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
-                    getAllUserRoutinesResponse.Routines = cacheRoutines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
+                    getAllUserRoutinesResponse.IsSuccess = false;
+                    getAllUserRoutinesResponse.Message = "User not found";
                 }
                 else
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllUserRoutinesRequest.UserEmail);
-                    if (user == null)
+                    List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
+                    if (routines.Count == 0)
                     {
                         getAllUserRoutinesResponse.IsSuccess = false;
-                        getAllUserRoutinesResponse.Message = "User not found";
+                        getAllUserRoutinesResponse.Message = "No routines found for the user";
                     }
                     else
                     {
-                        List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
-                        if (routines.Count == 0)
-                        {
-                            getAllUserRoutinesResponse.IsSuccess = false;
-                            getAllUserRoutinesResponse.Message = "No routines found for the user";
-                        }
-                        else
-                        {
-                            getAllUserRoutinesResponse.IsSuccess = true;
-                            getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
-                            getAllUserRoutinesResponse.Routines = routines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
-
-                            _cacheUtils.Set(cacheKey, routines, TimeSpan.FromMinutes(_expiryMinutes));
-                        }
+                        getAllUserRoutinesResponse.IsSuccess = true;
+                        getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
+                        getAllUserRoutinesResponse.Routines = routines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
                     }
                 }
             }
@@ -332,7 +318,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getRoutineByIdResponse;
         }
-
 
         public async Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
         {
