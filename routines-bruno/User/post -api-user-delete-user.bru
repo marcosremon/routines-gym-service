@@ -1,0 +1,17 @@
+meta {
+  name: post -api-user-delete-user
+  type: http
+  seq: 7
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/user/delete-user
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": ""
+  }
+}

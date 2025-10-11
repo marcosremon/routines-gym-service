@@ -1,0 +1,17 @@
+meta {
+  name: post -api-routine-get-all-user-routines
+  type: http
+  seq: 4
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/routine/get-all-user-routines
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userEmail": ""
+  }
+}

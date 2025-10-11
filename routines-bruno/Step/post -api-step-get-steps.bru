@@ -1,0 +1,17 @@
+meta {
+  name: post -api-step-get-steps
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://srvsroutines.duckdns.org:5122/api/step/get-steps
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userEmail": ""
+  }
+}
