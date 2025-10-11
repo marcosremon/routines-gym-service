@@ -219,17 +219,29 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
-                    if (routines.Count == 0)
-                    {
-                        getAllUserRoutinesResponse.IsSuccess = false;
-                        getAllUserRoutinesResponse.Message = "No routines found for the user";
-                    }
-                    else
+                    string cacheKey = $"{_routinePrefix}GetAllUserRoutines_{getAllUserRoutinesRequest.UserEmail}";
+
+                    List<Routine>? cacheRoutines = _cacheUtils.Get<List<Routine>>(cacheKey);
+                    if (cacheRoutines != null)
                     {
                         getAllUserRoutinesResponse.IsSuccess = true;
                         getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
-                        getAllUserRoutinesResponse.Routines = routines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
+                        getAllUserRoutinesResponse.Routines = cacheRoutines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
+                    }
+                    else
+                    {
+                        List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
+                        if (routines.Count == 0)
+                        {
+                            getAllUserRoutinesResponse.IsSuccess = false;
+                            getAllUserRoutinesResponse.Message = "No routines found for the user";
+                        }
+                        else
+                        {
+                            getAllUserRoutinesResponse.IsSuccess = true;
+                            getAllUserRoutinesResponse.Message = "Routines retrieved successfully";
+                            getAllUserRoutinesResponse.Routines = routines.Select(r => RoutineMapper.RoutineToDto(r)).ToList();
+                        }
                     }
                 }
             }

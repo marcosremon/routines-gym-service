@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
@@ -22,5 +23,6 @@ namespace RoutinesGymService.Application.Interface.Application
         Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest);
         Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest);
         Task<GetUserProfileDetailsResponse> GetUserProfileDetails(GetUserProfileDetailsRequest getUserProfileDetailsRequest);
+        Task<CheckUserExistenceResponse> CheckUserExistence(CheckUserExistenceRequest checkUserExistenceRequest);
     }
 }
