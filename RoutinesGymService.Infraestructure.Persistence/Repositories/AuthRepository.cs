@@ -53,7 +53,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             LoginResponse loginResponse = new LoginResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.UserEmail);
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.UserEmail.ToLower());
                 bool isPasswordValid = _passwordUtils.VerifyPassword(user?.Password!, loginRequest.UserPassword);
                 if (user == null)
                 {
