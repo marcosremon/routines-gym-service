@@ -368,7 +368,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     if (!GenericUtils.IsDniValid(updateUserRequest.NewDni!))
                     {
                         updateUserResponse.IsSuccess = false;
-                        updateUserResponse.Message = "The dni is not valid";
+                        updateUserResponse.Message = "The dni is not valid you need eight numbers and a capital letter";
                     }
                     else
                     {
