@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -259,7 +259,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         Username = createGenericUserRequest.Username!,
                         Surname = createGenericUserRequest.Surname!,
                         FriendCode = friendCode,
-                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!.ToLower()),
+                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!.ToLower(), isGoogleLogin: true),
                         Email = createGenericUserRequest.Email!.ToLower(),
                         Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
                         RoleString = createGenericUserRequest.Role.ToString().ToLower(),
@@ -535,6 +535,36 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return getUserProfileDetailsResponse;
+        }
+
+        public async Task<CheckUserExistenceResponse> CheckUserExistence(CheckUserExistenceRequest checkUserExistenceRequest)
+        {
+            CheckUserExistenceResponse checkUserExistenceResponse = new CheckUserExistenceResponse();
+
+            try
+            {
+                User? user = _context.Users.FirstOrDefault(u => u.Email == checkUserExistenceRequest.Email);
+                if (user == null)
+                {
+                    checkUserExistenceResponse.IsSuccess = false;
+                    checkUserExistenceResponse.UserExists = false;
+                    checkUserExistenceResponse.Message = "User not found";
+                }
+                else
+                {
+                    checkUserExistenceResponse.IsSuccess = true;
+                    checkUserExistenceResponse.UserExists = true;
+                    checkUserExistenceResponse.Message = "User found";
+                }
+            }
+            catch (Exception ex)
+            {
+                checkUserExistenceResponse.IsSuccess = false;
+                checkUserExistenceResponse.UserExists = false;
+                checkUserExistenceResponse.Message = $"unexpected error on UserRepository -> CheckUserExistence: {ex.Message}";
+            }
+
+            return checkUserExistenceResponse;
         }
     }
 }

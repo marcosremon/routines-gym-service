@@ -45,6 +45,18 @@ namespace RoutinesGymService.Transversal.Security
             }
         }
 
+        public byte[] PasswordEncoder(string password, bool isGoogleLogin)
+        {
+            // Si es login de Google, permite email como contraseña sin validación adicional
+            if (isGoogleLogin && password.Contains('@'))
+            {
+                return PasswordEncoder(password);
+            }
+
+            // Si no es Google login, usa el método normal
+            return PasswordEncoder(password);
+        }
+
         public bool VerifyPassword(byte[] encryptedPassword, string plainPassword)
         {
             try
