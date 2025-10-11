@@ -145,14 +145,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 if (!GenericUtils.IsDniValid(createGenericUserRequest.Dni!))
                 {
                     createUserResponse.IsSuccess = false;
-                    createUserResponse.Message = "The dni is not valid";
+                    createUserResponse.Message = "The dni is not valid you need eight numbers and a capital letter";
                 }
                 else
                 {
                     if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
                     {
                         createUserResponse.IsSuccess = false;
-                        createUserResponse.Message = "Invalid email format";
+                        createUserResponse.Message = "Invalid email format example (example@gmail.com)";
                     }
                     else
                     {
@@ -175,14 +175,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
                                 {
                                     createUserResponse.IsSuccess = false;
-                                    createUserResponse.Message = "Password and Confirm Password do not match";
+                                    createUserResponse.Message = "Password and confirm password do not match";
                                 }
                                 else
                                 {
                                     if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
                                     {
                                         createUserResponse.IsSuccess = false;
-                                        createUserResponse.Message = "Password does not meet the required criteria";
+                                        createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
                                     }
                                     else
                                     {

@@ -29,13 +29,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     checkTokenStatusResponse.IsValid = true;
                     checkTokenStatusResponse.IsSuccess = true;
-                    checkTokenStatusResponse.Message = "the token is valid";
+                    checkTokenStatusResponse.Message = "The token is valid";
                 }
                 else 
                 {
                     checkTokenStatusResponse.IsValid = true;
                     checkTokenStatusResponse.IsSuccess = false;
-                    checkTokenStatusResponse.Message = "the token is not valid";
+                    checkTokenStatusResponse.Message = "The token is not valid";
                 }
             } 
             catch (Exception ex)
