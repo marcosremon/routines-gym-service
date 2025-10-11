@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -15,6 +16,7 @@ using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common.Responses;
+using RoutinesGymService.Transversal.JsonInterchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateAdmin;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUser;
@@ -129,6 +131,47 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(getUserByEmailResponseJson);
+        }
+        #endregion
+
+        #region Check user existence
+        [HttpPost("check-user-existence")]
+        public async Task<ActionResult<CheckUserExistenceResponseJson>> CheckUserExistence([FromBody] CheckUserExistenceRequestJson checkUserExistenceRequestJson)
+        {
+            CheckUserExistenceResponseJson checkUserExistenceResponseJson = new CheckUserExistenceResponseJson();
+            checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;        
+            try
+            {
+                if (string.IsNullOrEmpty(checkUserExistenceRequestJson?.Email))
+                {
+                    checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    checkUserExistenceResponseJson.Message = "Email is required.";
+                    checkUserExistenceResponseJson.IsSuccess = false;
+                }
+                else
+                {
+                    CheckUserExistenceRequest checkUserExistenceRequest = new CheckUserExistenceRequest
+                    {
+                        Email = checkUserExistenceRequestJson.Email,
+                    };
+
+                    CheckUserExistenceResponse checkUserExistenceResponse = await _userApplication.CheckUserExistence(checkUserExistenceRequest);
+                    if (checkUserExistenceResponse.IsSuccess)
+                        checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+
+                    checkUserExistenceResponseJson.IsSuccess = checkUserExistenceResponse.IsSuccess;
+                    checkUserExistenceResponseJson.UserExists = checkUserExistenceResponse.UserExists; 
+                    checkUserExistenceResponseJson.Message = checkUserExistenceResponse.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                checkUserExistenceResponseJson.IsSuccess = false;
+                checkUserExistenceResponseJson.Message = $"Unexpected error: {ex.Message}";
+            }
+
+            return Ok(checkUserExistenceResponseJson);
         }
         #endregion
 
