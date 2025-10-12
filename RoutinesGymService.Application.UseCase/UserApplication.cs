@@ -6,6 +6,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
@@ -57,6 +58,11 @@ namespace RoutinesGymService.Application.UseCase
         public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
         {
             return await _userRepository.DeleteUser(deleteUserRequest);
+        }
+
+        public async Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest)
+        {
+            return await _userRepository.GetIntegralUserInfo(getIntegralUserInfoRequest);
         }
 
         public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)

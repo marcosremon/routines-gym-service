@@ -9,6 +9,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
@@ -24,6 +25,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUse
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
+using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetIntegralUserInfo;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
@@ -671,6 +673,51 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(addUserToBlackListResponseJson);
+        }
+        #endregion
+
+        #region Get integral user info
+        [HttpPost("get-integral-user-info")]
+        [Authorize(Roles = nameof(Role.ADMIN))]
+        public async Task<ActionResult<GetIntegralUserInfoResponseJson>> GetIntegralUserInfo([FromBody] GetIntegralUserInfoRequestJson getIntegralUserInfoRequestJson)
+        {
+            GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
+            getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
+            try
+            {
+                if (getIntegralUserInfoRequestJson == null ||
+                    getIntegralUserInfoRequestJson?.UserId == null)
+                {
+                    getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getIntegralUserInfoResponseJson.IsSuccess = false;
+                    getIntegralUserInfoResponseJson.Message = "invalid data, the email is null or empty";
+                }
+                else
+                {
+                    GetIntegralUserInfoRequest getIntegralUserInfoRequest = new GetIntegralUserInfoRequest
+                    {
+                        UserId = getIntegralUserInfoRequestJson.UserId,
+                        MasterKey = getIntegralUserInfoRequestJson.MasterKey,
+                    };
+
+                    GetIntegralUserInfoResponse getIntegralUserInfoResponse = await _userApplication.GetIntegralUserInfo(getIntegralUserInfoRequest);
+                    if (getIntegralUserInfoResponse.IsSuccess)
+                        getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                    
+                    getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
+                    getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
+                    getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getIntegralUserInfoResponseJson.IsSuccess = false;
+                getIntegralUserInfoResponseJson.Message = $"unexpected error -> UserController -> get-integral-user-info: {ex.Message}";
+            }
+
+            return Ok(getIntegralUserInfoResponseJson);
         }
         #endregion
     }
