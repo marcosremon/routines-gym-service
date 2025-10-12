@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
+using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -9,6 +10,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
@@ -20,6 +22,7 @@ using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
+using System.Text;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -48,7 +51,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
             _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
             _authPrefix = configuration["CacheSettings:AuthPrefix"]!;
-            _exercisePrefix  = configuration["CacheSettings:ExercisePrefix"]!;
+            _exercisePrefix = configuration["CacheSettings:ExercisePrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
@@ -97,7 +100,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             _cacheUtils.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
                         }
                     }
-                } 
+                }
             }
             catch (Exception ex)
             {
@@ -253,7 +256,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 createUserResponse.Message = $"unexpected error on UserRepository -> CreateUser: {ex.Message}";
                 createUserResponse.IsSuccess = false;
             }
-        
+
             return createUserResponse;
         }
 
@@ -324,10 +327,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 createGoogleUserResponse.IsSuccess = false;
                 createGoogleUserResponse.Message = $"unexpected error on UserRepository -> CreateGoogleUser: {ex.Message}";
             }
-        
+
             return createGoogleUserResponse;
         }
-        
+
         public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
         {
             DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
@@ -376,7 +379,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     _genericUtils.ClearCache(_friendPrefix);
                     _genericUtils.ClearCache(_authPrefix);
                     _genericUtils.ClearCache(_exercisePrefix);
-                    
+
                     _context.Routines.RemoveRange(routines);
                     _context.Users.Remove(user);
                     await _context.SaveChangesAsync();
@@ -418,7 +421,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         user.Username = updateUserRequest.NewUsername ?? user.Username;
                         user.Surname = updateUserRequest.NewSurname ?? user.Surname;
                         user.Email = updateUserRequest.NewEmail ?? user.Email;
-                    
+
                         _genericUtils.ClearCache(_userPrefix);
                         await _context.SaveChangesAsync();
 
@@ -442,7 +445,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 updateUserResponse.IsSuccess = false;
                 updateUserResponse.Message = $"unexpected error on UserRepository -> UpdateUser: {ex.Message}";
             }
-        
+
             return updateUserResponse;
         }
 
@@ -550,8 +553,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     getUserProfileDetailsResponse.InscriptionDate = cachedUser.InscriptionDate;
                     getUserProfileDetailsResponse.RoutineCount = cachedUser.Routines.Count;
                 }
-                else 
-                { 
+                else
+                {
                     User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == GetUserProfileDetails.UserEmail);
                     if (user == null)
                     {
@@ -624,9 +627,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     addUserToBlackListResponse.IsSuccess = false;
                     addUserToBlackListResponse.Message = $"That serial number does not match the user with id: {addUserToBlackListRequest.UserId}";
                 }
-                else 
+                else
                 {
-                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == addUserToBlackListRequest.SerialNumber && 
+                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == addUserToBlackListRequest.SerialNumber &&
                                                                                  bl.UserId == addUserToBlackListRequest.UserId);
                     if (isOnBlackList)
                     {
@@ -659,6 +662,101 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return addUserToBlackListResponse;
+        }
+
+        public async Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest)
+        {
+            GetIntegralUserInfoResponse getIntegralUserInfoResponse = new GetIntegralUserInfoResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == getIntegralUserInfoRequest.UserId);
+                if (user == null)
+                {
+                    getIntegralUserInfoResponse.IsSuccess = false;
+                    getIntegralUserInfoResponse.UserDTO = new UserDTO();
+                    getIntegralUserInfoResponse.Message = $"User not found";
+                }
+                else
+                {
+                    UserDTO userDTO = UserMapper.UserToDto(user);
+                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKeyStatic(user.Password!, getIntegralUserInfoRequest.MasterKey);
+
+                    getIntegralUserInfoResponse.IsSuccess = true;
+                    getIntegralUserInfoResponse.UserDTO = userDTO;
+                    getIntegralUserInfoResponse.Message = $"User found";
+                }
+            }
+            catch (Exception ex)
+            {
+                getIntegralUserInfoResponse.IsSuccess = false;
+                getIntegralUserInfoResponse.UserDTO = new UserDTO();
+                getIntegralUserInfoResponse.Message = $"unexpected error on UserRepository -> GetIntegralUserInfo: {ex.Message}";
+            }
+
+            return getIntegralUserInfoResponse;
+        }
+
+        public static string DiagnoseEncryptedPassword(byte[] encryptedPassword, string masterKey)
+        {
+            try
+            {
+                int nonceSize = 12;
+                int tagSize = 16;
+                int saltSize = 16;
+
+                Console.WriteLine($"=== DIAGNÓSTICO CONTRASEÑA CIFRADA ===");
+                Console.WriteLine($"Longitud total: {encryptedPassword.Length} bytes");
+
+                // Verificar marker
+                bool hasMarker = encryptedPassword.Length >= 4 &&
+                                encryptedPassword[^4] == 0xDE &&
+                                encryptedPassword[^3] == 0xAD &&
+                                encryptedPassword[^2] == 0xBE &&
+                                encryptedPassword[^1] == 0xEF;
+
+                Console.WriteLine($"Tiene marker DEADBEEF: {hasMarker}");
+
+                if (!hasMarker)
+                {
+                    return "No tiene marker DEADBEEF - formato incorrecto";
+                }
+
+                // Calcular tamaños
+                int firstLayerLength = saltSize + nonceSize + (encryptedPassword.Length - saltSize - nonceSize - nonceSize - tagSize - 4);
+                int masterNonceOffset = firstLayerLength;
+                int masterEncryptedOffset = masterNonceOffset + nonceSize;
+                int masterEncryptedLength = encryptedPassword.Length - masterEncryptedOffset - 4;
+
+                Console.WriteLine($"First layer length: {firstLayerLength}");
+                Console.WriteLine($"Master nonce offset: {masterNonceOffset}");
+                Console.WriteLine($"Master encrypted offset: {masterEncryptedOffset}");
+                Console.WriteLine($"Master encrypted length: {masterEncryptedLength}");
+
+                // Extraer componentes
+                byte[] masterNonce = new byte[nonceSize];
+                byte[] masterEncrypted = new byte[masterEncryptedLength];
+
+                Buffer.BlockCopy(encryptedPassword, masterNonceOffset, masterNonce, 0, nonceSize);
+                Buffer.BlockCopy(encryptedPassword, masterEncryptedOffset, masterEncrypted, 0, masterEncryptedLength);
+
+                Console.WriteLine($"Master nonce: {BitConverter.ToString(masterNonce)}");
+                Console.WriteLine($"Master encrypted: {BitConverter.ToString(masterEncrypted.Take(32).ToArray())}...");
+
+                // Verificar MasterKey
+                if (masterKey.Length != 32)
+                {
+                    return $"MasterKey tiene longitud {masterKey.Length}, debe ser 32";
+                }
+
+                byte[] masterKeyBytes = Encoding.UTF8.GetBytes(masterKey);
+                Console.WriteLine($"Master key bytes: {BitConverter.ToString(masterKeyBytes)}");
+
+                return "Diagnóstico completado - revisa los logs";
+            }
+            catch (Exception ex)
+            {
+                return $"Error en diagnóstico: {ex.Message}";
+            }
         }
     }
 }

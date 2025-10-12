@@ -6,36 +6,41 @@ namespace RoutinesGymService.Transversal.Security
 {
     public class PasswordUtils
     {
-        private readonly IConfiguration _configuration;
         private readonly int _iterations;
         private readonly int _saltSize;
         private readonly int _keySize;
         private readonly int _nonceSize;
         private readonly int _tagSize;
+        private readonly byte[] _masterKey;
 
         public PasswordUtils(IConfiguration configuration)
         {
-            _configuration = configuration;
             _iterations = int.Parse(configuration["Password:KeyDerivation:Iterations"] ?? "100000");
             _saltSize = int.Parse(configuration["Password:KeyDerivation:SaltSize"] ?? "16");
             _keySize = int.Parse(configuration["Password:KeyDerivation:KeySize"] ?? "32");
             _nonceSize = int.Parse(configuration["Password:Encryption:NonceSize"] ?? "12");
             _tagSize = int.Parse(configuration["Password:Encryption:TagSize"] ?? "16");
+
+            string masterKeyString = configuration["Password:MasterKey"] ?? throw new Exception("Password:MasterKey not configured");
+            if (masterKeyString.Length != 32)
+                throw new Exception("MasterKey must be exactly 32 characters");
+
+            _masterKey = Encoding.UTF8.GetBytes(masterKeyString);
         }
 
         public byte[] PasswordEncoder(string password)
         {
             try
             {
-                byte[] salt = RandomNumberGenerator.GetBytes(_saltSize);
-                byte[] key = DeriveKey(password, salt);
-                byte[] nonce = RandomNumberGenerator.GetBytes(_nonceSize);
-                byte[] encryptedData = EncryptWithAesGcm(key, nonce, Encoding.UTF8.GetBytes(password));
+                byte[] masterNonce = RandomNumberGenerator.GetBytes(_nonceSize);
+                byte[] encryptedPassword = EncryptWithAesGcm(_masterKey, masterNonce, Encoding.UTF8.GetBytes(password));
 
-                byte[] result = new byte[salt.Length + nonce.Length + encryptedData.Length];
-                Buffer.BlockCopy(salt, 0, result, 0, salt.Length);
-                Buffer.BlockCopy(nonce, 0, result, salt.Length, nonce.Length);
-                Buffer.BlockCopy(encryptedData, 0, result, salt.Length + nonce.Length, encryptedData.Length);
+                byte[] marker = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
+
+                byte[] result = new byte[masterNonce.Length + encryptedPassword.Length + marker.Length];
+                Buffer.BlockCopy(masterNonce, 0, result, 0, masterNonce.Length);
+                Buffer.BlockCopy(encryptedPassword, 0, result, masterNonce.Length, encryptedPassword.Length);
+                Buffer.BlockCopy(marker, 0, result, masterNonce.Length + encryptedPassword.Length, marker.Length);
 
                 return result;
             }
@@ -47,13 +52,6 @@ namespace RoutinesGymService.Transversal.Security
 
         public byte[] PasswordEncoder(string password, bool isGoogleLogin)
         {
-            // Si es login de Google, permite email como contraseña sin validación adicional
-            if (isGoogleLogin && password.Contains('@'))
-            {
-                return PasswordEncoder(password);
-            }
-
-            // Si no es Google login, usa el método normal
             return PasswordEncoder(password);
         }
 
@@ -61,24 +59,24 @@ namespace RoutinesGymService.Transversal.Security
         {
             try
             {
-                byte[] salt = new byte[_saltSize];
-                byte[] nonce = new byte[_nonceSize];
-                byte[] cipherText = new byte[encryptedPassword.Length - _saltSize - _nonceSize];
-
-                Buffer.BlockCopy(encryptedPassword, 0, salt, 0, _saltSize);
-                Buffer.BlockCopy(encryptedPassword, _saltSize, nonce, 0, _nonceSize);
-                Buffer.BlockCopy(encryptedPassword, _saltSize + _nonceSize, cipherText, 0, cipherText.Length);
-
-                byte[] key = DeriveKey(plainPassword, salt);
-
-                try
+                if (HasMasterKeyLayer(encryptedPassword))
                 {
-                    byte[] decryptedData = DecryptWithAesGcm(key, nonce, cipherText);
-                    return Encoding.UTF8.GetString(decryptedData) == plainPassword;
+                    try
+                    {
+                        string decryptedPassword = DecryptPasswordWithMasterKeyStatic(
+                            encryptedPassword,
+                            Encoding.UTF8.GetString(_masterKey)
+                        );
+                        return decryptedPassword == plainPassword;
+                    }
+                    catch (CryptographicException)
+                    {
+                        return false;
+                    }
                 }
-                catch (CryptographicException)
+                else
                 {
-                    return false;
+                    return VerifyOldFormatPassword(encryptedPassword, plainPassword);
                 }
             }
             catch
@@ -91,6 +89,90 @@ namespace RoutinesGymService.Transversal.Security
         {
             byte[] encryptedBytes = Convert.FromBase64String(encryptedPasswordBase64);
             return VerifyPassword(encryptedBytes, plainPassword);
+        }
+
+        public static string DecryptPasswordWithMasterKeyStatic(byte[] encryptedPassword, string masterKey)
+        {
+            int nonceSize = 12;
+            int tagSize = 16;
+
+            if (masterKey.Length != 32)
+                throw new ArgumentException("MasterKey must be 32 characters");
+
+            byte[] masterKeyBytes = Encoding.UTF8.GetBytes(masterKey);
+
+            if (encryptedPassword.Length < 4 + nonceSize + tagSize ||
+                encryptedPassword[^4] != 0xDE ||
+                encryptedPassword[^3] != 0xAD ||
+                encryptedPassword[^2] != 0xBE ||
+                encryptedPassword[^1] != 0xEF)
+            {
+                throw new CryptographicException("Esta contraseña no tiene capa de descifrado maestro");
+            }
+
+            int masterNonceOffset = 0;
+            int masterEncryptedOffset = nonceSize;
+            int masterEncryptedLength = encryptedPassword.Length - nonceSize - 4;
+
+            byte[] masterNonce = new byte[nonceSize];
+            byte[] masterEncrypted = new byte[masterEncryptedLength];
+
+            Buffer.BlockCopy(encryptedPassword, masterNonceOffset, masterNonce, 0, nonceSize);
+            Buffer.BlockCopy(encryptedPassword, masterEncryptedOffset, masterEncrypted, 0, masterEncryptedLength);
+
+            if (masterEncrypted.Length < tagSize)
+                throw new CryptographicException("Datos cifrados corruptos - longitud insuficiente");
+
+            byte[] ciphertext = new byte[masterEncrypted.Length - tagSize];
+            byte[] tag = new byte[tagSize];
+
+            Buffer.BlockCopy(masterEncrypted, 0, ciphertext, 0, ciphertext.Length);
+            Buffer.BlockCopy(masterEncrypted, ciphertext.Length, tag, 0, tagSize);
+
+            // Descifrar
+            byte[] plaintext = new byte[ciphertext.Length];
+
+            using var aesGcm = new AesGcm(masterKeyBytes, tagSize);
+            aesGcm.Decrypt(masterNonce, ciphertext, tag, plaintext);
+
+            return Encoding.UTF8.GetString(plaintext);
+        }
+
+        private bool VerifyOldFormatPassword(byte[] encryptedPassword, string plainPassword)
+        {
+            try
+            {
+                byte[] salt = new byte[_saltSize];
+                byte[] nonce = new byte[_nonceSize];
+
+                if (encryptedPassword.Length < _saltSize + _nonceSize + _tagSize)
+                    return false;
+
+                byte[] cipherText = new byte[encryptedPassword.Length - _saltSize - _nonceSize];
+
+                Buffer.BlockCopy(encryptedPassword, 0, salt, 0, _saltSize);
+                Buffer.BlockCopy(encryptedPassword, _saltSize, nonce, 0, _nonceSize);
+                Buffer.BlockCopy(encryptedPassword, _saltSize + _nonceSize, cipherText, 0, cipherText.Length);
+
+                byte[] key = DeriveKey(plainPassword, salt);
+
+                byte[] decryptedData = DecryptWithAesGcm(key, nonce, cipherText);
+                return Encoding.UTF8.GetString(decryptedData) == plainPassword;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
+        }
+
+        private bool HasMasterKeyLayer(byte[] encryptedPassword)
+        {
+            if (encryptedPassword.Length < 4) return false;
+
+            return encryptedPassword[^4] == 0xDE &&
+                   encryptedPassword[^3] == 0xAD &&
+                   encryptedPassword[^2] == 0xBE &&
+                   encryptedPassword[^1] == 0xEF;
         }
 
         private byte[] DeriveKey(string password, byte[] salt)
@@ -121,11 +203,14 @@ namespace RoutinesGymService.Transversal.Security
 
         private byte[] DecryptWithAesGcm(byte[] key, byte[] nonce, byte[] ciphertextWithTag)
         {
+            if (ciphertextWithTag.Length < _tagSize)
+                throw new CryptographicException("Datos cifrados insuficientes");
+
             byte[] ciphertext = new byte[ciphertextWithTag.Length - _tagSize];
             byte[] tag = new byte[_tagSize];
 
             Buffer.BlockCopy(ciphertextWithTag, 0, ciphertext, 0, ciphertext.Length);
-            Buffer.BlockCopy(ciphertextWithTag, ciphertext.Length, tag, 0, tag.Length);
+            Buffer.BlockCopy(ciphertextWithTag, ciphertext.Length, tag, 0, _tagSize);
 
             byte[] plaintext = new byte[ciphertext.Length];
 
@@ -184,6 +269,30 @@ namespace RoutinesGymService.Transversal.Security
             bool hasSpecial = password.Any(c => !char.IsLetterOrDigit(c) && !char.IsWhiteSpace(c));
 
             return hasUpper && hasLower && hasDigit && hasSpecial;
+        }
+
+        public static string DiagnoseEncryptedPassword(byte[] encryptedPassword, string masterKey)
+        {
+            try
+            {
+                Console.WriteLine($"=== DIAGNÓSTICO CONTRASEÑA CIFRADA ===");
+                Console.WriteLine($"Longitud total: {encryptedPassword.Length} bytes");
+
+                bool hasMarker = encryptedPassword.Length >= 4 &&
+                                encryptedPassword[^4] == 0xDE &&
+                                encryptedPassword[^3] == 0xAD &&
+                                encryptedPassword[^2] == 0xBE &&
+                                encryptedPassword[^1] == 0xEF;
+
+                Console.WriteLine($"Tiene marker DEADBEEF: {hasMarker}");
+                Console.WriteLine($"Formato: {(hasMarker ? "NUEVO (MasterKey)" : "ANTIGUO (PBKDF2)")}");
+
+                return $"Diagnóstico completado - Formato: {(hasMarker ? "NUEVO" : "ANTIGUO")}";
+            }
+            catch (Exception ex)
+            {
+                return $"Error en diagnóstico: {ex.Message}";
+            }
         }
     }
 }
