@@ -10,6 +10,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Cre
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? ConfirmPassword { get; set; }
+        public string SerialNumber { get; set; } = string.Empty;
         public Role Role { get; set; }
     }
 }
