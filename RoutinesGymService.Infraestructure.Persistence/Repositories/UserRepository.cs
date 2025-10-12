@@ -639,6 +639,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         {
                             SerialNumber = addUserToBlackListRequest.SerialNumber,
                             UserId = addUserToBlackListRequest.UserId,
+                            Description = addUserToBlackListRequest.Description,
                         };
 
                         _genericUtils.ClearCache(_userPrefix);

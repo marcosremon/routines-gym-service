@@ -19,8 +19,9 @@
 
 --CREATE TABLE black_list (
 --	black_list_id BIGSERIAL PRIMARY KEY,
+--	user_id BIGINT NOT NULL DEFAULT 0,
 --	movile_serial_number VARCHAR(255) NOT NULL DEFAULT '',
---	user_id BIGINT NOT NULL DEFAULT 0
+--	description VARCHAR(255) NOT NULL DEFAULT ''
 --);
 
 ---- Tabla de amistades entre usuarios

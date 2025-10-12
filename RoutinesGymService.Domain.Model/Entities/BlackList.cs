@@ -11,10 +11,13 @@ namespace RoutinesGymService.Domain.Model.Entities
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long BlackListId { get; set; }
 
+        [Column("user_id")]
+        public long UserId { get; set; }
+
         [Column("movile_serial_number")]
         public string SerialNumber { get; set; } = string.Empty;
 
-        [Column("user_id")]
-        public long UserId { get; set; }
+        [Column("description")]
+        public string Description { get; set; } = string.Empty;
     }
 }
