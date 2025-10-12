@@ -10,6 +10,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
 
         public DbSet<User> Users { get; set; }
         public DbSet<UserFriend> UserFriends { get; set; }
+        public DbSet<BlackList> BlackList { get; set; }
         public DbSet<Routine> Routines { get; set; }
         public DbSet<SplitDay> SplitDays { get; set; }
         public DbSet<Exercise> Exercises { get; set; }

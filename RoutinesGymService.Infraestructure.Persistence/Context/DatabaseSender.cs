@@ -37,11 +37,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
                 string insertQuery = @"
                     INSERT INTO users (
                         dni, username, surname, email, friend_code, 
-                        password, role, role_string, inscription_date
+                        password, role, role_string, inscription_date, serial_number
                     )
                     VALUES (
                         @dni, @username, @surname, @email, @friend_code,
-                        @password, @role, @role_string, @inscription_date
+                        @password, @role, @role_string, @inscription_date, @serial_number
                     )";
 
                 byte[] encryptedPassword = _passwordUtils.PasswordEncoder("1234");
@@ -56,6 +56,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Context
                     command.Parameters.AddWithValue("@password", encryptedPassword);
                     command.Parameters.AddWithValue("@role", 1);
                     command.Parameters.AddWithValue("@role_string", "admin");
+                    command.Parameters.AddWithValue("@serial_number", Guid.NewGuid().ToString());
                     command.Parameters.AddWithValue("@inscription_date", DateTime.UtcNow);
 
                     await command.ExecuteNonQueryAsync();

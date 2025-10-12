@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -77,13 +78,24 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        getUserByEmailResponse.IsSuccess = true;
-                        getUserByEmailResponse.Message = "User found successfully";
-                        getUserByEmailResponse.RoutinesCount = user.Routines.Count;
-                        getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
-                        getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
+                        bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == user.SerialNumber);
+                        if (isOnBlackList)
+                        {
+                            getUserByEmailResponse.IsSuccess = true;
+                            getUserByEmailResponse.LogoutAccount = true;
+                            getUserByEmailResponse.Message = "You are in Black List 💀";
+                        }
+                        else
+                        {
+                            getUserByEmailResponse.LogoutAccount = false;
+                            getUserByEmailResponse.IsSuccess = true;
+                            getUserByEmailResponse.Message = "User found successfully";
+                            getUserByEmailResponse.RoutinesCount = user.Routines.Count;
+                            getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
+                            getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
 
-                        _cacheUtils.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
+                            _cacheUtils.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
+                        }
                     }
                 } 
             }
@@ -142,80 +154,94 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateUserResponse createUserResponse = new CreateUserResponse();
             try
             {
-                if (!GenericUtils.IsDniValid(createGenericUserRequest.Dni!))
+                bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == createGenericUserRequest.SerialNumber);
+                if (isOnBlackList)
+                {
+                    createUserResponse.IsSuccess = false;
+                    createUserResponse.Message = "You are in Black List 💀";
+                }
+                else if (!GenericUtils.IsDniValid(createGenericUserRequest.Dni!))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "The dni is not valid you need eight numbers and a capital letter";
                 }
+                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                {
+                    createUserResponse.IsSuccess = false;
+                    createUserResponse.Message = "Invalid email format example (example@gmail.com)";
+                }
                 else
                 {
-                    if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createGenericUserRequest.Email);
+                    if (user != null)
                     {
                         createUserResponse.IsSuccess = false;
-                        createUserResponse.Message = "Invalid email format example (example@gmail.com)";
+                        createUserResponse.Message = "User already exists with the provided email";
                     }
                     else
                     {
-                        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createGenericUserRequest.Email);
+                        user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni);
                         if (user != null)
                         {
                             createUserResponse.IsSuccess = false;
-                            createUserResponse.Message = "User already exists with the provided email";
+                            createUserResponse.Message = "User already exists with the provided DNI";
                         }
                         else
                         {
-                            user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni);
-                            if (user != null)
+                            if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
                             {
                                 createUserResponse.IsSuccess = false;
-                                createUserResponse.Message = "User already exists with the provided DNI";
+                                createUserResponse.Message = "Password and confirm password do not match";
                             }
                             else
                             {
-                                if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
+                                if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
                                 {
                                     createUserResponse.IsSuccess = false;
-                                    createUserResponse.Message = "Password and confirm password do not match";
+                                    createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
                                 }
                                 else
                                 {
-                                    if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                                    string friendCode = GenericUtils.CreateFriendCode(8);
+                                    while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode))
                                     {
-                                        createUserResponse.IsSuccess = false;
-                                        createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
+                                        friendCode = GenericUtils.CreateFriendCode(8);
                                     }
-                                    else
-                                    {
-                                        string friendCode = GenericUtils.CreateFriendCode(8);
-                                        while (true)
-                                        {
-                                            if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
-                                                break;
 
-                                            friendCode = GenericUtils.CreateFriendCode(8);
+                                    if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
+                                        createGenericUserRequest.SerialNumber == "UNKNOWN" ||
+                                        createGenericUserRequest.SerialNumber.Contains("ERROR_"))
+                                    {
+                                        string newSerial = Guid.NewGuid().ToString();
+                                        while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial))
+                                        {
+                                            newSerial = Guid.NewGuid().ToString();
                                         }
 
-                                        User newUser = new User
-                                        {
-                                            Dni = createGenericUserRequest.Dni!,
-                                            Username = createGenericUserRequest.Username!,
-                                            Surname = createGenericUserRequest.Surname ?? "",
-                                            Email = createGenericUserRequest.Email!.ToLower(),
-                                            FriendCode = friendCode,
-                                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
-                                            Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
-                                            RoleString = createGenericUserRequest.Role.ToString().ToLower(),
-                                            InscriptionDate = DateTime.UtcNow
-                                        };
-
-                                        _genericUtils.ClearCache(_userPrefix);
-
-                                        await _context.Users.AddAsync(newUser);
-                                        await _context.SaveChangesAsync();
-
-                                        createUserResponse.IsSuccess = true;
-                                        createUserResponse.Message = "User created successfully";
+                                        createGenericUserRequest.SerialNumber = newSerial;
                                     }
+
+                                    User newUser = new User
+                                    {
+                                        Dni = createGenericUserRequest.Dni!,
+                                        Username = createGenericUserRequest.Username!,
+                                        Surname = createGenericUserRequest.Surname ?? "",
+                                        Email = createGenericUserRequest.Email!.ToLower(),
+                                        FriendCode = friendCode,
+                                        SerialNumber = createGenericUserRequest.SerialNumber!,
+                                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                                        Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
+                                        RoleString = createGenericUserRequest.Role.ToString().ToLower(),
+                                        InscriptionDate = DateTime.UtcNow
+                                    };
+
+                                    _genericUtils.ClearCache(_userPrefix);
+
+                                    await _context.Users.AddAsync(newUser);
+                                    await _context.SaveChangesAsync();
+
+                                    createUserResponse.IsSuccess = true;
+                                    createUserResponse.Message = "User created successfully";
                                 }
                             }
                         }
@@ -236,7 +262,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateGoogleUserResponse createGoogleUserResponse = new CreateGoogleUserResponse();
             try
             {
-                if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == createGenericUserRequest.SerialNumber);
+                if (isOnBlackList)
+                {
+                    createGoogleUserResponse.IsSuccess = false;
+                    createGoogleUserResponse.Message = "You are in Black List 💀";
+                }
+                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
                 {
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "Invalid email format";
@@ -244,13 +276,22 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     string friendCode = GenericUtils.CreateFriendCode(8);
-                    while (true)
+                    while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode))
                     {
-                        if (await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == friendCode) == null)
-                        {
-                            break;
-                        }
                         friendCode = GenericUtils.CreateFriendCode(8);
+                    }
+
+                    if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
+                       createGenericUserRequest.SerialNumber == "UNKNOWN" ||
+                       createGenericUserRequest.SerialNumber.Contains("ERROR_"))
+                    {
+                        string newSerial = Guid.NewGuid().ToString();
+                        while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial))
+                        {
+                            newSerial = Guid.NewGuid().ToString();
+                        }
+
+                        createGenericUserRequest.SerialNumber = newSerial;
                     }
 
                     User user = new User()
@@ -258,6 +299,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         Dni = createGenericUserRequest.Dni!,
                         Username = createGenericUserRequest.Username!,
                         Surname = createGenericUserRequest.Surname!,
+                        SerialNumber = createGenericUserRequest.SerialNumber!,
                         FriendCode = friendCode,
                         Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!.ToLower(), isGoogleLogin: true),
                         Email = createGenericUserRequest.Email!.ToLower(),
@@ -540,13 +582,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<CheckUserExistenceResponse> CheckUserExistence(CheckUserExistenceRequest checkUserExistenceRequest)
         {
             CheckUserExistenceResponse checkUserExistenceResponse = new CheckUserExistenceResponse();
-
             try
             {
-                User? user = _context.Users.FirstOrDefault(u => u.Email == checkUserExistenceRequest.Email);
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == checkUserExistenceRequest.Email);
                 if (user == null)
                 {
-                    checkUserExistenceResponse.IsSuccess = false;
+                    checkUserExistenceResponse.IsSuccess = true;
                     checkUserExistenceResponse.UserExists = false;
                     checkUserExistenceResponse.Message = "User not found";
                 }
@@ -565,6 +606,58 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return checkUserExistenceResponse;
+        }
+
+        public async Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest)
+        {
+            AddUserToBlackListResponse addUserToBlackListResponse = new AddUserToBlackListResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == addUserToBlackListRequest.UserId);
+                if (user == null)
+                {
+                    addUserToBlackListResponse.IsSuccess = false;
+                    addUserToBlackListResponse.Message = $"User not found with the id {addUserToBlackListRequest.UserId}";
+                }
+                else if (addUserToBlackListRequest.SerialNumber != user.SerialNumber)
+                {
+                    addUserToBlackListResponse.IsSuccess = false;
+                    addUserToBlackListResponse.Message = $"That serial number does not match the user with id: {addUserToBlackListRequest.UserId}";
+                }
+                else 
+                {
+                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == addUserToBlackListRequest.SerialNumber && 
+                                                                                 bl.UserId == addUserToBlackListRequest.UserId);
+                    if (isOnBlackList)
+                    {
+                        addUserToBlackListResponse.IsSuccess = false;
+                        addUserToBlackListResponse.Message = $"The user is already on the blacklist";
+                    }
+                    else
+                    {
+                        BlackList blackList = new BlackList
+                        {
+                            SerialNumber = addUserToBlackListRequest.SerialNumber,
+                            UserId = addUserToBlackListRequest.UserId,
+                        };
+
+                        _genericUtils.ClearCache(_userPrefix);
+
+                        await _context.BlackList.AddAsync(blackList);
+                        await _context.SaveChangesAsync();
+
+                        addUserToBlackListResponse.IsSuccess = true;
+                        addUserToBlackListResponse.Message = $"User with ID: {addUserToBlackListRequest.UserId} and Serial Number: {addUserToBlackListRequest.SerialNumber} added successfuly";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                addUserToBlackListResponse.IsSuccess = false;
+                addUserToBlackListResponse.Message = $"unexpected error on UserRepository -> AddUserToBlackList: {ex.Message}";
+            }
+
+            return addUserToBlackListResponse;
         }
     }
 }

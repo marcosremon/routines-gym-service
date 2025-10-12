@@ -1,4 +1,5 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -21,6 +22,11 @@ namespace RoutinesGymService.Application.UseCase
         public UserApplication(IUserRepository userRepository)
         {
             _userRepository = userRepository;
+        }
+
+        public async Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest)
+        {
+            return await _userRepository.AddUserToBlackList(addUserToBlackListRequest);
         }
 
         public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)

@@ -62,7 +62,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (!isPasswordValid && user.Email != "admin")
+                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == user.SerialNumber);
+                    if (isOnBlackList)
+                    {
+                        loginResponse.IsSuccess = false;
+                        loginResponse.Message = "You are in Black List 💀";
+                    }
+                    else if (!isPasswordValid && user.Email != "admin")
                     {
                         loginResponse.IsSuccess = false;
                         loginResponse.Message = "Password is not valid";

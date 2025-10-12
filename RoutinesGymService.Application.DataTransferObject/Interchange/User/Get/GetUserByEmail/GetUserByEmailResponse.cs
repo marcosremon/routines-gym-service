@@ -8,5 +8,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Get
         public UserDTO? UserDTO { get; set; }
         public int RoutinesCount { get; set; }
         public int FriendsCount { get; set; }
+        public bool LogoutAccount { get; set; }
     }
 }
