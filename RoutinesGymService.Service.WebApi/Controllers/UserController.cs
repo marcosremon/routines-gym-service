@@ -639,7 +639,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             {
                 if (addUserToBlackListRequestJson == null || 
                     addUserToBlackListRequestJson?.UserId == null || 
-                    string.IsNullOrEmpty(addUserToBlackListRequestJson.SerialNumber))
+                    string.IsNullOrEmpty(addUserToBlackListRequestJson.SerialNumber) ||
+                    string.IsNullOrEmpty(addUserToBlackListRequestJson.Description))
                 {
                     addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     addUserToBlackListResponseJson.IsSuccess = false;
@@ -651,6 +652,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         SerialNumber = addUserToBlackListRequestJson.SerialNumber,
                         UserId = addUserToBlackListRequestJson.UserId,
+                        Description = addUserToBlackListRequestJson.Description,
                     };
 
                     AddUserToBlackListResponse addUserToBlackListResponse = await _userApplication.AddUserToBlackList(addUserToBlackListRequest);
