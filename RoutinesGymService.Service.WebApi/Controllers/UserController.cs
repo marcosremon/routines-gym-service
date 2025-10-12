@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -13,10 +14,10 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
-using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.User.Check.CheckUserExistence;
+using RoutinesGymService.Transversal.JsonInterchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateAdmin;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUser;
@@ -120,6 +121,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     }
 
                     getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
+                    getUserByEmailResponseJson.LogoutAccount = getUserByEmailResponse.LogoutAccount;
                     getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
                 }
             }
@@ -187,6 +189,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 if (createUserRequestJson == null ||
                     string.IsNullOrEmpty(createUserRequestJson.Dni) ||
                     string.IsNullOrEmpty(createUserRequestJson.Username) ||
+                    string.IsNullOrEmpty(createUserRequestJson.SerialNumber) ||
                     string.IsNullOrEmpty(createUserRequestJson.Email) ||
                     string.IsNullOrEmpty(createUserRequestJson.Password) ||
                     string.IsNullOrEmpty(createUserRequestJson.ConfirmPassword))
@@ -204,6 +207,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         Email = createUserRequestJson.Email.Trim(),
                         Password = createUserRequestJson.Password.Trim(),
                         ConfirmPassword = createUserRequestJson.ConfirmPassword.Trim(),
+                        SerialNumber = createUserRequestJson.SerialNumber,
                         Role = Role.USER
                     };
 
@@ -239,6 +243,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                    string.IsNullOrEmpty(createGoogleUserRequestJson.Username) ||
                    string.IsNullOrEmpty(createGoogleUserRequestJson.Email) ||
                    string.IsNullOrEmpty(createGoogleUserRequestJson.Password) ||
+                   string.IsNullOrEmpty(createGoogleUserRequestJson.SerialNumber) ||
                    string.IsNullOrEmpty(createGoogleUserRequestJson.ConfirmPassword))
                 {
                     createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -254,6 +259,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         Surname = createGoogleUserRequestJson.Surname,
                         Email = createGoogleUserRequestJson.Email,
                         Password = createGoogleUserRequestJson.Email, // no se puede sacar la contraseña desde google, a si que se usa el email como contraseña
+                        SerialNumber = createGoogleUserRequestJson.SerialNumber,
                         Role = Role.USER
                     };
 
@@ -290,6 +296,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                  string.IsNullOrEmpty(createAdminRequstJson.Dni) ||
                  string.IsNullOrEmpty(createAdminRequstJson.Username) ||
                  string.IsNullOrEmpty(createAdminRequstJson.Email) ||
+                 string.IsNullOrEmpty(createAdminRequstJson.SerialNumber) ||
                  string.IsNullOrEmpty(createAdminRequstJson.Password) ||
                  string.IsNullOrEmpty(createAdminRequstJson.ConfirmPassword))
                 {
@@ -307,6 +314,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         Email = createAdminRequstJson.Email,
                         Password = createAdminRequstJson.Password,
                         ConfirmPassword = createAdminRequstJson.ConfirmPassword,
+                        SerialNumber = createAdminRequstJson.SerialNumber,  
                         Role = Role.ADMIN
                     };
 
@@ -616,6 +624,51 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(getUserProfileDetailsResponseJson);
+        }
+        #endregion
+
+        #region Add user to BlackList
+        [HttpPost("add-user-to-black-list")]
+        [Authorize(Roles = nameof(Role.ADMIN))]
+        public async Task<ActionResult<AddUserToBlackListResponseJson>> AddUserToBlackList([FromBody] AddUserToBlackListRequestJson addUserToBlackListRequestJson)
+        {
+            AddUserToBlackListResponseJson addUserToBlackListResponseJson = new AddUserToBlackListResponseJson();
+            addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
+            try
+            {
+                if (addUserToBlackListRequestJson == null || 
+                    addUserToBlackListRequestJson?.UserId == null || 
+                    string.IsNullOrEmpty(addUserToBlackListRequestJson.SerialNumber))
+                {
+                    addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    addUserToBlackListResponseJson.IsSuccess = false;
+                    addUserToBlackListResponseJson.Message = "invalid data, the data is null or empty";
+                }
+                else
+                {
+                    AddUserToBlackListRequest addUserToBlackListRequest = new AddUserToBlackListRequest
+                    {
+                        SerialNumber = addUserToBlackListRequestJson.SerialNumber,
+                        UserId = addUserToBlackListRequestJson.UserId,
+                    };
+
+                    AddUserToBlackListResponse addUserToBlackListResponse = await _userApplication.AddUserToBlackList(addUserToBlackListRequest);
+                    if (addUserToBlackListResponse.IsSuccess)
+                        addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+
+                    addUserToBlackListResponseJson.IsSuccess = addUserToBlackListResponse.IsSuccess;
+                    addUserToBlackListResponseJson.Message = addUserToBlackListResponse.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                addUserToBlackListResponseJson.IsSuccess = false;
+                addUserToBlackListResponseJson.Message = $"unexpected error on UserController -> add-user-to-black-list {ex.Message}";
+            }
+
+            return Ok(addUserToBlackListResponseJson);
         }
         #endregion
     }

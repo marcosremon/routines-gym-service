@@ -14,6 +14,15 @@
 --    CONSTRAINT unique_friend_code UNIQUE (friend_code)
 --);
 
+--ALTER TABLE users 
+--ADD COLUMN serial_number VARCHAR(255) NOT NULL DEFAULT '';
+
+--CREATE TABLE black_list (
+--	black_list_id BIGSERIAL PRIMARY KEY,
+--	movile_serial_number VARCHAR(255) NOT NULL DEFAULT '',
+--	user_id BIGINT NOT NULL DEFAULT 0
+--);
+
 ---- Tabla de amistades entre usuarios
 --CREATE TABLE user_friends (
 --    user_friend_id BIGSERIAL PRIMARY KEY,

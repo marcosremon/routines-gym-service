@@ -10,5 +10,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogl
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? ConfirmPassword { get; set; }
+        public string SerialNumber { get; set; } = string.Empty;
     }
 }

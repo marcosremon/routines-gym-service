@@ -14,6 +14,9 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Column("dni")]
         public string Dni { get; set; } = string.Empty;
 
+        [Column("serial_number")]
+        public string SerialNumber { get; set; } = string.Empty;
+
         [Column("username")]
         public string Username { get; set; } = string.Empty;
 
