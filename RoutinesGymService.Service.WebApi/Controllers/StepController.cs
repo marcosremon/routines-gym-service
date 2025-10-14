@@ -25,7 +25,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         #region Get steps
         [HttpPost("get-steps")]
         [Authorize]
-        public async Task<ActionResult<GetStepResponseJson>> GetStats([FromBody] GetStepRequestJson getStepRequestJson)
+        public async Task<ActionResult<GetStepResponseJson>> GetSteps([FromBody] GetStepRequestJson getStepRequestJson)
         {
             GetStepResponseJson getStepResponseJson = new GetStepResponseJson();
             try
@@ -46,20 +46,20 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         UserEmail = getStepRequestJson.UserEmail
                     };
 
-                    GetStepResponse getStatsResponse = await _stepApplication.GetSteps(getStatRequest);
-                    if (getStatsResponse.IsSuccess)
+                    GetStepResponse getStepsResponse = await _stepApplication.GetSteps(getStatRequest);
+                    if (getStepsResponse.IsSuccess)
                     {
                         getStepResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getStepResponseJson.Steps = getStatsResponse.Stats;
-                        getStepResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                        getStepResponseJson.Message = getStatsResponse.Message;
+                        getStepResponseJson.Steps = getStepsResponse.Stats;
+                        getStepResponseJson.IsSuccess = getStepsResponse.IsSuccess;
+                        getStepResponseJson.Message = getStepsResponse.Message;
                     }
                     else
                     {
                         getStepResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        getStepResponseJson.Steps = getStatsResponse.Stats;
-                        getStepResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                        getStepResponseJson.Message = getStatsResponse.Message;
+                        getStepResponseJson.Steps = getStepsResponse.Stats;
+                        getStepResponseJson.IsSuccess = getStepsResponse.IsSuccess;
+                        getStepResponseJson.Message = getStepsResponse.Message;
                     }
                 }
             }
