@@ -1,67 +1,48 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Transversal.Security;
-using Npgsql;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Context
 {
     public class DatabaseSeeder
     {
-        private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _context;
         private readonly PasswordUtils _passwordUtils;
 
-        public DatabaseSeeder(IConfiguration configuration)
+        public DatabaseSeeder(ApplicationDbContext context, IConfiguration configuration)
         {
-            _configuration = configuration;
+            _context = context;
             _passwordUtils = new PasswordUtils(configuration);
         }
 
         public async Task SeedAdminUserAsync()
         {
-            string? connectionString = _configuration.GetConnectionString("PostgreSQLConnection");
-
-            using (var connection = new NpgsqlConnection(connectionString))
+            User? existingAdmin = await _context.Users.FirstOrDefaultAsync(u => u.Email == "admin");
+            if (existingAdmin != null)
             {
-                await connection.OpenAsync();
-
-                string checkQuery = "SELECT COUNT(*) FROM users WHERE email = 'admin'";
-                using (var checkCommand = new NpgsqlCommand(checkQuery, connection))
-                {
-                    long? count = (long?) await checkCommand.ExecuteScalarAsync();
-                    if (count > 0)
-                    {
-                        Console.WriteLine("Usuario admin ya existe, omitiendo creación...");
-                        return;
-                    }
-                }
-
-                string insertQuery = @"
-                    INSERT INTO users (
-                        dni, username, surname, email, friend_code, 
-                        password, role, role_string, inscription_date, serial_number
-                    )
-                    VALUES (
-                        @dni, @username, @surname, @email, @friend_code,
-                        @password, @role, @role_string, @inscription_date, @serial_number
-                    )";
-
-                byte[] encryptedPassword = _passwordUtils.PasswordEncoder("1234");
-
-                using (var command = new NpgsqlCommand(insertQuery, connection))
-                {
-                    command.Parameters.AddWithValue("@dni", "00000000A");
-                    command.Parameters.AddWithValue("@username", "Administrador");
-                    command.Parameters.AddWithValue("@surname", "Sistema");
-                    command.Parameters.AddWithValue("@email", "admin");
-                    command.Parameters.AddWithValue("@friend_code", $"@boss");
-                    command.Parameters.AddWithValue("@password", encryptedPassword);
-                    command.Parameters.AddWithValue("@role", 1);
-                    command.Parameters.AddWithValue("@role_string", "admin");
-                    command.Parameters.AddWithValue("@serial_number", Guid.NewGuid().ToString());
-                    command.Parameters.AddWithValue("@inscription_date", DateTime.UtcNow);
-
-                    await command.ExecuteNonQueryAsync();
-                }
+                Console.WriteLine("Usuario admin ya existe, omitiendo creación...");
+                return;
             }
+
+            User adminUser = new User
+            {
+                Dni = "00000000A",
+                Username = "Administrador",
+                Surname = "Sistema",
+                Email = "admin",
+                FriendCode = "@boss",
+                Password = _passwordUtils.PasswordEncoder("1234"),
+                Role = 1,
+                RoleString = "admin",
+                InscriptionDate = DateTime.UtcNow,
+                SerialNumber = Guid.NewGuid().ToString()
+            };
+
+            _context.Users.Add(adminUser);
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine("Usuario admin creado correctamente.");
         }
     }
 }
