@@ -85,12 +85,6 @@ namespace RoutinesGymService.Transversal.Security
             }
         }
 
-        public bool VerifyPassword(string encryptedPasswordBase64, string plainPassword)
-        {
-            byte[] encryptedBytes = Convert.FromBase64String(encryptedPasswordBase64);
-            return VerifyPassword(encryptedBytes, plainPassword);
-        }
-
         public static string DecryptPasswordWithMasterKey(byte[] encryptedPassword, string masterKey)
         {
             int nonceSize = 12;
@@ -129,7 +123,6 @@ namespace RoutinesGymService.Transversal.Security
             Buffer.BlockCopy(masterEncrypted, 0, ciphertext, 0, ciphertext.Length);
             Buffer.BlockCopy(masterEncrypted, ciphertext.Length, tag, 0, tagSize);
 
-            // Descifrar
             byte[] plaintext = new byte[ciphertext.Length];
 
             using var aesGcm = new AesGcm(masterKeyBytes, tagSize);
@@ -269,30 +262,6 @@ namespace RoutinesGymService.Transversal.Security
             bool hasSpecial = password.Any(c => !char.IsLetterOrDigit(c) && !char.IsWhiteSpace(c));
 
             return hasUpper && hasLower && hasDigit && hasSpecial;
-        }
-
-        public static string DiagnoseEncryptedPassword(byte[] encryptedPassword, string masterKey)
-        {
-            try
-            {
-                Console.WriteLine($"=== DIAGNÓSTICO CONTRASEÑA CIFRADA ===");
-                Console.WriteLine($"Longitud total: {encryptedPassword.Length} bytes");
-
-                bool hasMarker = encryptedPassword.Length >= 4 &&
-                                encryptedPassword[^4] == 0xDE &&
-                                encryptedPassword[^3] == 0xAD &&
-                                encryptedPassword[^2] == 0xBE &&
-                                encryptedPassword[^1] == 0xEF;
-
-                Console.WriteLine($"Tiene marker DEADBEEF: {hasMarker}");
-                Console.WriteLine($"Formato: {(hasMarker ? "NUEVO (MasterKey)" : "ANTIGUO (PBKDF2)")}");
-
-                return $"Diagnóstico completado - Formato: {(hasMarker ? "NUEVO" : "ANTIGUO")}";
-            }
-            catch (Exception ex)
-            {
-                return $"Error en diagnóstico: {ex.Message}";
-            }
         }
     }
 }

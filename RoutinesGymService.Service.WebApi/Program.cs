@@ -71,7 +71,6 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// ===== CONFIGURACIÓN DEL PIPELINE =====
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -80,15 +79,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// ? ORDEN CORRECTO DEL MIDDLEWARE
-app.UseRouting();           // ?? PRIMERO: Routing
-app.UseCors("AllowAll");    // ?? SEGUNDO: CORS
-app.UseAuthentication();    // ?? TERCERO: Authentication (IMPORTANTE: antes de Authorization)
-app.UseAuthorization();     // ?? CUARTO: Authorization
+app.UseRouting();   
+app.UseCors("AllowAll");    
+app.UseAuthentication();    
+app.UseAuthorization();     
 
-app.MapControllers();       // ?? FINAL: MapControllers
+app.MapControllers();       
 
-// ===== CREAR USUARIO ADMIN AL INICIAR =====
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -108,7 +105,6 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-// Clase para aplicar el prefijo /api a todas las rutas
 public class RoutePrefixConvention : IApplicationModelConvention
 {
     private readonly AttributeRouteModel _routePrefix;
