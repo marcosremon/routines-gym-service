@@ -11,6 +11,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
@@ -690,7 +691,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     UserDTO userDTO = UserMapper.UserToDto(user);
-                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKeyStatic(user.Password!, getIntegralUserInfoRequest.MasterKey);
+                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password!, getIntegralUserInfoRequest.MasterKey);
 
                     getIntegralUserInfoResponse.IsSuccess = true;
                     getIntegralUserInfoResponse.UserDTO = userDTO;
@@ -704,6 +705,40 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return getIntegralUserInfoResponse;
+        }
+
+        public async Task<GetIntegralUsersResponse> GetIntegralUsers(GetIntegralUsersRequest getIntegralUsersRequest)
+        {
+            GetIntegralUsersResponse getIntegralUsersResponse = new GetIntegralUsersResponse();
+            try
+            {
+                List<User> users = await _context.Users.ToListAsync();
+                if (!users.Any())
+                {
+                    getIntegralUsersResponse.IsSuccess = false;
+                    getIntegralUsersResponse.Message = $"Users not found";
+                }
+                else
+                {
+                    List<UserDTO> usersDto = users.Select(u =>
+                    {
+                        UserDTO user = UserMapper.UserToDto(u);
+                        user.Password = PasswordUtils.DecryptPasswordWithMasterKey(u.Password!, getIntegralUsersRequest.MasterKey);
+                        return user;
+                    }).ToList();
+
+                    getIntegralUsersResponse.IsSuccess = true;
+                    getIntegralUsersResponse.Message = $"Users found";
+                    getIntegralUsersResponse.UsersDto = usersDto;
+                }
+            }
+            catch (Exception ex)
+            {
+                getIntegralUsersResponse.IsSuccess = false;
+                getIntegralUsersResponse.Message = $"unexpected error on UserRepository -> GetIntegralUserInfo: {ex.Message}";
+            }
+
+            return getIntegralUsersResponse;
         }
     }
 }

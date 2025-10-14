@@ -92,7 +92,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addNewUserFriendResponseJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addNewUserFriendRequestJson.UserEmail))
                 {
                     addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     addNewUserFriendResponseJson.IsSuccess = false;
@@ -150,7 +150,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteFriendResponseJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteFriendRequestJson.UserEmail))
                 {
                     deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     deleteFriendResponseJson.IsSuccess = false;

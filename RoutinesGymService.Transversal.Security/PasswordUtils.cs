@@ -63,7 +63,7 @@ namespace RoutinesGymService.Transversal.Security
                 {
                     try
                     {
-                        string decryptedPassword = DecryptPasswordWithMasterKeyStatic(
+                        string decryptedPassword = DecryptPasswordWithMasterKey(
                             encryptedPassword,
                             Encoding.UTF8.GetString(_masterKey)
                         );
@@ -91,7 +91,7 @@ namespace RoutinesGymService.Transversal.Security
             return VerifyPassword(encryptedBytes, plainPassword);
         }
 
-        public static string DecryptPasswordWithMasterKeyStatic(byte[] encryptedPassword, string masterKey)
+        public static string DecryptPasswordWithMasterKey(byte[] encryptedPassword, string masterKey)
         {
             int nonceSize = 12;
             int tagSize = 16;
