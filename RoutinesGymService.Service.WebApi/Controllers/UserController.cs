@@ -47,57 +47,22 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             _friendApplication = friendApplication;
         }
 
-        #region Get users
-        [HttpGet("get-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
-        {
-            GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
-            getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            { 
-                GetUsersResponse getUsersResponse = await _userApplication.GetUsers();
-                if (getUsersResponse.IsSuccess)
-                {
-                    getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
-                }
-
-                getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
-                getUsersResponseJson.Message = getUsersResponse.Message;
-            }
-            catch (Exception ex)
-            {
-                getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getUsersResponseJson.IsSuccess = false;
-                getUsersResponseJson.Message = $"unexpected error on UserController -> get-users {ex.Message}";
-            }
-
-            return Ok(getUsersResponseJson);
-        }
-        #endregion
-
         #region Get user by email
         [HttpPost("get-user-by-email")]
         [Authorize]
         public async Task<ActionResult<GetUserByEmailResponseJson>> GetUserByEmail([FromBody] GetUserByEmailRequestJson getUserByEmailRequestJson)
         {
             GetUserByEmailResponseJson getUserByEmailResponseJson = new GetUserByEmailResponseJson();
-            getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getUserByEmailRequestJson.Email))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != getUserByEmailRequestJson.Email)
-                {
-                    return Unauthorized();
+                    getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getUserByEmailResponseJson.IsSuccess = false;
+                    getUserByEmailResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getUserByEmailRequestJson == null ||
                     string.IsNullOrEmpty(getUserByEmailRequestJson.Email))
@@ -120,11 +85,18 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         getUserByEmailResponseJson.UserDTO = getUserByEmailResponse.UserDTO;
                         getUserByEmailResponseJson.FriendsCount = getUserByEmailResponse.FriendsCount;
                         getUserByEmailResponseJson.RoutinesCount = getUserByEmailResponse.RoutinesCount;
+                        getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
+                        getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
                     }
-
-                    getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
-                    getUserByEmailResponseJson.LogoutAccount = getUserByEmailResponse.LogoutAccount;
-                    getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
+                    else
+                    {
+                        getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getUserByEmailResponseJson.UserDTO = getUserByEmailResponse.UserDTO;
+                        getUserByEmailResponseJson.FriendsCount = getUserByEmailResponse.FriendsCount;
+                        getUserByEmailResponseJson.RoutinesCount = getUserByEmailResponse.RoutinesCount;
+                        getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
+                        getUserByEmailResponseJson.Message = getUserByEmailResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -143,7 +115,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<CheckUserExistenceResponseJson>> CheckUserExistence([FromBody] CheckUserExistenceRequestJson checkUserExistenceRequestJson)
         {
             CheckUserExistenceResponseJson checkUserExistenceResponseJson = new CheckUserExistenceResponseJson();
-            checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;        
             try
             {
                 if (string.IsNullOrEmpty(checkUserExistenceRequestJson?.Email))
@@ -161,11 +132,19 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CheckUserExistenceResponse checkUserExistenceResponse = await _userApplication.CheckUserExistence(checkUserExistenceRequest);
                     if (checkUserExistenceResponse.IsSuccess)
+                    {
                         checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    checkUserExistenceResponseJson.IsSuccess = checkUserExistenceResponse.IsSuccess;
-                    checkUserExistenceResponseJson.UserExists = checkUserExistenceResponse.UserExists; 
-                    checkUserExistenceResponseJson.Message = checkUserExistenceResponse.Message;
+                        checkUserExistenceResponseJson.IsSuccess = checkUserExistenceResponse.IsSuccess;
+                        checkUserExistenceResponseJson.UserExists = checkUserExistenceResponse.UserExists;
+                        checkUserExistenceResponseJson.Message = checkUserExistenceResponse.Message;
+                    }
+                    else
+                    {
+                        checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        checkUserExistenceResponseJson.IsSuccess = checkUserExistenceResponse.IsSuccess;
+                        checkUserExistenceResponseJson.UserExists = checkUserExistenceResponse.UserExists;
+                        checkUserExistenceResponseJson.Message = checkUserExistenceResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -184,8 +163,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<CreateUserResponseJson>> CreateUser([FromBody] CreateUserRequestJson createUserRequestJson)
         {
             CreateUserResponseJson createUserResponseJson = new CreateUserResponseJson();
-            createUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (createUserRequestJson == null ||
@@ -215,10 +192,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
                     if (createUserResponse.IsSuccess)
+                    {
                         createUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                    createUserResponseJson.Message = createUserResponse.Message;
+                        createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
+                        createUserResponseJson.Message = createUserResponse.Message;
+                    }
+                    else
+                    {
+                        createUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        createUserResponseJson.IsSuccess = createUserResponse.IsSuccess;
+                        createUserResponseJson.Message = createUserResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -237,8 +221,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<CreateGoogleUserResponseJson>> CreateGoogleUser([FromBody] CreateGoogleUserRequestJson createGoogleUserRequestJson)
         {
             CreateGoogleUserResponseJson createGoogleUserResponseJson = new CreateGoogleUserResponseJson();
-            createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (createGoogleUserRequestJson == null ||
@@ -267,10 +249,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateGoogleUserResponse createGoogleUserResponse = await _userApplication.CreateGoogleUser(createGenericUserRequest);
                     if (createGoogleUserResponse.IsSuccess)
+                    {
                         createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
-                    createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
+                        createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
+                        createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
+                    }
+                    else
+                    {
+                        createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        createGoogleUserResponseJson.IsSuccess = createGoogleUserResponse.IsSuccess;
+                        createGoogleUserResponseJson.Message = createGoogleUserResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -284,14 +273,418 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
+        #region Update user
+        [HttpPost("update-user")]
+        [Authorize]
+        public async Task<ActionResult<UpdateUserResponseJson>> UpdateUser([FromBody] UpdateUserRequestJson updateUserRequestJson)
+        {
+            UpdateUserResponseJson updateUserResponseJson = new UpdateUserResponseJson();
+            try
+            {
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
+
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != updateUserRequestJson.OriginalEmail))
+                {
+                    updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    updateUserResponseJson.IsSuccess = false;
+                    updateUserResponseJson.Message = "UNAUTHORIZED";
+                }
+                else if (updateUserRequestJson == null ||
+                    string.IsNullOrEmpty(updateUserRequestJson.OriginalEmail) ||
+                    string.IsNullOrEmpty(updateUserRequestJson.DniToBeFound) ||
+                    string.IsNullOrEmpty(updateUserRequestJson.Username) ||
+                    string.IsNullOrEmpty(updateUserRequestJson.Email))
+                {
+                    updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    updateUserResponseJson.IsSuccess = false;
+                    updateUserResponseJson.Message = "invalid data, the email is null or empty";
+                }
+                else
+                {
+                    UpdateUserRequest updateUserRequest = new UpdateUserRequest
+                    {
+                        OldEmail = updateUserRequestJson.OriginalEmail,
+                        NewDni = updateUserRequestJson.DniToBeFound,
+                        NewUsername = updateUserRequestJson.Username,
+                        NewSurname = updateUserRequestJson.Surname,
+                        NewEmail = updateUserRequestJson.Email,
+                    };
+
+                    UpdateUserResponse updateUserResponse = await _userApplication.UpdateUser(updateUserRequest);
+                    if (updateUserResponse.IsSuccess)
+                    {
+                        updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
+                        updateUserResponseJson.NewToken = updateUserResponse.NewToken;
+                        updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
+                        updateUserResponseJson.Message = updateUserResponse.Message;
+                    }
+                    else
+                    {
+                        updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
+                        updateUserResponseJson.NewToken = updateUserResponse.NewToken;
+                        updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
+                        updateUserResponseJson.Message = updateUserResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                updateUserResponseJson.IsSuccess = false;
+                updateUserResponseJson.Message = $"unexpected error on UserController -> update-user: {ex.Message}";
+            }
+
+            return Ok(updateUserResponseJson);
+        }
+        #endregion
+
+        #region Delete user
+        [HttpPost("delete-user")]
+        [Authorize]
+        public async Task<ActionResult<DeleteUserResponseJson>> DeleteUser([FromBody] DeleteUserRequestJson deleteUserRequestJson)
+        {
+            DeleteUserResponseJson deleteUserResponseJson = new DeleteUserResponseJson();
+            deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+
+            try
+            {
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
+
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteUserRequestJson.Email))
+                {
+                    deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    deleteUserResponseJson.IsSuccess = false;
+                    deleteUserResponseJson.Message = "UNAUTHORIZED";
+                }
+                else
+                {
+                    DeleteUserRequest deleteUserRequest = new DeleteUserRequest
+                    {
+                        Email = deleteUserRequestJson.Email
+                    };
+
+                    DeleteUserResponse deleteUserResponse = await _userApplication.DeleteUser(deleteUserRequest);
+                    if (deleteUserResponse.IsSuccess)
+                    {
+                        deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
+                        deleteUserResponseJson.Message = deleteUserResponse.Message;
+
+                    }
+                    else
+                    {
+                        deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
+                        deleteUserResponseJson.Message = deleteUserResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                deleteUserResponseJson.IsSuccess = false;
+                deleteUserResponseJson.Message = $"unexpected error on -> UserController -> delete-user: {ex.Message}";
+            }
+
+            return Ok(deleteUserResponseJson);
+        }
+        #endregion
+
+        #region Create new password
+        [HttpPost("create-new-password")]
+        [Authorize]
+        public async Task<ActionResult<CreateNewPasswordResponseJson>> CreateNewPassword([FromBody] CreateNewPasswordRequestJson createNewPasswordRequestJson)
+        {
+            CreateNewPasswordResponseJson createNewPasswordResponseJson = new CreateNewPasswordResponseJson();
+            try
+            {
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
+
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != createNewPasswordRequestJson.UserEmail))
+                {
+                    createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    createNewPasswordResponseJson.IsSuccess = false;
+                    createNewPasswordResponseJson.Message = "UNAUTHORIZED";
+                }
+                else
+                {
+                    CreateNewPasswordRequest createNewPasswordRequest = new CreateNewPasswordRequest
+                    {
+                        UserEmail = createNewPasswordRequestJson.UserEmail,
+                    };
+
+                    CreateNewPasswordResponse createNewPasswordResponse = await _userApplication.CreateNewPassword(createNewPasswordRequest);
+                    if (createNewPasswordResponse.IsSuccess)
+                    {
+                        createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
+                        createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
+                    }
+                    else
+                    {
+                        createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
+                        createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                createNewPasswordResponseJson.IsSuccess = false;
+                createNewPasswordResponseJson.Message = $"unexpected error on UserController -> create-new-password: {ex.Message}";
+            }
+
+            return Ok(createNewPasswordResponseJson);
+        }
+        #endregion
+
+        #region Change password with password and email
+        [HttpPost("change-password-with-password-and-email")]
+        [Authorize]
+        public async Task<ActionResult<ChangePasswordWithPasswordAndEmailResponseJson>> ChangePasswordWithPasswordAndEmail([FromBody] ChangePasswordWithPasswordAndEmailRequestJson changePasswordWithPasswordAndEmailRequestJson)
+        {
+            ChangePasswordWithPasswordAndEmailResponseJson changePasswordWithPasswordAndEmailResponseJson = new ChangePasswordWithPasswordAndEmailResponseJson();
+            try
+            {
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
+
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != changePasswordWithPasswordAndEmailRequestJson.UserEmail))
+                {
+                    changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    changePasswordWithPasswordAndEmailResponseJson.IsSuccess = false;
+                    changePasswordWithPasswordAndEmailResponseJson.Message = "UNAUTHORIZED";
+                }
+                else if (changePasswordWithPasswordAndEmailRequestJson == null ||
+                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.UserEmail) ||
+                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.OldPassword) ||
+                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.NewPassword) ||
+                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.ConfirmNewPassword))
+                {
+                    changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    changePasswordWithPasswordAndEmailResponseJson.IsSuccess = false;
+                    changePasswordWithPasswordAndEmailResponseJson.Message = "invalid data the data is null or empty";
+                }
+                else
+                {
+                    ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest = new ChangePasswordWithPasswordAndEmailRequest
+                    {
+                         UserEmail = changePasswordWithPasswordAndEmailRequestJson.UserEmail,
+                         OldPassword = changePasswordWithPasswordAndEmailRequestJson.OldPassword,
+                         NewPassword = changePasswordWithPasswordAndEmailRequestJson.NewPassword,
+                         ConfirmNewPassword = changePasswordWithPasswordAndEmailRequestJson.ConfirmNewPassword,
+                    };
+
+                    ChangePasswordWithPasswordAndEmailResponse changePasswordWithPasswordAndEmailResponse = await _userApplication.ChangePasswordWithPasswordAndEmail(changePasswordWithPasswordAndEmailRequest);
+                    if (changePasswordWithPasswordAndEmailResponse.IsSuccess)
+                    {
+                        changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
+                        changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
+                    }
+                    else
+                    {
+                        changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
+                        changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                changePasswordWithPasswordAndEmailResponseJson.IsSuccess = false;
+                changePasswordWithPasswordAndEmailResponseJson.Message = $"unexpected error on UserController -> change-password-with-password-and-email: {ex.Message}";
+            }
+
+            return Ok(changePasswordWithPasswordAndEmailResponseJson);
+        }
+        #endregion
+        
+        #region Get user profile details
+        [HttpPost("get-user-profile-details")]
+        [Authorize]
+        public async Task<ActionResult<GetUserProfileDetailsResponseJson>> GetUserProfileDetails([FromBody] GetUserProfileDetailsRequestJson getUserProfileDetailsRequestJson)
+        {
+            GetUserProfileDetailsResponseJson getUserProfileDetailsResponseJson = new GetUserProfileDetailsResponseJson();
+            try
+            {
+                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(tokenEmail))
+                {
+                    getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getUserProfileDetailsResponseJson.IsSuccess = false;
+                    getUserProfileDetailsResponseJson.Message = "UNAUTHORIZED";
+                }
+                else if (getUserProfileDetailsRequestJson == null ||
+                    string.IsNullOrEmpty(getUserProfileDetailsRequestJson?.UserEmail))
+                {
+                    getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getUserProfileDetailsResponseJson.IsSuccess = false;
+                    getUserProfileDetailsResponseJson.Message = "invalid data, the data is null or empty";
+                }
+                else
+                {
+                    string requestedEmail = getUserProfileDetailsRequestJson.UserEmail;
+                    bool isOwnProfile = requestedEmail == tokenEmail;
+
+                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
+                    {
+                        UserEmail = tokenEmail
+                    };
+
+                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
+                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
+
+                    if (!isOwnProfile && !areFriends && !isAdmin)
+                    {
+                        getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                        getUserProfileDetailsResponseJson.IsSuccess = false;
+                        getUserProfileDetailsResponseJson.Message = "UNAUTHORIZED";
+                    }
+                    else
+                    {
+                        GetUserProfileDetailsRequest getUserProfileDetailsRequest = new GetUserProfileDetailsRequest
+                        {
+                            UserEmail = requestedEmail,
+                        };
+
+                        GetUserProfileDetailsResponse getUserProfileDetailsResponse = await _userApplication.GetUserProfileDetails(getUserProfileDetailsRequest);
+                        if (getUserProfileDetailsResponse.IsSuccess)
+                        {
+                            getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                            getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username;
+                            getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate;
+                            getUserProfileDetailsResponseJson.RoutineCount = getUserProfileDetailsResponse.RoutineCount;
+                            getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
+                            getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
+                        }
+                        else
+                        {
+                            getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                            getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username;
+                            getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate;
+                            getUserProfileDetailsResponseJson.RoutineCount = getUserProfileDetailsResponse.RoutineCount;
+                            getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
+                            getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getUserProfileDetailsResponseJson.IsSuccess = false;
+                getUserProfileDetailsResponseJson.Message = $"unexpected error on UserController -> get-user-profile-details {ex.Message}";
+            }
+
+            return Ok(getUserProfileDetailsResponseJson);
+        }
+        #endregion
+        
+
+        /* Only admin endpoints */
+
+        #region Get users
+        [HttpGet("get-users")]
+        [Authorize(Roles = nameof(Role.ADMIN))]
+        public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
+        {
+            GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
+            try
+            { 
+                GetUsersResponse getUsersResponse = await _userApplication.GetUsers();
+                if (getUsersResponse.IsSuccess)
+                {
+                    getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
+                    getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
+                    getUsersResponseJson.Message = getUsersResponse.Message;
+                }
+                else
+                {
+                    getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
+                    getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
+                    getUsersResponseJson.Message = getUsersResponse.Message;
+                }
+            }
+            catch (Exception ex)
+            {
+                getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getUsersResponseJson.IsSuccess = false;
+                getUsersResponseJson.Message = $"unexpected error on UserController -> get-users {ex.Message}";
+            }
+
+            return Ok(getUsersResponseJson);
+        }
+        #endregion
+
+        #region Get integral user info
+        [HttpPost("get-integral-user-info")]
+        [Authorize(Roles = nameof(Role.ADMIN))]
+        public async Task<ActionResult<GetIntegralUserInfoResponseJson>> GetIntegralUserInfo([FromBody] GetIntegralUserInfoRequestJson getIntegralUserInfoRequestJson)
+        {
+            GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
+            try
+            {
+                if (getIntegralUserInfoRequestJson == null ||
+                    getIntegralUserInfoRequestJson?.UserId == null)
+                {
+                    getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getIntegralUserInfoResponseJson.IsSuccess = false;
+                    getIntegralUserInfoResponseJson.Message = "invalid data, the email is null or empty";
+                }
+                else
+                {
+                    GetIntegralUserInfoRequest getIntegralUserInfoRequest = new GetIntegralUserInfoRequest
+                    {
+                        UserId = getIntegralUserInfoRequestJson.UserId,
+                        MasterKey = getIntegralUserInfoRequestJson.MasterKey,
+                    };
+
+                    GetIntegralUserInfoResponse getIntegralUserInfoResponse = await _userApplication.GetIntegralUserInfo(getIntegralUserInfoRequest);
+                    if (getIntegralUserInfoResponse.IsSuccess)
+                    {
+                        getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
+                        getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
+                        getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
+                    }
+                    else
+                    {
+                        getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
+                        getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
+                        getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getIntegralUserInfoResponseJson.IsSuccess = false;
+                getIntegralUserInfoResponseJson.Message = $"unexpected error -> UserController -> get-integral-user-info: {ex.Message}";
+            }
+
+            return Ok(getIntegralUserInfoResponseJson);
+        }
+        #endregion
+
         #region Create admin
         [HttpPost("create-admin")]
         [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<CreateAdminResponseJson>> CreateAdmin([FromBody] CreateAdminRequestJson createAdminRequstJson)
         {
             CreateAdminResponseJson createAdminResponseJson = new CreateAdminResponseJson();
-            createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (createAdminRequstJson == null ||
@@ -322,10 +715,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
                     if (createUserResponse.IsSuccess)
+                    {
                         createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                    createAdminResponseJson.Message = createUserResponse.Message;
+                        createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
+                        createAdminResponseJson.Message = createUserResponse.Message;
+                    }
+                    else
+                    {
+                        createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
+                        createAdminResponseJson.Message = createUserResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -339,304 +739,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Update user
-        [HttpPost("update-user")]
-        [Authorize]
-        public async Task<ActionResult<UpdateUserResponseJson>> UpdateUser([FromBody] UpdateUserRequestJson updateUserRequestJson)
-        {
-            UpdateUserResponseJson updateUserResponseJson = new UpdateUserResponseJson();
-            updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail))
-                {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != updateUserRequestJson.OriginalEmail)
-                {
-                    return Unauthorized();
-                }
-                else if (updateUserRequestJson == null ||
-                    string.IsNullOrEmpty(updateUserRequestJson.OriginalEmail) ||
-                    string.IsNullOrEmpty(updateUserRequestJson.DniToBeFound) ||
-                    string.IsNullOrEmpty(updateUserRequestJson.Username) ||
-                    string.IsNullOrEmpty(updateUserRequestJson.Email))
-                {
-                    updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    updateUserResponseJson.IsSuccess = false;
-                    updateUserResponseJson.Message = "invalid data, the email is null or empty";
-                }
-                else
-                {
-                    UpdateUserRequest updateUserRequest = new UpdateUserRequest
-                    {
-                        OldEmail = updateUserRequestJson.OriginalEmail,
-                        NewDni = updateUserRequestJson.DniToBeFound,
-                        NewUsername = updateUserRequestJson.Username,
-                        NewSurname = updateUserRequestJson.Surname,
-                        NewEmail = updateUserRequestJson.Email,
-                    };
-
-                    UpdateUserResponse updateUserResponse = await _userApplication.UpdateUser(updateUserRequest);
-                    if (updateUserResponse.IsSuccess)
-                    {
-                        updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
-                    }
-
-                    updateUserResponseJson.NewToken = updateUserResponse.NewToken;
-                    updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
-                    updateUserResponseJson.Message = updateUserResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                updateUserResponseJson.IsSuccess = false;
-                updateUserResponseJson.Message = $"unexpected error on UserController -> update-user: {ex.Message}";
-            }
-
-            return Ok(updateUserResponseJson);
-        }
-        #endregion
-
-        #region Delete user
-        [HttpPost("delete-user")]
-        [Authorize]
-        public async Task<ActionResult<DeleteUserResponseJson>> DeleteUser([FromBody] DeleteUserRequestJson deleteUserRequestJson)
-        {
-            DeleteUserResponseJson deleteUserResponseJson = new DeleteUserResponseJson();
-            deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail))
-                {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != deleteUserRequestJson.Email)
-                {
-                    return Unauthorized();
-                }
-                else
-                {
-                    DeleteUserRequest deleteUserRequest = new DeleteUserRequest
-                    {
-                        Email = deleteUserRequestJson.Email
-                    };
-
-                    DeleteUserResponse deleteUserResponse = await _userApplication.DeleteUser(deleteUserRequest);
-                    if (deleteUserResponse.IsSuccess)
-                        deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    deleteUserResponseJson.IsSuccess = deleteUserResponse.IsSuccess;
-                    deleteUserResponseJson.Message = deleteUserResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                deleteUserResponseJson.IsSuccess = false;
-                deleteUserResponseJson.Message = $"unexpected error on -> UserController -> delete-user: {ex.Message}";
-            }
-
-            return Ok(deleteUserResponseJson);
-        }
-        #endregion
-
-        #region Create new password
-        [HttpPost("create-new-password")]
-        [Authorize]
-        public async Task<ActionResult<CreateNewPasswordResponseJson>> CreateNewPassword([FromBody] CreateNewPasswordRequestJson createNewPasswordRequestJson)
-        {
-            CreateNewPasswordResponseJson createNewPasswordResponseJson = new CreateNewPasswordResponseJson();
-            createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail))
-                {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != createNewPasswordRequestJson.UserEmail)
-                {
-                    return Unauthorized();
-                }
-                else
-                {
-                    CreateNewPasswordRequest createNewPasswordRequest = new CreateNewPasswordRequest
-                    {
-                        UserEmail = createNewPasswordRequestJson.UserEmail,
-                    };
-
-                    CreateNewPasswordResponse createNewPasswordResponse = await _userApplication.CreateNewPassword(createNewPasswordRequest);
-                    if (createNewPasswordResponse.IsSuccess)
-                        createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    createNewPasswordResponseJson.IsSuccess = createNewPasswordResponse.IsSuccess;
-                    createNewPasswordResponseJson.Message = createNewPasswordResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                createNewPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                createNewPasswordResponseJson.IsSuccess = false;
-                createNewPasswordResponseJson.Message = $"unexpected error on UserController -> create-new-password: {ex.Message}";
-            }
-
-            return Ok(createNewPasswordResponseJson);
-        }
-        #endregion
-
-        #region Change password with password and email
-        [HttpPost("change-password-with-password-and-email")]
-        [Authorize]
-        public async Task<ActionResult<ChangePasswordWithPasswordAndEmailResponseJson>> ChangePasswordWithPasswordAndEmail([FromBody] ChangePasswordWithPasswordAndEmailRequestJson changePasswordWithPasswordAndEmailRequestJson)
-        {
-            ChangePasswordWithPasswordAndEmailResponseJson changePasswordWithPasswordAndEmailResponseJson = new ChangePasswordWithPasswordAndEmailResponseJson();
-            changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail))
-                {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != changePasswordWithPasswordAndEmailRequestJson.UserEmail)
-                {
-                    return Unauthorized();
-                }
-                else if (changePasswordWithPasswordAndEmailRequestJson == null ||
-                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.UserEmail) ||
-                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.OldPassword) ||
-                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.NewPassword) ||
-                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.ConfirmNewPassword))
-                {
-                    changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    changePasswordWithPasswordAndEmailResponseJson.IsSuccess = false;
-                    changePasswordWithPasswordAndEmailResponseJson.Message = "invalid data the data is null or empty";
-                }
-                else
-                {
-                    ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest = new ChangePasswordWithPasswordAndEmailRequest
-                    {
-                         UserEmail = changePasswordWithPasswordAndEmailRequestJson.UserEmail,
-                         OldPassword = changePasswordWithPasswordAndEmailRequestJson.OldPassword,
-                         NewPassword = changePasswordWithPasswordAndEmailRequestJson.NewPassword,
-                         ConfirmNewPassword = changePasswordWithPasswordAndEmailRequestJson.ConfirmNewPassword,
-                    };
-
-                    ChangePasswordWithPasswordAndEmailResponse changePasswordWithPasswordAndEmailResponse = await _userApplication.ChangePasswordWithPasswordAndEmail(changePasswordWithPasswordAndEmailRequest);
-                    if (changePasswordWithPasswordAndEmailResponse.IsSuccess)
-                        changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    changePasswordWithPasswordAndEmailResponseJson.IsSuccess = changePasswordWithPasswordAndEmailResponse.IsSuccess;
-                    changePasswordWithPasswordAndEmailResponseJson.Message = changePasswordWithPasswordAndEmailResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                changePasswordWithPasswordAndEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                changePasswordWithPasswordAndEmailResponseJson.IsSuccess = false;
-                changePasswordWithPasswordAndEmailResponseJson.Message = $"unexpected error on UserController -> change-password-with-password-and-email: {ex.Message}";
-            }
-
-            return Ok(changePasswordWithPasswordAndEmailResponseJson);
-        }
-        #endregion
-
-        #region Get user profile details
-        [HttpPost("get-user-profile-details")]
-        [Authorize]
-        public async Task<ActionResult<GetUserProfileDetailsResponseJson>> GetUserProfileDetails([FromBody] GetUserProfileDetailsRequestJson getUserProfileDetailsRequestJson)
-        {
-            GetUserProfileDetailsResponseJson getUserProfileDetailsResponseJson = new GetUserProfileDetailsResponseJson();
-            getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-
-                if (string.IsNullOrEmpty(tokenEmail))
-                {
-                    return Unauthorized();
-                }
-                else if (getUserProfileDetailsRequestJson == null ||
-                    string.IsNullOrEmpty(getUserProfileDetailsRequestJson?.UserEmail))
-                {
-                    getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getUserProfileDetailsResponseJson.IsSuccess = false;
-                    getUserProfileDetailsResponseJson.Message = "invalid data, the data is null or empty";
-                }
-                else
-                {
-                    string requestedEmail = getUserProfileDetailsRequestJson.UserEmail;
-                    bool isOwnProfile = requestedEmail == tokenEmail;
-
-                    GetAllUserFriendsRequest getAllUserFriendsRequest = new GetAllUserFriendsRequest
-                    {
-                        UserEmail = tokenEmail
-                    };
-
-                    GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
-                    bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                    if (!isOwnProfile && !areFriends && !isAdmin)
-                    {
-                        return Unauthorized("No puedes ver el perfil de este usuario");
-                    }
-
-                    GetUserProfileDetailsRequest getUserProfileDetailsRequest = new GetUserProfileDetailsRequest
-                    {
-                        UserEmail = requestedEmail,
-                    };
-
-                    GetUserProfileDetailsResponse getUserProfileDetailsResponse = await _userApplication.GetUserProfileDetails(getUserProfileDetailsRequest);
-                    if (getUserProfileDetailsResponse.IsSuccess)
-                    {
-                        getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getUserProfileDetailsResponseJson.Username = getUserProfileDetailsResponse.Username;
-                        getUserProfileDetailsResponseJson.InscriptionDate = getUserProfileDetailsResponse.InscriptionDate;
-                        getUserProfileDetailsResponseJson.RoutineCount = getUserProfileDetailsResponse.RoutineCount;
-                    }
-
-                    getUserProfileDetailsResponseJson.IsSuccess = getUserProfileDetailsResponse.IsSuccess;
-                    getUserProfileDetailsResponseJson.Message = getUserProfileDetailsResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getUserProfileDetailsResponseJson.IsSuccess = false;
-                getUserProfileDetailsResponseJson.Message = $"unexpected error on UserController -> get-user-profile-details {ex.Message}";
-            }
-
-            return Ok(getUserProfileDetailsResponseJson);
-        }
-        #endregion
-
         #region Add user to BlackList
         [HttpPost("add-user-to-black-list")]
         [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<AddUserToBlackListResponseJson>> AddUserToBlackList([FromBody] AddUserToBlackListRequestJson addUserToBlackListRequestJson)
         {
             AddUserToBlackListResponseJson addUserToBlackListResponseJson = new AddUserToBlackListResponseJson();
-            addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (addUserToBlackListRequestJson == null || 
@@ -659,10 +767,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     AddUserToBlackListResponse addUserToBlackListResponse = await _userApplication.AddUserToBlackList(addUserToBlackListRequest);
                     if (addUserToBlackListResponse.IsSuccess)
+                    {
                         addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    addUserToBlackListResponseJson.IsSuccess = addUserToBlackListResponse.IsSuccess;
-                    addUserToBlackListResponseJson.Message = addUserToBlackListResponse.Message;
+                        addUserToBlackListResponseJson.IsSuccess = addUserToBlackListResponse.IsSuccess;
+                        addUserToBlackListResponseJson.Message = addUserToBlackListResponse.Message;
+                    }
+                    else
+                    {
+                        addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        addUserToBlackListResponseJson.IsSuccess = addUserToBlackListResponse.IsSuccess;
+                        addUserToBlackListResponseJson.Message = addUserToBlackListResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -673,51 +788,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(addUserToBlackListResponseJson);
-        }
-        #endregion
-
-        #region Get integral user info
-        [HttpPost("get-integral-user-info")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<GetIntegralUserInfoResponseJson>> GetIntegralUserInfo([FromBody] GetIntegralUserInfoRequestJson getIntegralUserInfoRequestJson)
-        {
-            GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
-            getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
-            try
-            {
-                if (getIntegralUserInfoRequestJson == null ||
-                    getIntegralUserInfoRequestJson?.UserId == null)
-                {
-                    getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getIntegralUserInfoResponseJson.IsSuccess = false;
-                    getIntegralUserInfoResponseJson.Message = "invalid data, the email is null or empty";
-                }
-                else
-                {
-                    GetIntegralUserInfoRequest getIntegralUserInfoRequest = new GetIntegralUserInfoRequest
-                    {
-                        UserId = getIntegralUserInfoRequestJson.UserId,
-                        MasterKey = getIntegralUserInfoRequestJson.MasterKey,
-                    };
-
-                    GetIntegralUserInfoResponse getIntegralUserInfoResponse = await _userApplication.GetIntegralUserInfo(getIntegralUserInfoRequest);
-                    if (getIntegralUserInfoResponse.IsSuccess)
-                        getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    
-                    getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
-                    getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
-                    getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getIntegralUserInfoResponseJson.IsSuccess = false;
-                getIntegralUserInfoResponseJson.Message = $"unexpected error -> UserController -> get-integral-user-info: {ex.Message}";
-            }
-
-            return Ok(getIntegralUserInfoResponseJson);
         }
         #endregion
     }

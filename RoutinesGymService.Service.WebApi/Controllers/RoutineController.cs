@@ -38,20 +38,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
             CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
-            createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != createRoutineRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != createRoutineRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    createRoutineResponseJson.IsSuccess = false;
+                    createRoutineResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (createRoutineRequestJson == null ||
                     string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
@@ -72,10 +68,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CreateRoutineResponse createRoutineResponse = await _routineApplication.CreateRoutine(createRoutineRequest);
                     if (createRoutineResponse.IsSuccess)
+                    {
                         createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    createRoutineResponseJson.IsSuccess = createRoutineResponse.IsSuccess;
-                    createRoutineResponseJson.Message = createRoutineResponse.Message;
+                        createRoutineResponseJson.IsSuccess = createRoutineResponse.IsSuccess;
+                        createRoutineResponseJson.Message = createRoutineResponse.Message;
+                    }
+                    else
+                    {
+                        createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        createRoutineResponseJson.IsSuccess = createRoutineResponse.IsSuccess;
+                        createRoutineResponseJson.Message = createRoutineResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -94,8 +97,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<UpdateRoutineResponseJson>> UpdateRoutine([FromBody] UpdateRoutineRequestJson updateRoutineRequestJson)
         {
             UpdateRoutineResponseJson updateRoutineResponseJson = new UpdateRoutineResponseJson();
-            updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (updateRoutineRequestJson == null ||
@@ -120,10 +121,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         updateRoutineResponseJson.RoutineDTO = updateRoutineResponse.RoutineDTO;
+                        updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
+                        updateRoutineResponseJson.Message = updateRoutineResponse.Message;
                     }
-                 
-                    updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
-                    updateRoutineResponseJson.Message = updateRoutineResponse.Message;
+                    else
+                    {
+                        updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        updateRoutineResponseJson.RoutineDTO = updateRoutineResponse.RoutineDTO;
+                        updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
+                        updateRoutineResponseJson.Message = updateRoutineResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -143,20 +150,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
             DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
-            deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteRoutineRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != deleteRoutineRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    deleteRoutineResponseJson.IsSuccess = false;
+                    deleteRoutineResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (deleteRoutineRequestJson == null ||
                     string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
@@ -175,10 +178,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     DeleteRoutineResponse deleteRoutineResponse = await _routineApplication.DeleteRoutine(deleteRoutineRequest);
                     if (deleteRoutineResponse.IsSuccess)
+                    {
                         deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    deleteRoutineResponseJson.IsSuccess = deleteRoutineResponse.IsSuccess;
-                    deleteRoutineResponseJson.Message = deleteRoutineResponse.Message;
+                        deleteRoutineResponseJson.IsSuccess = deleteRoutineResponse.IsSuccess;
+                        deleteRoutineResponseJson.Message = deleteRoutineResponse.Message;
+                    }
+                    else
+                    {
+                        deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        deleteRoutineResponseJson.IsSuccess = deleteRoutineResponse.IsSuccess;
+                        deleteRoutineResponseJson.Message = deleteRoutineResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -198,15 +208,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetAllUserRoutinesResponseJson>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequestJson getAllUserRoutinesRequestJson)
         {
             GetAllUserRoutinesResponseJson getAllUserRoutinesResponseJson = new GetAllUserRoutinesResponseJson();
-            getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
                 if (string.IsNullOrEmpty(tokenEmail))
                 {
-                    return Unauthorized();
+                    getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getAllUserRoutinesResponseJson.IsSuccess = false;
+                    getAllUserRoutinesResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getAllUserRoutinesRequestJson == null ||
                     string.IsNullOrEmpty(getAllUserRoutinesRequestJson?.UserEmail))
@@ -231,23 +241,33 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     if (!isOwnProfile && !areFriends && !isAdmin)
                     {
-                        return Unauthorized("No puedes ver las rutinas de este usuario");
+                        getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                        getAllUserRoutinesResponseJson.IsSuccess = false;
+                        getAllUserRoutinesResponseJson.Message = "UNAUTHORIZED";
                     }
-
-                    GetAllUserRoutinesRequest getAllUserRoutinesRequest = new GetAllUserRoutinesRequest
+                    else
                     {
-                        UserEmail = requestedEmail, 
-                    };
+                        GetAllUserRoutinesRequest getAllUserRoutinesRequest = new GetAllUserRoutinesRequest
+                        {
+                            UserEmail = requestedEmail,
+                        };
 
-                    GetAllUserRoutinesResponse getAllUserRoutinesResponse = await _routineApplication.GetAllUserRoutines(getAllUserRoutinesRequest);
-                    if (getAllUserRoutinesResponse.IsSuccess)
-                    {
-                        getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getAllUserRoutinesResponseJson.Routines = getAllUserRoutinesResponse.Routines;
+                        GetAllUserRoutinesResponse getAllUserRoutinesResponse = await _routineApplication.GetAllUserRoutines(getAllUserRoutinesRequest);
+                        if (getAllUserRoutinesResponse.IsSuccess)
+                        {
+                            getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                            getAllUserRoutinesResponseJson.Routines = getAllUserRoutinesResponse.Routines;
+                            getAllUserRoutinesResponseJson.IsSuccess = getAllUserRoutinesResponse.IsSuccess;
+                            getAllUserRoutinesResponseJson.Message = getAllUserRoutinesResponse.Message;
+                        }
+                        else
+                        {
+                            getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                            getAllUserRoutinesResponseJson.Routines = getAllUserRoutinesResponse.Routines;
+                            getAllUserRoutinesResponseJson.IsSuccess = getAllUserRoutinesResponse.IsSuccess;
+                            getAllUserRoutinesResponseJson.Message = getAllUserRoutinesResponse.Message;
+                        }
                     }
-
-                    getAllUserRoutinesResponseJson.IsSuccess = getAllUserRoutinesResponse.IsSuccess;
-                    getAllUserRoutinesResponseJson.Message = getAllUserRoutinesResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -267,20 +287,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
             GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();
-            getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getRoutineStatsRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != getRoutineStatsRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getRoutineStatsResponseJson.IsSuccess = false;
+                    getRoutineStatsResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getRoutineStatsRequestJson == null)
                 {
@@ -297,13 +313,23 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     GetRoutineStatsResponse getRoutineStatsResponse = await _routineApplication.GetRoutineStats(getRoutineStatsRequest);
                     if (getRoutineStatsResponse.IsSuccess)
+                    {
                         getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
-                    getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
-                    getRoutineStatsResponseJson.RoutinesCount = getRoutineStatsResponse.RoutinesCount;
-                    getRoutineStatsResponseJson.ExercisesCount = getRoutineStatsResponse.ExercisesCount;
-                    getRoutineStatsResponseJson.SplitsCount = getRoutineStatsResponse.SplitsCount;
+                        getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
+                        getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
+                        getRoutineStatsResponseJson.RoutinesCount = getRoutineStatsResponse.RoutinesCount;
+                        getRoutineStatsResponseJson.ExercisesCount = getRoutineStatsResponse.ExercisesCount;
+                        getRoutineStatsResponseJson.SplitsCount = getRoutineStatsResponse.SplitsCount;
+                    }
+                    else
+                    {
+                        getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getRoutineStatsResponseJson.IsSuccess = getRoutineStatsResponse.IsSuccess;
+                        getRoutineStatsResponseJson.Message = getRoutineStatsResponse.Message;
+                        getRoutineStatsResponseJson.RoutinesCount = getRoutineStatsResponse.RoutinesCount;
+                        getRoutineStatsResponseJson.ExercisesCount = getRoutineStatsResponse.ExercisesCount;
+                        getRoutineStatsResponseJson.SplitsCount = getRoutineStatsResponse.SplitsCount;
+                    }
                 }
             }
             catch (Exception ex)
@@ -323,15 +349,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
             GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
-            getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
                 if (string.IsNullOrEmpty(tokenEmail))
                 {
-                    return Unauthorized();
+                    getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getRoutineByRoutineNameResponseJson.IsSuccess = false;
+                    getRoutineByRoutineNameResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getRoutineByRoutineNameRequestJson == null ||
                     string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.RoutineName) ||
@@ -357,24 +383,34 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     if (!isOwnProfile && !areFriends && !isAdmin)
                     {
-                        return Unauthorized("No puedes ver las rutinas de este usuario");
+                        getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                        getRoutineByRoutineNameResponseJson.IsSuccess = false;
+                        getRoutineByRoutineNameResponseJson.Message = "UNAUTHORIZED";
                     }
-
-                    GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest = new GetRoutineByRoutineNameRequest
+                    else
                     {
-                        RoutineName = getRoutineByRoutineNameRequestJson.RoutineName,
-                        UserEmail = requestedEmail 
-                    };
+                        GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest = new GetRoutineByRoutineNameRequest
+                        {
+                            RoutineName = getRoutineByRoutineNameRequestJson.RoutineName,
+                            UserEmail = requestedEmail
+                        };
 
-                    GetRoutineByRoutineNameResponse getRoutineByRoutineNameResponse = await _routineApplication.GetRoutineByRoutineName(getRoutineByRoutineNameRequest);
-                    if (getRoutineByRoutineNameResponse.IsSuccess)
-                    {
-                        getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
+                        GetRoutineByRoutineNameResponse getRoutineByRoutineNameResponse = await _routineApplication.GetRoutineByRoutineName(getRoutineByRoutineNameRequest);
+                        if (getRoutineByRoutineNameResponse.IsSuccess)
+                        {
+                            getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                            getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
+                            getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
+                            getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
+                        }
+                        else
+                        {
+                            getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                            getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
+                            getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
+                            getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
+                        }
                     }
-
-                    getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
-                    getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
                 }
             }
             catch (Exception ex)

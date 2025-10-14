@@ -8,7 +8,6 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
-using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
@@ -30,20 +29,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetAllUserFriendsResponseJson>> GetAllUserFriends([FromBody] GetAllUserFriendsRequestJson getAllUserFriendsRequestJson)
         {
             GetAllUserFriendsResponseJson getAllUserFriendsResponseJson = new GetAllUserFriendsResponseJson();
-            getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getAllUserFriendsRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != getAllUserFriendsRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getAllUserFriendsResponseJson.IsSuccess = false;
+                    getAllUserFriendsResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getAllUserFriendsRequestJson == null)
                 {
@@ -63,10 +58,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getAllUserFriendsResponseJson.Friends = getAllUserFriendsResponse.Friends;
+                        getAllUserFriendsResponseJson.IsSuccess = getAllUserFriendsResponse.IsSuccess;
+                        getAllUserFriendsResponseJson.Message = getAllUserFriendsResponse.Message;
                     }
-                     
-                    getAllUserFriendsResponseJson.IsSuccess = getAllUserFriendsResponse.IsSuccess;
-                    getAllUserFriendsResponseJson.Message = getAllUserFriendsResponse.Message;
+                    else
+                    {
+                        getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getAllUserFriendsResponseJson.Friends = getAllUserFriendsResponse.Friends;
+                        getAllUserFriendsResponseJson.IsSuccess = getAllUserFriendsResponse.IsSuccess;
+                        getAllUserFriendsResponseJson.Message = getAllUserFriendsResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -86,20 +87,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<AddNewUserFriendResponseJson>> AddNewUserFriend([FromBody] AddNewUserFriendRequestJson addNewUserFriendRequestJson)
         {
             AddNewUserFriendResponseJson addNewUserFriendResponseJson = new AddNewUserFriendResponseJson();
-            addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addNewUserFriendResponseJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != addNewUserFriendRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    addNewUserFriendResponseJson.IsSuccess = false;
+                    addNewUserFriendResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (addNewUserFriendRequestJson == null ||
                     string.IsNullOrEmpty(addNewUserFriendRequestJson.FriendCode))
@@ -118,10 +115,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     AddNewUserFriendResponse addNewUserFriendResponse = await _friendApplication.AddNewUserFriend(addNewUserFriendRequest);
                     if (addNewUserFriendResponse.IsSuccess)
+                    {
                         addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                 
-                    addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
-                    addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
+                        addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
+                        addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
+                    }
+                    else
+                    {
+                        addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        addNewUserFriendResponseJson.IsSuccess = addNewUserFriendResponse.IsSuccess;
+                        addNewUserFriendResponseJson.Message = addNewUserFriendResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -141,20 +145,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<DeleteFriendResponseJson>> DeleteFriend([FromBody] DeleteFriendRequestJson deleteFriendRequestJson)
         {
             DeleteFriendResponseJson deleteFriendResponseJson = new DeleteFriendResponseJson();
-            deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteFriendResponseJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != deleteFriendRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    deleteFriendResponseJson.IsSuccess = false;
+                    deleteFriendResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (deleteFriendRequestJson == null ||
                     string.IsNullOrEmpty(deleteFriendRequestJson.UserEmail) ||
@@ -174,10 +174,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     DeleteFriendResponse deleteFriendResponse = await _friendApplication.DeleteFriend(deleteFriendRequest);
                     if (deleteFriendResponse.IsSuccess)
+                    {
                         deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                 
-                    deleteFriendResponseJson.IsSuccess = deleteFriendResponse.IsSuccess;
-                    deleteFriendResponseJson.Message = deleteFriendResponse.Message;
+                        deleteFriendResponseJson.IsSuccess = deleteFriendResponse.IsSuccess;
+                        deleteFriendResponseJson.Message = deleteFriendResponse.Message;
+                    }
+                    else
+                    {
+                        deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        deleteFriendResponseJson.IsSuccess = deleteFriendResponse.IsSuccess;
+                        deleteFriendResponseJson.Message = deleteFriendResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
