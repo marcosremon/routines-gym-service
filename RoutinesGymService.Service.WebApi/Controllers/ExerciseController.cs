@@ -38,20 +38,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<AddExerciseAddExerciseProgressResponseJson>> AddExerciseProgress([FromBody] AddExerciseAddExerciseProgressRequestJson addExerciseRequestJson)
         {
             AddExerciseAddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseAddExerciseProgressResponseJson();
-            addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
+                    addExerciseAddExerciseProgressResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (addExerciseRequestJson == null ||
                     addExerciseRequestJson?.RoutineId == null ||
@@ -75,10 +71,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     
                     AddExerciseAddExerciseProgressResponse addExerciseAddExerciseProgressResponse = await _exerciseApplication.AddExerciseProgress(addExerciseRequest);
                     if (addExerciseAddExerciseProgressResponse.IsSuccess)
+                    {
                         addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                     
-                    addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
-                    addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
+                        addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
+                        addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
+                    }
+                    else
+                    {
+                        addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        addExerciseAddExerciseProgressResponseJson.IsSuccess = addExerciseAddExerciseProgressResponse.IsSuccess;
+                        addExerciseAddExerciseProgressResponseJson.Message = addExerciseAddExerciseProgressResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -97,8 +100,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<UpdateExerciseResponseJson>> UpdateExercise([FromBody] UpdateExerciseRequestJson updateExerciseRequestJson)
         {
             UpdateExerciseResponseJson updateExerciseResponseJson = new UpdateExerciseResponseJson();
-            updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (updateExerciseRequestJson == null ||
@@ -129,10 +130,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         updateExerciseResponseJson.UserDTO = updateExerciseResponse.UserDTO;
+                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
+                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
                     }
-                 
-                    updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
-                    updateExerciseResponseJson.Message = updateExerciseResponse.Message;
+                    else
+                    {
+                        updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        updateExerciseResponseJson.UserDTO = updateExerciseResponse.UserDTO;
+                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
+                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -152,20 +159,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<DeleteExerciseResponseJson>> DeleteExercise([FromBody] DeleteExerciseRequestJson deleteExerciseRequestJson)
         {
             DeleteExerciseResponseJson deleteExerciseResponseJson = new DeleteExerciseResponseJson();
-            deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteExerciseRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != deleteExerciseRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    deleteExerciseResponseJson.IsSuccess = false;
+                    deleteExerciseResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (deleteExerciseRequestJson == null ||
                     deleteExerciseRequestJson?.RoutineId == null ||
@@ -188,10 +191,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     DeleteExerciseResponse deleteExerciseResponse = await _exerciseApplication.DeleteExercise(deleteExerciseRequest);
                     if (deleteExerciseResponse.IsSuccess)
+                    {
                         deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                 
-                    deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
-                    deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
+                        deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
+                        deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
+                    }
+                    else
+                    {
+                        deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        deleteExerciseResponseJson.IsSuccess = deleteExerciseResponse.IsSuccess;
+                        deleteExerciseResponseJson.Message = deleteExerciseResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -211,20 +221,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<AddExerciseResponseJson>> AddExercise([FromBody] AddExerciseRequestJson addExerciseRequestJson)
         {
             AddExerciseResponseJson addExerciseResponseJson = new AddExerciseResponseJson();
-            addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    addExerciseResponseJson.IsSuccess = false;
+                    addExerciseResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (addExerciseRequestJson == null ||
                     string.IsNullOrEmpty(addExerciseRequestJson.RoutineName) ||
@@ -247,10 +253,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     AddExerciseResponse addExerciseResponse = await _exerciseApplication.AddExercise(addExerciseRequest);
                     if (addExerciseResponse.IsSuccess)
+                    {
                         addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                 
-                    addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
-                    addExerciseResponseJson.Message = addExerciseResponse.Message;
+                        addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
+                        addExerciseResponseJson.Message = addExerciseResponse.Message;
+                    }
+                    else
+                    {
+                        addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        addExerciseResponseJson.IsSuccess = addExerciseResponse.IsSuccess;
+                        addExerciseResponseJson.Message = addExerciseResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -270,15 +283,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetExercisesByDayAndRoutineNameResponseJson>> GetExercisesByDayAndRoutineName([FromBody] GetExercisesByDayAndRoutineNameRequestJson getExercisesByDayNameAndRoutineNameRequestJson)
         {
             GetExercisesByDayAndRoutineNameResponseJson getExercisesByDayAndRoutineNameResponseJson = new GetExercisesByDayAndRoutineNameResponseJson();
-            getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
 
                 if (string.IsNullOrEmpty(tokenEmail))
                 {
-                    return Unauthorized();
+                    getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getExercisesByDayAndRoutineNameResponseJson.IsSuccess = false;
+                    getExercisesByDayAndRoutineNameResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getExercisesByDayNameAndRoutineNameRequestJson == null ||
                     string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.RoutineName) ||
@@ -305,27 +318,37 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     if (!isOwnProfile && !areFriends && !isAdmin)
                     {
-                        return Unauthorized("No puedes ver las rutinas de este usuario");
+                        getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                        getExercisesByDayAndRoutineNameResponseJson.IsSuccess = false;
+                        getExercisesByDayAndRoutineNameResponseJson.Message = "UNAUTHORIZED";
                     }
-
-                    GetExercisesByDayAndRoutineNameRequest getExercisesByDayNameAndRoutineNameRequest = new GetExercisesByDayAndRoutineNameRequest
+                    else
                     {
-                        RoutineName = getExercisesByDayNameAndRoutineNameRequestJson.RoutineName,
-                        DayName = getExercisesByDayNameAndRoutineNameRequestJson.DayName,
-                        UserEmail = requestedEmail 
-                    };
+                        GetExercisesByDayAndRoutineNameRequest getExercisesByDayNameAndRoutineNameRequest = new GetExercisesByDayAndRoutineNameRequest
+                        {
+                            RoutineName = getExercisesByDayNameAndRoutineNameRequestJson.RoutineName,
+                            DayName = getExercisesByDayNameAndRoutineNameRequestJson.DayName,
+                            UserEmail = requestedEmail
+                        };
 
-                    GetExercisesByDayAndRoutineNameResponse getExercisesByDayAndRoutineNameResponse = await _exerciseApplication.GetExercisesByDayAndRoutineName(getExercisesByDayNameAndRoutineNameRequest);
-
-                    if (getExercisesByDayAndRoutineNameResponse.IsSuccess)
-                    {
-                        getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getExercisesByDayAndRoutineNameResponseJson.Exercises = getExercisesByDayAndRoutineNameResponse.Exercises;
-                        getExercisesByDayAndRoutineNameResponseJson.PastProgress = getExercisesByDayAndRoutineNameResponse.PastProgress;
+                        GetExercisesByDayAndRoutineNameResponse getExercisesByDayAndRoutineNameResponse = await _exerciseApplication.GetExercisesByDayAndRoutineName(getExercisesByDayNameAndRoutineNameRequest);
+                        if (getExercisesByDayAndRoutineNameResponse.IsSuccess)
+                        {
+                            getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                            getExercisesByDayAndRoutineNameResponseJson.Exercises = getExercisesByDayAndRoutineNameResponse.Exercises;
+                            getExercisesByDayAndRoutineNameResponseJson.PastProgress = getExercisesByDayAndRoutineNameResponse.PastProgress;
+                            getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
+                            getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
+                        }
+                        else
+                        {
+                            getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                            getExercisesByDayAndRoutineNameResponseJson.Exercises = getExercisesByDayAndRoutineNameResponse.Exercises;
+                            getExercisesByDayAndRoutineNameResponseJson.PastProgress = getExercisesByDayAndRoutineNameResponse.PastProgress;
+                            getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
+                            getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
+                        }
                     }
-
-                    getExercisesByDayAndRoutineNameResponseJson.IsSuccess = getExercisesByDayAndRoutineNameResponse.IsSuccess;
-                    getExercisesByDayAndRoutineNameResponseJson.Message = getExercisesByDayAndRoutineNameResponse.Message;
                 }
             }
             catch (Exception ex)
@@ -345,20 +368,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetAllExerciseProgressResponseJson>> GetAllExerciseProgress([FromBody] GetAllExerciseProgressRequestJson getAllExerciseProgressRequestJson)
         {
             GetAllExerciseProgressResponseJson getAllExerciseProgressResponseJson = new GetAllExerciseProgressResponseJson();
-            getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getAllExerciseProgressRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != getAllExerciseProgressRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getAllExerciseProgressResponseJson.IsSuccess = false;
+                    getAllExerciseProgressResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getAllExerciseProgressRequestJson == null ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.RoutineName) ||
@@ -384,10 +403,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getAllExerciseProgressResponseJson.ExerciseProgressList = getAllExerciseProgressResponse.ExerciseProgressList;
+                        getAllExerciseProgressResponseJson.IsSuccess = getAllExerciseProgressResponse.IsSuccess;
+                        getAllExerciseProgressResponseJson.Message = getAllExerciseProgressResponse.Message;
                     }
-
-                    getAllExerciseProgressResponseJson.IsSuccess = getAllExerciseProgressResponse.IsSuccess;
-                    getAllExerciseProgressResponseJson.Message = getAllExerciseProgressResponse.Message;
+                    else
+                    {
+                        getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getAllExerciseProgressResponseJson.ExerciseProgressList = getAllExerciseProgressResponse.ExerciseProgressList;
+                        getAllExerciseProgressResponseJson.IsSuccess = getAllExerciseProgressResponse.IsSuccess;
+                        getAllExerciseProgressResponseJson.Message = getAllExerciseProgressResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
