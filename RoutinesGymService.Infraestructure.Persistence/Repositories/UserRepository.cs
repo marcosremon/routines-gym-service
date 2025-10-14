@@ -22,7 +22,6 @@ using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
-using System.Text;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
@@ -191,60 +190,71 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {
-                            if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
+                            user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni && u.Email == createGenericUserRequest.Email);
+                            if (user == null)
                             {
                                 createUserResponse.IsSuccess = false;
-                                createUserResponse.Message = "Password and confirm password do not match";
+                                createUserResponse.Message = "The email entered does not match the user's email address with the ID number entered";
                             }
                             else
                             {
-                                if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                                if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
                                 {
                                     createUserResponse.IsSuccess = false;
-                                    createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
+                                    createUserResponse.Message = "Password and confirm password do not match";
                                 }
                                 else
                                 {
-                                    string friendCode = GenericUtils.CreateFriendCode(8);
-                                    while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode))
+                                    if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
                                     {
-                                        friendCode = GenericUtils.CreateFriendCode(8);
+                                        createUserResponse.IsSuccess = false;
+                                        createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
                                     }
-
-                                    if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
-                                        createGenericUserRequest.SerialNumber == "UNKNOWN" ||
-                                        createGenericUserRequest.SerialNumber.Contains("ERROR_"))
+                                    else
                                     {
-                                        string newSerial = Guid.NewGuid().ToString();
-                                        while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial))
+                                        string friendCode = string.Empty;
+                                        do
                                         {
-                                            newSerial = Guid.NewGuid().ToString();
+                                            friendCode = GenericUtils.CreateFriendCode(8);
+                                        }
+                                        while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode));
+
+                                        if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
+                                            createGenericUserRequest.SerialNumber == "UNKNOWN" ||
+                                            createGenericUserRequest.SerialNumber.Contains("ERROR_"))
+                                        {
+                                            string newSerial = string.Empty;
+                                            do
+                                            {
+                                                newSerial = Guid.NewGuid().ToString();
+                                            }
+                                            while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial));
+
+                                            createGenericUserRequest.SerialNumber = newSerial;
                                         }
 
-                                        createGenericUserRequest.SerialNumber = newSerial;
+                                        User newUser = new User
+                                        {
+                                            Dni = createGenericUserRequest.Dni!,
+                                            Username = createGenericUserRequest.Username!,
+                                            Surname = createGenericUserRequest.Surname ?? "",
+                                            Email = createGenericUserRequest.Email!.ToLower(),
+                                            FriendCode = friendCode,
+                                            SerialNumber = createGenericUserRequest.SerialNumber!,
+                                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                                            Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
+                                            RoleString = createGenericUserRequest.Role.ToString().ToLower(),
+                                            InscriptionDate = DateTime.UtcNow
+                                        };
+
+                                        _genericUtils.ClearCache(_userPrefix);
+
+                                        await _context.Users.AddAsync(newUser);
+                                        await _context.SaveChangesAsync();
+
+                                        createUserResponse.IsSuccess = true;
+                                        createUserResponse.Message = "User created successfully";
                                     }
-
-                                    User newUser = new User
-                                    {
-                                        Dni = createGenericUserRequest.Dni!,
-                                        Username = createGenericUserRequest.Username!,
-                                        Surname = createGenericUserRequest.Surname ?? "",
-                                        Email = createGenericUserRequest.Email!.ToLower(),
-                                        FriendCode = friendCode,
-                                        SerialNumber = createGenericUserRequest.SerialNumber!,
-                                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
-                                        Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
-                                        RoleString = createGenericUserRequest.Role.ToString().ToLower(),
-                                        InscriptionDate = DateTime.UtcNow
-                                    };
-
-                                    _genericUtils.ClearCache(_userPrefix);
-
-                                    await _context.Users.AddAsync(newUser);
-                                    await _context.SaveChangesAsync();
-
-                                    createUserResponse.IsSuccess = true;
-                                    createUserResponse.Message = "User created successfully";
                                 }
                             }
                         }
@@ -278,21 +288,23 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    string friendCode = GenericUtils.CreateFriendCode(8);
-                    while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode))
+                    string friendCode = string.Empty;
+                    do
                     {
                         friendCode = GenericUtils.CreateFriendCode(8);
                     }
+                    while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode));
 
                     if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
                        createGenericUserRequest.SerialNumber == "UNKNOWN" ||
                        createGenericUserRequest.SerialNumber.Contains("ERROR_"))
                     {
-                        string newSerial = Guid.NewGuid().ToString();
-                        while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial))
+                        string newSerial = string.Empty;
+                        do
                         {
                             newSerial = Guid.NewGuid().ToString();
                         }
+                        while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial));
 
                         createGenericUserRequest.SerialNumber = newSerial;
                     }
@@ -474,7 +486,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     MailUtils.SendEmail(user.Username, user.Email, newPassword);
 
-
                     createNewPasswordResponse.IsSuccess = true;
                     createNewPasswordResponse.Message = "New password created successfully";
                 }
@@ -501,7 +512,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (!_passwordUtils.VerifyPassword(user.Password, changePasswordWithPasswordAndEmailRequest.OldPassword))
+                    if (!_passwordUtils.VerifyPassword(user.Password!, changePasswordWithPasswordAndEmailRequest.OldPassword!))
                     {
                         changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
                         changePasswordWithPasswordAndEmailResponse.Message = "Old password does not match";
@@ -543,7 +554,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 string cacheKey = $"{_userPrefix}GetUserProfileDetails_{GetUserProfileDetails.UserEmail}";
-                _genericUtils.ClearCache(_userPrefix);
+
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)
                 {
@@ -689,74 +700,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             catch (Exception ex)
             {
                 getIntegralUserInfoResponse.IsSuccess = false;
-                getIntegralUserInfoResponse.UserDTO = new UserDTO();
                 getIntegralUserInfoResponse.Message = $"unexpected error on UserRepository -> GetIntegralUserInfo: {ex.Message}";
             }
 
             return getIntegralUserInfoResponse;
-        }
-
-        public static string DiagnoseEncryptedPassword(byte[] encryptedPassword, string masterKey)
-        {
-            try
-            {
-                int nonceSize = 12;
-                int tagSize = 16;
-                int saltSize = 16;
-
-                Console.WriteLine($"=== DIAGNÓSTICO CONTRASEÑA CIFRADA ===");
-                Console.WriteLine($"Longitud total: {encryptedPassword.Length} bytes");
-
-                // Verificar marker
-                bool hasMarker = encryptedPassword.Length >= 4 &&
-                                encryptedPassword[^4] == 0xDE &&
-                                encryptedPassword[^3] == 0xAD &&
-                                encryptedPassword[^2] == 0xBE &&
-                                encryptedPassword[^1] == 0xEF;
-
-                Console.WriteLine($"Tiene marker DEADBEEF: {hasMarker}");
-
-                if (!hasMarker)
-                {
-                    return "No tiene marker DEADBEEF - formato incorrecto";
-                }
-
-                // Calcular tamaños
-                int firstLayerLength = saltSize + nonceSize + (encryptedPassword.Length - saltSize - nonceSize - nonceSize - tagSize - 4);
-                int masterNonceOffset = firstLayerLength;
-                int masterEncryptedOffset = masterNonceOffset + nonceSize;
-                int masterEncryptedLength = encryptedPassword.Length - masterEncryptedOffset - 4;
-
-                Console.WriteLine($"First layer length: {firstLayerLength}");
-                Console.WriteLine($"Master nonce offset: {masterNonceOffset}");
-                Console.WriteLine($"Master encrypted offset: {masterEncryptedOffset}");
-                Console.WriteLine($"Master encrypted length: {masterEncryptedLength}");
-
-                // Extraer componentes
-                byte[] masterNonce = new byte[nonceSize];
-                byte[] masterEncrypted = new byte[masterEncryptedLength];
-
-                Buffer.BlockCopy(encryptedPassword, masterNonceOffset, masterNonce, 0, nonceSize);
-                Buffer.BlockCopy(encryptedPassword, masterEncryptedOffset, masterEncrypted, 0, masterEncryptedLength);
-
-                Console.WriteLine($"Master nonce: {BitConverter.ToString(masterNonce)}");
-                Console.WriteLine($"Master encrypted: {BitConverter.ToString(masterEncrypted.Take(32).ToArray())}...");
-
-                // Verificar MasterKey
-                if (masterKey.Length != 32)
-                {
-                    return $"MasterKey tiene longitud {masterKey.Length}, debe ser 32";
-                }
-
-                byte[] masterKeyBytes = Encoding.UTF8.GetBytes(masterKey);
-                Console.WriteLine($"Master key bytes: {BitConverter.ToString(masterKeyBytes)}");
-
-                return "Diagnóstico completado - revisa los logs";
-            }
-            catch (Exception ex)
-            {
-                return $"Error en diagnóstico: {ex.Message}";
-            }
         }
     }
 }
