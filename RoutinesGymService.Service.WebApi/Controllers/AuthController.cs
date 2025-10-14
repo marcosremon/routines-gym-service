@@ -6,7 +6,6 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.Login;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.LoginWeb;
-using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Service.WebApi.Controllers
 {
@@ -26,8 +25,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<LoginResponseJson>> Login([FromBody] LoginRequestJson loginRequestJson)
         {
             LoginResponseJson loginResponseJson = new LoginResponseJson();
-            loginResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 if (loginRequestJson == null ||
@@ -52,10 +49,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         loginResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         loginResponseJson.IsAdmin = loginResponse.IsAdmin;
                         loginResponseJson.BearerToken = loginResponse.BearerToken;
+                        loginResponseJson.IsSuccess = loginResponse.IsSuccess;
+                        loginResponseJson.Message = loginResponse.Message;
                     }
-                 
-                    loginResponseJson.IsSuccess = loginResponse.IsSuccess;
-                    loginResponseJson.Message = loginResponse.Message;
+                    else
+                    {
+                        loginResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        loginResponseJson.IsAdmin = loginResponse.IsAdmin;
+                        loginResponseJson.BearerToken = loginResponse.BearerToken;
+                        loginResponseJson.IsSuccess = loginResponse.IsSuccess;
+                        loginResponseJson.Message = loginResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -98,13 +102,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     if (loginResponse.IsSuccess)
                     {
                         loginWebResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        loginWebResponseJson.BearerToken = loginResponse.IsAdmin
-                            ? JwtUtils.GenerateAdminJwtToken(loginWebRequest.UserEmail)
-                            : JwtUtils.GenerateUserJwtToken(loginWebRequest.UserEmail);
+                        loginWebResponseJson.BearerToken = loginResponse.BearerToken;
+                        loginWebResponseJson.IsSuccess = loginResponse.IsSuccess;
+                        loginWebResponseJson.Message = loginResponse.Message;
                     }
-                     
-                    loginWebResponseJson.IsSuccess = loginResponse.IsSuccess;
-                    loginWebResponseJson.Message = loginResponse.Message;
+                    else
+                    {
+                        loginWebResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        loginWebResponseJson.BearerToken = loginResponse.BearerToken; 
+                        loginWebResponseJson.IsSuccess = loginResponse.IsSuccess;
+                        loginWebResponseJson.Message = loginResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -143,13 +151,19 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     CheckTokenStatusResponse checkTokenStatusResponse = _authApplication.CheckTokenStatus(checkTokenStatusRequest);
                     if (checkTokenStatusResponse.IsValid)
+                    {
                         checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        checkTokenStatusResponseJson.IsValid = checkTokenStatusResponse.IsValid;
+                        checkTokenStatusResponseJson.IsSuccess = checkTokenStatusResponse.IsSuccess;
+                        checkTokenStatusResponseJson.Message = checkTokenStatusResponse.Message;
+                    }
                     else
+                    {
                         checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-
-                    checkTokenStatusResponseJson.IsValid = checkTokenStatusResponse.IsValid;
-                    checkTokenStatusResponseJson.IsSuccess = checkTokenStatusResponse.IsSuccess;
-                    checkTokenStatusResponseJson.Message = checkTokenStatusResponse.Message;
+                        checkTokenStatusResponseJson.IsValid = checkTokenStatusResponse.IsValid;
+                        checkTokenStatusResponseJson.IsSuccess = checkTokenStatusResponse.IsSuccess;
+                        checkTokenStatusResponseJson.Message = checkTokenStatusResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)

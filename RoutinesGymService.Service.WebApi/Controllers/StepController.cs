@@ -28,20 +28,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetStepResponseJson>> GetStats([FromBody] GetStepRequestJson getStepRequestJson)
         {
             GetStepResponseJson getStepResponseJson = new GetStepResponseJson();
-            getStepResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getStepRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != getStepRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    getStepResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getStepResponseJson.IsSuccess = false;
+                    getStepResponseJson.Message = "UNAUTHORIZED";
                 }
                 else
                 {
@@ -55,10 +51,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         getStepResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getStepResponseJson.Steps = getStatsResponse.Stats;
+                        getStepResponseJson.IsSuccess = getStatsResponse.IsSuccess;
+                        getStepResponseJson.Message = getStatsResponse.Message;
                     }
-
-                    getStepResponseJson.IsSuccess = getStatsResponse.IsSuccess;
-                    getStepResponseJson.Message = getStatsResponse.Message;
+                    else
+                    {
+                        getStepResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getStepResponseJson.Steps = getStatsResponse.Stats;
+                        getStepResponseJson.IsSuccess = getStatsResponse.IsSuccess;
+                        getStepResponseJson.Message = getStatsResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -78,20 +80,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<GetDailyStepsInfoResponseJson>> GetDailyStepsInfo([FromBody] GetDailyStepsInfoRequestJson getDailyStepsInfoRequestJson)
         {
             GetDailyStepsInfoResponseJson getDailyStepsInfoResponseJson = new GetDailyStepsInfoResponseJson();
-            getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getDailyStepsInfoRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != getDailyStepsInfoRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getDailyStepsInfoResponseJson.IsSuccess = false;
+                    getDailyStepsInfoResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (getDailyStepsInfoRequestJson.DailySteps == null || 
                     getDailyStepsInfoRequestJson.Day == null)
@@ -104,7 +102,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 {
                     GetDailyStepsInfoRequest getDailyStepsInfoRequest = new GetDailyStepsInfoRequest
                     {
-                        UserEmail = getDailyStepsInfoRequestJson.UserEmail,
+                        UserEmail = getDailyStepsInfoRequestJson.UserEmail!,
                         DailySteps = getDailyStepsInfoRequestJson.DailySteps,
                         Day = getDailyStepsInfoRequestJson.Day,
                     };
@@ -115,10 +113,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                         getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         getDailyStepsInfoResponseJson.DailyStepsGoal = getDailyStepsInfoResponse.DailyStepsGoal;
                         getDailyStepsInfoResponseJson.DailySteps = getDailyStepsInfoResponse.DailySteps;
+                        getDailyStepsInfoResponseJson.IsSuccess = getDailyStepsInfoResponse.IsSuccess;
+                        getDailyStepsInfoResponseJson.Message = getDailyStepsInfoResponse.Message;
                     }
-
-                    getDailyStepsInfoResponseJson.IsSuccess = getDailyStepsInfoResponse.IsSuccess;
-                    getDailyStepsInfoResponseJson.Message = getDailyStepsInfoResponse.Message;
+                    else
+                    {
+                        getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getDailyStepsInfoResponseJson.DailyStepsGoal = getDailyStepsInfoResponse.DailyStepsGoal;
+                        getDailyStepsInfoResponseJson.DailySteps = getDailyStepsInfoResponse.DailySteps;
+                        getDailyStepsInfoResponseJson.IsSuccess = getDailyStepsInfoResponse.IsSuccess;
+                        getDailyStepsInfoResponseJson.Message = getDailyStepsInfoResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
@@ -138,20 +143,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<SaveDailyStepsResponseJson>> SaveDailySteps([FromBody] SaveDailyStepsRequestJson saveDailyStepsRequestJson)
         {
             SaveDailyStepsResponseJson saveDailyStepsResponseJson = new SaveDailyStepsResponseJson();
-            saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-          
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != saveDailyStepsRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != saveDailyStepsRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    saveDailyStepsResponseJson.IsSuccess = false;
+                    saveDailyStepsResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (saveDailyStepsRequestJson == null ||
                     saveDailyStepsRequestJson.Steps == null ||
@@ -172,10 +173,17 @@ namespace RoutinesGymService.Service.WebApi.Controllers
 
                     SaveDailyStepsResponse saveDailyStepsResponse = await _stepApplication.SaveDailySteps(saveDailyStepsRequest);
                     if (saveDailyStepsResponse.IsSuccess)
+                    {
                         saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-
-                    saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
-                    saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
+                        saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
+                        saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
+                    }
+                    else
+                    {
+                        saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        saveDailyStepsResponseJson.IsSuccess = saveDailyStepsResponse.IsSuccess;
+                        saveDailyStepsResponseJson.Message = saveDailyStepsResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)

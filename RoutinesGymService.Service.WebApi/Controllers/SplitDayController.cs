@@ -25,20 +25,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         public async Task<ActionResult<UpdateSplitDayResponseJson>> UpdateSplitDay([FromBody] UpdateSplitDayRequestJson updateSplitDayRequestJson)
         {
             UpdateSplitDayResponseJson updateSplitDayResponseJson = new UpdateSplitDayResponseJson();
-            updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != updateSplitDayRequestJson.UserEmail))
                 {
-                    return Unauthorized();
-                }
-                else if (!isAdmin && tokenEmail != updateSplitDayRequestJson.UserEmail)
-                {
-                    return Unauthorized();
+                    updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    updateSplitDayResponseJson.IsSuccess = false;
+                    updateSplitDayResponseJson.Message = "UNAUTHORIZED";
                 }
                 else if (updateSplitDayRequestJson == null ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.RoutineName) ||
@@ -63,10 +59,16 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                     {
                         updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
                         updateSplitDayResponseJson.UserDTO = updateSplitDayResponse.UserDTO;
+                        updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
+                        updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
                     }
-
-                    updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
-                    updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
+                    else
+                    {
+                        updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        updateSplitDayResponseJson.UserDTO = updateSplitDayResponse.UserDTO;
+                        updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
+                        updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
