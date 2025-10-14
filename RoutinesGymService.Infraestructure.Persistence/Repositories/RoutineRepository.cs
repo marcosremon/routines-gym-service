@@ -292,8 +292,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 }
                             )
                             .SelectMany(
-                                x => x.SplitDaysGroup.DefaultIfEmpty(), // Mantiene la rutina si SplitDaysGroup está vacío
-                                (parent, child) => new { parent.Routine, SplitDay = child } // Aplana los resultados
+                                x => x.SplitDaysGroup.DefaultIfEmpty(), 
+                                (parent, child) => new { parent.Routine, SplitDay = child } 
                             )
                             .GroupBy(x => x.Routine)
                             .Select(g => new Routine 
