@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
@@ -13,6 +14,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.Get
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Domain.Model.Enums;
@@ -26,6 +28,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateNewPasswo
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetIntegralUserInfo;
+using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
@@ -625,6 +628,55 @@ namespace RoutinesGymService.Service.WebApi.Controllers
             }
 
             return Ok(getUsersResponseJson);
+        }
+        #endregion
+
+        #region Get integral users
+        [HttpPost("get-integral-users")]
+        [Authorize(Roles = nameof(Role.ADMIN))]
+        public async Task<ActionResult<GetIntegralUsersResponseJson>> GetIntegralUsers([FromBody] GetIntegralUsersRequestJson getIntegralUsersRequestJson)
+        {
+            GetIntegralUsersResponseJson getIntegralUsersResponseJson = new GetIntegralUsersResponseJson();
+            try
+            {
+                if (getIntegralUsersRequestJson == null || getIntegralUsersRequestJson.MasterKey == null)
+                {
+                    getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getIntegralUsersResponseJson.IsSuccess = false;
+                    getIntegralUsersResponseJson.Message = $"Invalid data the data is null or empty";
+                }
+                else
+                {
+                    GetIntegralUsersRequest getIntegralUsersRequest = new GetIntegralUsersRequest
+                    {
+                        MasterKey = getIntegralUsersRequestJson.MasterKey,
+                    };
+
+                    GetIntegralUsersResponse getIntegralUsersResponse = await _userApplication.GetIntegralUsers(getIntegralUsersRequest);
+                    if (getIntegralUsersResponse.IsSuccess)
+                    {
+                        getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getIntegralUsersResponseJson.UsersDTO = getIntegralUsersResponse.UsersDto;
+                        getIntegralUsersResponseJson.IsSuccess = getIntegralUsersResponse.IsSuccess;
+                        getIntegralUsersResponseJson.Message = getIntegralUsersResponse.Message;
+                    }
+                    else
+                    {
+                        getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getIntegralUsersResponseJson.UsersDTO = getIntegralUsersResponse.UsersDto!;
+                        getIntegralUsersResponseJson.IsSuccess = getIntegralUsersResponse.IsSuccess;
+                        getIntegralUsersResponseJson.Message = getIntegralUsersResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                getIntegralUsersResponseJson.IsSuccess = false;
+                getIntegralUsersResponseJson.Message = $"unexpected error on UserController -> get-integral-users {ex.Message}";
+            }
+
+            return Ok(getIntegralUsersResponseJson);
         }
         #endregion
 
