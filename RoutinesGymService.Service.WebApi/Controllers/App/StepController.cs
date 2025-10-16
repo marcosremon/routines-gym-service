@@ -8,7 +8,6 @@ using RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetStats;
 using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
 using RoutinesGymService.Transversal.Security;
-using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
@@ -34,9 +33,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             {
                 if (string.IsNullOrEmpty(getStepRequestJson.UserEmail))
                 {
-                    getStepResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
+                    getStepResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getStepResponseJson.IsSuccess = false;
-                    getStepResponseJson.Message = "UNAUTHORIZED";
+                    getStepResponseJson.Message = "Invalid data, the email is null or empty";
                 }
                 else
                 {

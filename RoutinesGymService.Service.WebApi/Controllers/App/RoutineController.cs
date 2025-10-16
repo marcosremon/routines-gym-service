@@ -9,6 +9,7 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetR
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
+using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.CreateRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.DeleteRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
@@ -275,7 +276,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();
             try
             {
-                if (getRoutineStatsRequestJson == null)
+                if (getRoutineStatsRequestJson == null ||
+                    string.IsNullOrEmpty(getRoutineStatsRequestJson.UserEmail))
                 {
                     getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getRoutineStatsResponseJson.IsSuccess = false;
@@ -323,13 +325,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get routine by routine name
         [HttpPost("get-routine-by-routine-name")]
         [Authorize]
-        [ResourceAuthorization]public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
+        public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
             GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
             try
             {
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-
+                
                 if (string.IsNullOrEmpty(tokenEmail))
                 {
                     getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
