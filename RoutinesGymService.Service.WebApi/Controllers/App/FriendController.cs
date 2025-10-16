@@ -10,7 +10,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
 using System.Security.Claims;
 
-namespace RoutinesGymService.Service.WebApi.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
     [Route("friend")]
@@ -34,7 +34,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getAllUserFriendsRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getAllUserFriendsRequestJson.UserEmail)
                 {
                     getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     getAllUserFriendsResponseJson.IsSuccess = false;
@@ -92,7 +92,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addNewUserFriendRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != addNewUserFriendRequestJson.UserEmail)
                 {
                     addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     addNewUserFriendResponseJson.IsSuccess = false;
@@ -150,7 +150,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteFriendRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != deleteFriendRequestJson.UserEmail)
                 {
                     deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     deleteFriendResponseJson.IsSuccess = false;

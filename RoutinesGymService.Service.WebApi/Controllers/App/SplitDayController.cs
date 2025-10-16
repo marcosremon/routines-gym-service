@@ -6,7 +6,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
 using System.Security.Claims;
 
-namespace RoutinesGymService.Service.WebApi.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
     [Route("split-day")]
@@ -30,7 +30,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != updateSplitDayRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != updateSplitDayRequestJson.UserEmail)
                 {
                     updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     updateSplitDayResponseJson.IsSuccess = false;

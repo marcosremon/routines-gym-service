@@ -3,7 +3,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Add
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 
@@ -41,11 +40,6 @@ namespace RoutinesGymService.Application.UseCase
         public async Task<GetExercisesByDayAndRoutineNameResponse> GetExercisesByDayAndRoutineName(GetExercisesByDayAndRoutineNameRequest getExercisesByDayAndRoutineNameRequest)
         {
             return await _exerciseRepository.GetExercisesByDayAndRoutineName(getExercisesByDayAndRoutineNameRequest);
-        }
-
-        public async Task<UpdateExerciseResponse> UpdateExercise(UpdateExerciseRequest updateExerciseRequest)
-        {
-            return await _exerciseRepository.UpdateExercise(updateExerciseRequest);
         }
     }
 }

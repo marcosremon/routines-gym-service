@@ -17,7 +17,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
 using System.Security.Claims;
 
-namespace RoutinesGymService.Service.WebApi.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
     [Route("routine")]
@@ -43,7 +43,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != createRoutineRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != createRoutineRequestJson.UserEmail)
                 {
                     createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     createRoutineResponseJson.IsSuccess = false;
@@ -155,7 +155,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteRoutineRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != deleteRoutineRequestJson.UserEmail)
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     deleteRoutineResponseJson.IsSuccess = false;
@@ -292,7 +292,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getRoutineStatsRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getRoutineStatsRequestJson.UserEmail)
                 {
                     getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     getRoutineStatsResponseJson.IsSuccess = false;
