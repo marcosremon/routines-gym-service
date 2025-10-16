@@ -53,7 +53,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get user by email
         [HttpPost("get-user-by-email")]
         [Authorize]
-        [ResourceAuthorization("Email")]
+        [ResourceAuthorization]
         public async Task<ActionResult<GetUserByEmailResponseJson>> GetUserByEmail([FromBody] GetUserByEmailRequestJson getUserByEmailRequestJson)
         {
             GetUserByEmailResponseJson getUserByEmailResponseJson = new GetUserByEmailResponseJson();
