@@ -5,7 +5,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Add
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
@@ -14,10 +13,9 @@ using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgres
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
-using RoutinesGymService.Transversal.JsonInterchange.Exercise.UpdateExercise;
 using System.Security.Claims;
 
-namespace RoutinesGymService.Service.WebApi.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
     [Route("exercise")]
@@ -43,7 +41,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
                 {
                     addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
@@ -95,64 +93,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers
         }
         #endregion
 
-        #region Update exercise
-        [HttpPost("update-exercise")]
-        public async Task<ActionResult<UpdateExerciseResponseJson>> UpdateExercise([FromBody] UpdateExerciseRequestJson updateExerciseRequestJson)
-        {
-            UpdateExerciseResponseJson updateExerciseResponseJson = new UpdateExerciseResponseJson();
-            try
-            {
-                if (updateExerciseRequestJson == null ||
-                    updateExerciseRequestJson?.UserId == null ||
-                    updateExerciseRequestJson?.RoutineId == null ||
-                    updateExerciseRequestJson.DayName == 0 ||
-                    string.IsNullOrEmpty(updateExerciseRequestJson.ExerciseName))
-                {
-                    updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    updateExerciseResponseJson.IsSuccess = false;
-                    updateExerciseResponseJson.Message = "invalid data, user id, routine id, day name or exercise name is null or empty";
-                }
-                else
-                {
-                    UpdateExerciseRequest updateExerciseRequest = new UpdateExerciseRequest
-                    {
-                        UserId = updateExerciseRequestJson.UserId,
-                        RoutineId = updateExerciseRequestJson.RoutineId,
-                        DayName = updateExerciseRequestJson.DayName,
-                        ExerciseName = updateExerciseRequestJson.ExerciseName,
-                        Sets = updateExerciseRequestJson.Sets,
-                        Reps = updateExerciseRequestJson.Reps,
-                        Weight = updateExerciseRequestJson.Weight
-                    };
-
-                    UpdateExerciseResponse updateExerciseResponse = await _exerciseApplication.UpdateExercise(updateExerciseRequest);
-                    if (updateExerciseResponse.IsSuccess)
-                    {
-                        updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateExerciseResponseJson.UserDTO = updateExerciseResponse.UserDTO;
-                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
-                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
-                    }
-                    else
-                    {
-                        updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        updateExerciseResponseJson.UserDTO = updateExerciseResponse.UserDTO;
-                        updateExerciseResponseJson.IsSuccess = updateExerciseResponse.IsSuccess;
-                        updateExerciseResponseJson.Message = updateExerciseResponse.Message;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                updateExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                updateExerciseResponseJson.IsSuccess = false;
-                updateExerciseResponseJson.Message = $"unexpected error on ExerciseController -> update-exercise {ex.Message}";
-            }
-
-            return Ok(updateExerciseResponseJson);
-        }
-        #endregion
-
         #region Delete exercise
         [HttpPost("delete-exercise")]
         [Authorize]
@@ -164,7 +104,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != deleteExerciseRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != deleteExerciseRequestJson.UserEmail)
                 {
                     deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     deleteExerciseResponseJson.IsSuccess = false;
@@ -226,7 +166,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != addExerciseRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
                 {
                     addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     addExerciseResponseJson.IsSuccess = false;
@@ -373,7 +313,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers
                 string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-                if (string.IsNullOrEmpty(tokenEmail) || (!isAdmin && tokenEmail != getAllExerciseProgressRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getAllExerciseProgressRequestJson.UserEmail)
                 {
                     getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     getAllExerciseProgressResponseJson.IsSuccess = false;

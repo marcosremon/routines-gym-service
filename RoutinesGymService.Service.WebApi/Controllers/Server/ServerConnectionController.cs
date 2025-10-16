@@ -4,7 +4,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Status.CheckDatabaseConnection;
 using RoutinesGymService.Transversal.JsonInterchange.Status.CheckServiceConnection;
 
-namespace RoutinesGymService.Service.WebApi.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers.Server
 {
     [ApiController]
     [Route("status")]
