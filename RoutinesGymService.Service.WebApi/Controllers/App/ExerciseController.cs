@@ -13,6 +13,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgres
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
+using RoutinesGymService.Transversal.Security;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -33,21 +34,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Add exercise progress
         [HttpPost("add-exercise-progress")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<AddExerciseAddExerciseProgressResponseJson>> AddExerciseProgress([FromBody] AddExerciseAddExerciseProgressRequestJson addExerciseRequestJson)
         {
             AddExerciseAddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseAddExerciseProgressResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
-                {
-                    addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
-                    addExerciseAddExerciseProgressResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (addExerciseRequestJson == null ||
+                if (addExerciseRequestJson == null ||
                     addExerciseRequestJson?.RoutineId == null ||
                     addExerciseRequestJson?.splitDayId == null ||
                     string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName))
@@ -96,21 +89,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete exercise
         [HttpPost("delete-exercise")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<DeleteExerciseResponseJson>> DeleteExercise([FromBody] DeleteExerciseRequestJson deleteExerciseRequestJson)
         {
             DeleteExerciseResponseJson deleteExerciseResponseJson = new DeleteExerciseResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != deleteExerciseRequestJson.UserEmail)
-                {
-                    deleteExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    deleteExerciseResponseJson.IsSuccess = false;
-                    deleteExerciseResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (deleteExerciseRequestJson == null ||
+                if (deleteExerciseRequestJson == null ||
                     deleteExerciseRequestJson?.RoutineId == null ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.DayName))
@@ -158,21 +143,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Add exercise
         [HttpPost("add-exercise")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<AddExerciseResponseJson>> AddExercise([FromBody] AddExerciseRequestJson addExerciseRequestJson)
         {
             AddExerciseResponseJson addExerciseResponseJson = new AddExerciseResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != addExerciseRequestJson.UserEmail)
-                {
-                    addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    addExerciseResponseJson.IsSuccess = false;
-                    addExerciseResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (addExerciseRequestJson == null ||
+                if (addExerciseRequestJson == null ||
                     string.IsNullOrEmpty(addExerciseRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.DayName))
@@ -305,21 +282,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get all exercise progress
         [HttpPost("get-all-exercise-progress")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<GetAllExerciseProgressResponseJson>> GetAllExerciseProgress([FromBody] GetAllExerciseProgressRequestJson getAllExerciseProgressRequestJson)
         {
             GetAllExerciseProgressResponseJson getAllExerciseProgressResponseJson = new GetAllExerciseProgressResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getAllExerciseProgressRequestJson.UserEmail)
-                {
-                    getAllExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    getAllExerciseProgressResponseJson.IsSuccess = false;
-                    getAllExerciseProgressResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (getAllExerciseProgressRequestJson == null ||
+                if (getAllExerciseProgressRequestJson == null ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.DayName))

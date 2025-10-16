@@ -1,120 +1,114 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
+using RoutinesGymService.Transversal.JsonInterchange.Auth;
 using System.Reflection;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Transversal.Security
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
-    public class ResourceAuthorizationAttribute : Attribute, IAuthorizationFilter
+    public class ResourceAuthorizationAttribute : Attribute, IAsyncActionFilter
     {
         private readonly string[] _emailParameterNames;
 
         public ResourceAuthorizationAttribute(params string[] emailParameterNames)
         {
-            // Si no se especifican parámetros, usar los comunes por defecto
             _emailParameterNames = emailParameterNames?.Any() == true
                 ? emailParameterNames
                 : new[] { "Email", "UserEmail", "OriginalEmail", "email", "userEmail" };
         }
 
-        public void OnAuthorization(AuthorizationFilterContext context)
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var user = context.HttpContext.User;
             string? tokenEmail = user.FindFirst(ClaimTypes.Email)?.Value;
             bool isAdmin = user.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
+            // Si el email del token es null o empty → UNAUTHORIZED
             if (string.IsNullOrEmpty(tokenEmail))
             {
                 SetUnauthorizedResult(context);
                 return;
             }
 
+            // Si es admin → PERMITIR ACCESO (bypass)
             if (isAdmin)
             {
+                await next();
                 return;
             }
 
-            if (!CanAccessResource(context, tokenEmail))
+            // Si NO es admin → verificar que el email del token coincida con el del request
+            string? requestEmail = FindEmailInRequest(context);
+
+            // Si no encuentra email en el request O no coincide con el del token → UNAUTHORIZED
+            if (string.IsNullOrEmpty(requestEmail) || tokenEmail != requestEmail)
             {
                 SetUnauthorizedResult(context);
+                return;
             }
+
+            // Si llegó aquí: email del token == email del request → PERMITIR ACCESO
+            await next();
         }
 
-        private bool CanAccessResource(AuthorizationFilterContext context, string tokenEmail)
+        private string? FindEmailInRequest(ActionExecutingContext context)
         {
+            // Busca el email usando los nombres de parámetros configurados
             foreach (string paramName in _emailParameterNames)
             {
-                string requestEmail = FindEmailInRequest(context, paramName);
-                if (!string.IsNullOrEmpty(requestEmail) && tokenEmail == requestEmail)
+                // 1. Buscar en action arguments (AHORA SÍ FUNCIONA porque estamos en ActionExecutingContext)
+                string? emailFromArgs = GetEmailFromActionArguments(context, paramName);
+                if (!string.IsNullOrEmpty(emailFromArgs))
                 {
-                    return true;
+                    return emailFromArgs;
                 }
-            }
 
-            return false;
-        }
+                // 2. Buscar en form data
+                if (context.HttpContext.Request.HasFormContentType &&
+                    context.HttpContext.Request.Form.TryGetValue(paramName, out var formValue))
+                {
+                    return formValue.ToString();
+                }
 
-        private string? FindEmailInRequest(AuthorizationFilterContext context, string paramName)
-        {
-            string emailFromArgs = GetEmailFromActionArguments(context, paramName);
-            if (!string.IsNullOrEmpty(emailFromArgs))
-            {
-                return emailFromArgs;
-            }
+                // 3. Buscar en query parameters
+                if (context.HttpContext.Request.Query.TryGetValue(paramName, out var queryValue))
+                {
+                    return queryValue.ToString();
+                }
 
-            if (context.HttpContext.Request.HasFormContentType &&
-                context.HttpContext.Request.Form.TryGetValue(paramName, out var formValue))
-            {
-                return formValue.ToString();
-            }
-
-            if (context.HttpContext.Request.Query.TryGetValue(paramName, out var queryValue))
-            {
-                return queryValue.ToString();
-            }
-
-            if (context.RouteData.Values.TryGetValue(paramName, out var routeValue))
-            {
-                return routeValue?.ToString();
+                // 4. Buscar en route parameters
+                if (context.RouteData.Values.TryGetValue(paramName, out var routeValue))
+                {
+                    return routeValue?.ToString();
+                }
             }
 
             return null;
         }
 
-        private string? GetEmailFromActionArguments(AuthorizationFilterContext context, string paramName)
+        private string? GetEmailFromActionArguments(ActionExecutingContext context, string paramName)
         {
             try
             {
-                if (context.HttpContext.Items is IDictionary<string, object> actionArguments)
+                // AHORA ActionArguments ESTÁ DISPONIBLE Y LLENO
+                // Buscar directamente en los argumentos por nombre
+                if (context.ActionArguments.TryGetValue(paramName, out var value))
                 {
-                    foreach (object argument in actionArguments.Values)
+                    if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
                     {
-                        if (argument == null) continue;
+                        return stringValue;
+                    }
+                }
 
-                        Type type = argument.GetType();
-
-                        PropertyInfo? property = type.GetProperty(paramName);
-                        if (property != null)
+                // Buscar en todos los objetos de los argumentos
+                foreach (var argument in context.ActionArguments.Values)
+                {
+                    if (argument != null)
+                    {
+                        var emailFromObject = GetEmailFromObject(argument, paramName);
+                        if (!string.IsNullOrEmpty(emailFromObject))
                         {
-                            object? value = property.GetValue(argument);
-                            if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-                            {
-                                return stringValue;
-                            }
-                        }
-
-                        property = type.GetProperty(paramName,
-                            BindingFlags.IgnoreCase |
-                            BindingFlags.Public |
-                            BindingFlags.Instance);
-
-                        if (property != null)
-                        {
-                            object? value = property.GetValue(argument);
-                            if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-                            {
-                                return stringValue;
-                            }
+                            return emailFromObject;
                         }
                     }
                 }
@@ -127,8 +121,49 @@ namespace RoutinesGymService.Transversal.Security
             return null;
         }
 
-        private void SetUnauthorizedResult(AuthorizationFilterContext context)
+        private string? GetEmailFromObject(object obj, string propertyName)
         {
+            try
+            {
+                Type type = obj.GetType();
+
+                // Buscar la propiedad con el nombre exacto
+                PropertyInfo? property = type.GetProperty(propertyName);
+                if (property != null)
+                {
+                    object? value = property.GetValue(obj);
+                    if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
+                    {
+                        return stringValue;
+                    }
+                }
+
+                // Buscar ignorando mayúsculas/minúsculas
+                property = type.GetProperty(propertyName,
+                    BindingFlags.IgnoreCase |
+                    BindingFlags.Public |
+                    BindingFlags.Instance);
+
+                if (property != null)
+                {
+                    object? value = property.GetValue(obj);
+                    if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
+                    {
+                        return stringValue;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error obteniendo email del objeto: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        private void SetUnauthorizedResult(ActionExecutingContext context)
+        {
+            context.HttpContext.Items["CustomAuthResponse"] = true;
             context.Result = new UnauthorizedObjectResponse();
         }
     }

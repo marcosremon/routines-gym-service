@@ -52,6 +52,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ClockSkew = TimeSpan.Zero
     };
+
+    // Configurar eventos para respetar respuestas personalizadas
+    options.Events = new JwtBearerEvents
+    {
+        OnChallenge = context =>
+        {
+            // Si el filtro de autorización ya estableció una respuesta personalizada, respétala
+            if (context.HttpContext.Items.ContainsKey("CustomAuthResponse"))
+            {
+                context.HandleResponse();
+                return Task.CompletedTask;
+            }
+
+            // Para otros casos (token inválido, expirado, etc.), usa respuesta personalizada
+            context.HandleResponse();
+
+            if (!context.Response.HasStarted)
+            {
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+
+                return context.Response.WriteAsJsonAsync(new
+                {
+                    responseCodeJson = "UNAUTHORIZED",
+                    isSuccess = false,
+                    message = "Invalid or expired token"
+                });
+            }
+
+            return Task.CompletedTask;
+        },
+
+        OnAuthenticationFailed = context =>
+        {
+            // Logging opcional para debugging
+            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Configuración de CORS
@@ -79,21 +118,22 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseRouting();   
-app.UseCors("AllowAll");    
-app.UseAuthentication();    
-app.UseAuthorization();     
+app.UseRouting();
+app.UseCors("AllowAll");
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapControllers();       
+app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var configuration = services.GetRequiredService<IConfiguration>();
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
     try
     {
-        var seeder = new DatabaseSeeder(configuration);
+        DatabaseSeeder seeder = new DatabaseSeeder(dbContext, configuration);
         await seeder.SeedAdminUserAsync();
         Console.WriteLine("Usuario admin creado o ya existente.");
     }

@@ -4,6 +4,7 @@ using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
+using RoutinesGymService.Transversal.Security;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -22,21 +23,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Update split day
         [HttpPost("update-split-day")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<UpdateSplitDayResponseJson>> UpdateSplitDay([FromBody] UpdateSplitDayRequestJson updateSplitDayRequestJson)
         {
             UpdateSplitDayResponseJson updateSplitDayResponseJson = new UpdateSplitDayResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != updateSplitDayRequestJson.UserEmail)
-                {
-                    updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    updateSplitDayResponseJson.IsSuccess = false;
-                    updateSplitDayResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (updateSplitDayRequestJson == null ||
+                if (updateSplitDayRequestJson == null ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.UserEmail))
                 {
