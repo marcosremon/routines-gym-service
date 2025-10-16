@@ -18,7 +18,7 @@ using RoutinesGymService.Transversal.Security;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {
-    public class AdminRepositroy : IAdminRepository
+    public class AdminRepository : IAdminRepository
     {
         private readonly ApplicationDbContext _context;
         private readonly GenericUtils _genericUtils;
@@ -26,7 +26,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly string _userPrefix;
         private readonly int _expiryMinutes;
 
-        public AdminRepositroy(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
+        public AdminRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
             _genericUtils = genericUtils;
@@ -241,7 +241,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             return changeUserRoleResponse;
         }
 
-        public async Task<GetBlacklistedUsersResponse> GetBlacklistedUsers()
+        public async Task<GetBlacklistedUsersResponse> GetBlacklistedUsers(GetBlacklistedUsersRequest getBlacklistedUsersRequest)
         {
             GetBlacklistedUsersResponse getBlacklistedUsersResponse = new GetBlacklistedUsersResponse();
             try
@@ -257,7 +257,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             Surname = user.Surname,
                             Email = user.Email,
                             FriendCode = user.FriendCode,
-                            Password = "***************",
+                            Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password!, getBlacklistedUsersRequest.MasterKey),
                             Role = GenericUtils.ChangeIntToEnumOnRole(user.Role),
                             InscriptionDate = user.InscriptionDate.ToString(),
                         })

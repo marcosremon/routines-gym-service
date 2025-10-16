@@ -13,7 +13,7 @@ namespace RoutinesGymService.Application.Interface.Application
     {
         Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest);
         Task<ChangeUserRoleResponse> ChangeUserRole(ChangeUserRoleRequest changeUserRoleRequest);
-        Task<GetBlacklistedUsersResponse> GetBlacklistedUsers();
+        Task<GetBlacklistedUsersResponse> GetBlacklistedUsers(GetBlacklistedUsersRequest getBlacklistedUsersRequest);
         Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest);
         Task<GetIntegralUsersResponse> GetIntegralUsers(GetIntegralUsersRequest getIntegralUsersRequest);
         Task<GetUsersResponse> GetUsers();

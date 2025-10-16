@@ -30,9 +30,9 @@ namespace RoutinesGymService.Application.UseCase
             return await _adminRepository.ChangeUserRole(changeUserRoleRequest);
         }
 
-        public async Task<GetBlacklistedUsersResponse> GetBlacklistedUsers()
+        public async Task<GetBlacklistedUsersResponse> GetBlacklistedUsers(GetBlacklistedUsersRequest getBlacklistedUsersRequest)
         {
-            return await _adminRepository.GetBlacklistedUsers();
+            return await _adminRepository.GetBlacklistedUsers(getBlacklistedUsersRequest);
         }
 
         public async Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest)

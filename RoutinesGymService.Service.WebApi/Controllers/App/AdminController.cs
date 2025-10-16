@@ -13,7 +13,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common.Responses;
-using RoutinesGymService.Transversal.JsonInterchange.Admin;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.AddUserToBlackList;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.ChangeUserRole;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.CreateAdmin;
@@ -335,27 +334,41 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #endregion
 
         #region Get blacklisted users
-        [HttpGet("get-blacklisted-users")]
+        [HttpPost("get-blacklisted-users")]
         [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<GetBlacklistedUsersResponseJson>> GetBlacklistedUsers()
+        public async Task<ActionResult<GetBlacklistedUsersResponseJson>> GetBlacklistedUsers([FromBody] GetBlacklistedUsersRequestJson getBlacklistedUsersRequestJson)
         {
             GetBlacklistedUsersResponseJson getBlacklistedUsersResponseJson = new GetBlacklistedUsersResponseJson();
             try
             {
-                GetBlacklistedUsersResponse getBlacklistedUsersResponse = await _adminApplication.GetBlacklistedUsers();
-                if (getBlacklistedUsersResponse.IsSuccess)
+                if (string.IsNullOrEmpty(getBlacklistedUsersRequestJson.MasterKey))
                 {
-                    getBlacklistedUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    getBlacklistedUsersResponseJson.BlackListUsers = getBlacklistedUsersResponse.BlackListUsers;
-                    getBlacklistedUsersResponseJson.IsSuccess = getBlacklistedUsersResponse.IsSuccess;
-                    getBlacklistedUsersResponseJson.Message = getBlacklistedUsersResponse.Message;
+                    getBlacklistedUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    getBlacklistedUsersResponseJson.IsSuccess = false;
+                    getBlacklistedUsersResponseJson.Message = "invalid data, the data is null or empty";
                 }
                 else
                 {
-                    getBlacklistedUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                    getBlacklistedUsersResponseJson.BlackListUsers = getBlacklistedUsersResponse.BlackListUsers;
-                    getBlacklistedUsersResponseJson.IsSuccess = getBlacklistedUsersResponse.IsSuccess;
-                    getBlacklistedUsersResponseJson.Message = getBlacklistedUsersResponse.Message;
+                    GetBlacklistedUsersRequest getBlacklistedUsersRequest = new GetBlacklistedUsersRequest
+                    {
+                        MasterKey = getBlacklistedUsersRequestJson.MasterKey,
+                    };
+
+                    GetBlacklistedUsersResponse getBlacklistedUsersResponse = await _adminApplication.GetBlacklistedUsers(getBlacklistedUsersRequest);
+                    if (getBlacklistedUsersResponse.IsSuccess)
+                    {
+                        getBlacklistedUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        getBlacklistedUsersResponseJson.BlackListUsers = getBlacklistedUsersResponse.BlackListUsers;
+                        getBlacklistedUsersResponseJson.IsSuccess = getBlacklistedUsersResponse.IsSuccess;
+                        getBlacklistedUsersResponseJson.Message = getBlacklistedUsersResponse.Message;
+                    }
+                    else
+                    {
+                        getBlacklistedUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        getBlacklistedUsersResponseJson.BlackListUsers = getBlacklistedUsersResponse.BlackListUsers;
+                        getBlacklistedUsersResponseJson.IsSuccess = getBlacklistedUsersResponse.IsSuccess;
+                        getBlacklistedUsersResponseJson.Message = getBlacklistedUsersResponse.Message;
+                    }
                 }
             }
             catch (Exception ex)
