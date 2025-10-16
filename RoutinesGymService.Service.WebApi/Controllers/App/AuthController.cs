@@ -7,7 +7,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.Login;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.LoginWeb;
 
-namespace RoutinesGymService.Service.WebApi.Controllers
+namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
     [Route("auth")]

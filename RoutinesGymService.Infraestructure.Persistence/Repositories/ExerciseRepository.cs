@@ -6,7 +6,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.Add
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.DeleteExercise;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.GetExercisesByDayAndRoutineId;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Exercise.UpdateExercise;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
@@ -282,79 +281,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return getExercisesByDayAndRoutineIdResponse;
-        }
-
-        public async Task<UpdateExerciseResponse> UpdateExercise(UpdateExerciseRequest updateExerciseRequest)
-        {
-            UpdateExerciseResponse updateExerciseResponse = new UpdateExerciseResponse();
-            try
-            {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == updateExerciseRequest.UserId);
-                if (user == null)
-                {
-                    updateExerciseResponse.IsSuccess = false;
-                    updateExerciseResponse.Message = "User not found";
-                }
-                else
-                {
-                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => 
-                        r.RoutineId == updateExerciseRequest.RoutineId &&
-                        r.UserId == user.UserId);
-                    if (routine == null)
-                    {
-                        updateExerciseResponse.IsSuccess = false;
-                        updateExerciseResponse.Message = "Routine not found.";
-                    }
-                    else
-                    {
-                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
-                            s.RoutineId == updateExerciseRequest.RoutineId &&
-                            s.DayName == GenericUtils.ChangeEnumToIntOnDayName(updateExerciseRequest.DayName));
-                        if (splitDay == null)
-                        {
-                            updateExerciseResponse.IsSuccess = false;
-                            updateExerciseResponse.Message = "Split day not found.";
-                        }
-                        else
-                        {
-                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
-                                e.RoutineId == routine.RoutineId &&
-                                e.SplitDayId == splitDay.SplitDayId &&
-                                e.ExerciseName == updateExerciseRequest.ExerciseName);
-                            if (exercise == null)
-                            {
-                                updateExerciseResponse.IsSuccess = false;
-                                updateExerciseResponse.Message = "Exercise not found.";
-                            }
-                            else
-                            {
-                                // to_do
-
-                                // Update the exercise properties
-                                //exercise.ExerciseName = updateExerciseRequest.ExerciseName ?? exercise.ExerciseName;
-                                //exercise.Sets = updateExerciseRequest.Sets ?? exercise.Sets;
-                                //exercise.Reps = updateExerciseRequest.Reps ?? exercise.Reps;
-                                //exercise.Weight = updateExerciseRequest.Weight ?? exercise.Weight;
-                                //_context.Exercises.Update(exercise);
-                                //await _context.SaveChangesAsync();
-                                //updateExerciseResponse.IsSuccess = true;
-                                //updateExerciseResponse.UserDTO = UserMapper.UserToDto(user);
-                                //updateExerciseResponse.Message = "Exercise updated successfully.";
-
-
-                                _genericUtils.ClearCache(_exercisePrefix);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                updateExerciseResponse.IsSuccess = false;
-                updateExerciseResponse.Message = $"unexpected error on ExerciseRepository -> UpdateExercise: {ex.Message}";
-            }
-            
-            return updateExerciseResponse;
         }
 
         public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseAddExerciseProgressRequest)
