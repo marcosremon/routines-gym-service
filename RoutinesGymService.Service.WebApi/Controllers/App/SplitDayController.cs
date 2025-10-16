@@ -5,7 +5,6 @@ using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Transversal.Security;
-using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {

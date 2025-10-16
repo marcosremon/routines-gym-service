@@ -9,7 +9,6 @@ using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Transversal.Security;
-using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
