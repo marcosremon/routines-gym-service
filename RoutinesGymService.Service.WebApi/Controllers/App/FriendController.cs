@@ -8,6 +8,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
+using RoutinesGymService.Transversal.Security;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -26,21 +27,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get all user friends 
         [HttpPost("get-all-user-friends")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<GetAllUserFriendsResponseJson>> GetAllUserFriends([FromBody] GetAllUserFriendsRequestJson getAllUserFriendsRequestJson)
         {
             GetAllUserFriendsResponseJson getAllUserFriendsResponseJson = new GetAllUserFriendsResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getAllUserFriendsRequestJson.UserEmail)
-                {
-                    getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    getAllUserFriendsResponseJson.IsSuccess = false;
-                    getAllUserFriendsResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (getAllUserFriendsRequestJson == null)
+                if (getAllUserFriendsRequestJson == null)
                 {
                     getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getAllUserFriendsResponseJson.IsSuccess = false;
@@ -84,21 +77,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Add new user friend 
         [HttpPost("add-new-user-friend")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<AddNewUserFriendResponseJson>> AddNewUserFriend([FromBody] AddNewUserFriendRequestJson addNewUserFriendRequestJson)
         {
             AddNewUserFriendResponseJson addNewUserFriendResponseJson = new AddNewUserFriendResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != addNewUserFriendRequestJson.UserEmail)
-                {
-                    addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    addNewUserFriendResponseJson.IsSuccess = false;
-                    addNewUserFriendResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (addNewUserFriendRequestJson == null ||
+                if (addNewUserFriendRequestJson == null ||
                     string.IsNullOrEmpty(addNewUserFriendRequestJson.FriendCode))
                 {
                     addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -142,21 +127,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete friend
         [HttpPost("delete-friend")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<DeleteFriendResponseJson>> DeleteFriend([FromBody] DeleteFriendRequestJson deleteFriendRequestJson)
         {
             DeleteFriendResponseJson deleteFriendResponseJson = new DeleteFriendResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != deleteFriendRequestJson.UserEmail)
-                {
-                    deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    deleteFriendResponseJson.IsSuccess = false;
-                    deleteFriendResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (deleteFriendRequestJson == null ||
+                if (deleteFriendRequestJson == null ||
                     string.IsNullOrEmpty(deleteFriendRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(deleteFriendRequestJson.FriendEmail))
                 {

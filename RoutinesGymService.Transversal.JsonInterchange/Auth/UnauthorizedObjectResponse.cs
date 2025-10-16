@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Transversal.Common.Responses;
 
-namespace RoutinesGymService.Transversal.Security
+namespace RoutinesGymService.Transversal.JsonInterchange.Auth
 {
     public class UnauthorizedObjectResponse : ObjectResult
     {
@@ -13,6 +13,8 @@ namespace RoutinesGymService.Transversal.Security
         })
         {
             StatusCode = 401;
+            ContentTypes.Clear();
+            ContentTypes.Add("application/json");
         }
 
         public UnauthorizedObjectResponse(string message) : base(new BaseResponseJson
@@ -23,6 +25,8 @@ namespace RoutinesGymService.Transversal.Security
         })
         {
             StatusCode = 401;
+            ContentTypes.Clear();
+            ContentTypes.Add("application/json");
         }
     }
 }

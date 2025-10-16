@@ -15,6 +15,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
+using RoutinesGymService.Transversal.Security;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -35,21 +36,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Create routine
         [HttpPost("create-routine")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
             CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != createRoutineRequestJson.UserEmail)
-                {
-                    createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    createRoutineResponseJson.IsSuccess = false;
-                    createRoutineResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (createRoutineRequestJson == null ||
+                if (createRoutineRequestJson == null ||
                     string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
                 {
                     createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -147,21 +140,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete routine
         [HttpPost("delete-routine")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
             DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != deleteRoutineRequestJson.UserEmail)
-                {
-                    deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    deleteRoutineResponseJson.IsSuccess = false;
-                    deleteRoutineResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (deleteRoutineRequestJson == null ||
+                if (deleteRoutineRequestJson == null ||
                     string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -284,21 +269,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get routine stats
         [HttpPost("get-routine-stats")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
             GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getRoutineStatsRequestJson.UserEmail)
-                {
-                    getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    getRoutineStatsResponseJson.IsSuccess = false;
-                    getRoutineStatsResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (getRoutineStatsRequestJson == null)
+                if (getRoutineStatsRequestJson == null)
                 {
                     getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getRoutineStatsResponseJson.IsSuccess = false;
@@ -346,7 +323,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get routine by routine name
         [HttpPost("get-routine-by-routine-name")]
         [Authorize]
-        public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
+        [ResourceAuthorization]public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
             GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
             try

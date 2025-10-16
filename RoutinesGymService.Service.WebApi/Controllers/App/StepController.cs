@@ -7,6 +7,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetStats;
 using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
+using RoutinesGymService.Transversal.Security;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -25,15 +26,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get steps
         [HttpPost("get-steps")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<GetStepResponseJson>> GetSteps([FromBody] GetStepRequestJson getStepRequestJson)
         {
             GetStepResponseJson getStepResponseJson = new GetStepResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getStepRequestJson.UserEmail)
+                if (string.IsNullOrEmpty(getStepRequestJson.UserEmail))
                 {
                     getStepResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
                     getStepResponseJson.IsSuccess = false;
@@ -77,21 +76,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get daily steps info
         [HttpPost("get-daily-steps-info")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<GetDailyStepsInfoResponseJson>> GetDailyStepsInfo([FromBody] GetDailyStepsInfoRequestJson getDailyStepsInfoRequestJson)
         {
             GetDailyStepsInfoResponseJson getDailyStepsInfoResponseJson = new GetDailyStepsInfoResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != getDailyStepsInfoRequestJson.UserEmail)
-                {
-                    getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    getDailyStepsInfoResponseJson.IsSuccess = false;
-                    getDailyStepsInfoResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (getDailyStepsInfoRequestJson.DailySteps == null || 
+                if (getDailyStepsInfoRequestJson.DailySteps == null || 
                     getDailyStepsInfoRequestJson.Day == null)
                 {
                     getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -140,21 +131,13 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Save daily steps
         [HttpPost("save-daily-steps")]
         [Authorize]
+        [ResourceAuthorization]
         public async Task<ActionResult<SaveDailyStepsResponseJson>> SaveDailySteps([FromBody] SaveDailyStepsRequestJson saveDailyStepsRequestJson)
         {
             SaveDailyStepsResponseJson saveDailyStepsResponseJson = new SaveDailyStepsResponseJson();
             try
             {
-                string? tokenEmail = User.FindFirst(ClaimTypes.Email)?.Value;
-                bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
-
-                if (string.IsNullOrEmpty(tokenEmail) || !isAdmin && tokenEmail != saveDailyStepsRequestJson.UserEmail)
-                {
-                    saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED;
-                    saveDailyStepsResponseJson.IsSuccess = false;
-                    saveDailyStepsResponseJson.Message = "UNAUTHORIZED";
-                }
-                else if (saveDailyStepsRequestJson == null ||
+                if (saveDailyStepsRequestJson == null ||
                     saveDailyStepsRequestJson.Steps == null ||
                     saveDailyStepsRequestJson.DailyStepsGoal == null)
                 {
