@@ -2,36 +2,26 @@
 using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common.Responses;
-using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Transversal.JsonInterchange.User.Check.CheckUserExistence;
-using RoutinesGymService.Transversal.JsonInterchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.ChangePasswordWithPasswordAndEmail;
-using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateAdmin;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Transversal.JsonInterchange.User.Create.CreateUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
-using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetIntegralUserInfo;
-using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
-using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
 using RoutinesGymService.Transversal.Security;
 using System.Security.Claims;
@@ -560,256 +550,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             }
 
             return Ok(getUserProfileDetailsResponseJson);
-        }
-        #endregion
-
-
-        /* Only admin endpoints */
-
-        #region Get users
-        [HttpGet("get-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
-        {
-            GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
-            try
-            { 
-                GetUsersResponse getUsersResponse = await _userApplication.GetUsers();
-                if (getUsersResponse.IsSuccess)
-                {
-                    getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
-                    getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
-                    getUsersResponseJson.Message = getUsersResponse.Message;
-                }
-                else
-                {
-                    getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
-                    getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
-                    getUsersResponseJson.Message = getUsersResponse.Message;
-                }
-            }
-            catch (Exception ex)
-            {
-                getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getUsersResponseJson.IsSuccess = false;
-                getUsersResponseJson.Message = $"unexpected error on UserController -> get-users {ex.Message}";
-            }
-
-            return Ok(getUsersResponseJson);
-        }
-        #endregion
-
-        #region Get integral users
-        [HttpPost("get-integral-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<GetIntegralUsersResponseJson>> GetIntegralUsers([FromBody] GetIntegralUsersRequestJson getIntegralUsersRequestJson)
-        {
-            GetIntegralUsersResponseJson getIntegralUsersResponseJson = new GetIntegralUsersResponseJson();
-            try
-            {
-                if (getIntegralUsersRequestJson == null || getIntegralUsersRequestJson.MasterKey == null)
-                {
-                    getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getIntegralUsersResponseJson.IsSuccess = false;
-                    getIntegralUsersResponseJson.Message = $"Invalid data the data is null or empty";
-                }
-                else
-                {
-                    GetIntegralUsersRequest getIntegralUsersRequest = new GetIntegralUsersRequest
-                    {
-                        MasterKey = getIntegralUsersRequestJson.MasterKey,
-                    };
-
-                    GetIntegralUsersResponse getIntegralUsersResponse = await _userApplication.GetIntegralUsers(getIntegralUsersRequest);
-                    if (getIntegralUsersResponse.IsSuccess)
-                    {
-                        getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getIntegralUsersResponseJson.UsersDTO = getIntegralUsersResponse.UsersDto;
-                        getIntegralUsersResponseJson.IsSuccess = getIntegralUsersResponse.IsSuccess;
-                        getIntegralUsersResponseJson.Message = getIntegralUsersResponse.Message;
-                    }
-                    else
-                    {
-                        getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        getIntegralUsersResponseJson.UsersDTO = getIntegralUsersResponse.UsersDto!;
-                        getIntegralUsersResponseJson.IsSuccess = getIntegralUsersResponse.IsSuccess;
-                        getIntegralUsersResponseJson.Message = getIntegralUsersResponse.Message;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getIntegralUsersResponseJson.IsSuccess = false;
-                getIntegralUsersResponseJson.Message = $"unexpected error on UserController -> get-integral-users {ex.Message}";
-            }
-
-            return Ok(getIntegralUsersResponseJson);
-        }
-        #endregion
-
-        #region Get integral user info
-        [HttpPost("get-integral-user-info")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<GetIntegralUserInfoResponseJson>> GetIntegralUserInfo([FromBody] GetIntegralUserInfoRequestJson getIntegralUserInfoRequestJson)
-        {
-            GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
-            try
-            {
-                if (getIntegralUserInfoRequestJson == null ||
-                    getIntegralUserInfoRequestJson?.UserId == null)
-                {
-                    getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    getIntegralUserInfoResponseJson.IsSuccess = false;
-                    getIntegralUserInfoResponseJson.Message = "invalid data, the email is null or empty";
-                }
-                else
-                {
-                    GetIntegralUserInfoRequest getIntegralUserInfoRequest = new GetIntegralUserInfoRequest
-                    {
-                        UserId = getIntegralUserInfoRequestJson.UserId,
-                        MasterKey = getIntegralUserInfoRequestJson.MasterKey,
-                    };
-
-                    GetIntegralUserInfoResponse getIntegralUserInfoResponse = await _userApplication.GetIntegralUserInfo(getIntegralUserInfoRequest);
-                    if (getIntegralUserInfoResponse.IsSuccess)
-                    {
-                        getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
-                        getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
-                        getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
-                    }
-                    else
-                    {
-                        getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
-                        getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
-                        getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                getIntegralUserInfoResponseJson.IsSuccess = false;
-                getIntegralUserInfoResponseJson.Message = $"unexpected error -> UserController -> get-integral-user-info: {ex.Message}";
-            }
-
-            return Ok(getIntegralUserInfoResponseJson);
-        }
-        #endregion
-
-        #region Create admin
-        [HttpPost("create-admin")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<CreateAdminResponseJson>> CreateAdmin([FromBody] CreateAdminRequestJson createAdminRequstJson)
-        {
-            CreateAdminResponseJson createAdminResponseJson = new CreateAdminResponseJson();
-            try
-            {
-                if (createAdminRequstJson == null ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Dni) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Username) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Email) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.SerialNumber) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Password) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.ConfirmPassword))
-                {
-                    createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA; 
-                    createAdminResponseJson.IsSuccess = false;
-                    createAdminResponseJson.Message = "invalid data, the data is null or empty";
-                }
-                else
-                {
-                    CreateGenericUserRequest createGenericUserRequest = new CreateGenericUserRequest
-                    {
-                        Dni = createAdminRequstJson.Dni,
-                        Username = createAdminRequstJson.Username,
-                        Surname = createAdminRequstJson.Surname,
-                        Email = createAdminRequstJson.Email,
-                        Password = createAdminRequstJson.Password,
-                        ConfirmPassword = createAdminRequstJson.ConfirmPassword,
-                        SerialNumber = createAdminRequstJson.SerialNumber,  
-                        Role = Role.ADMIN
-                    };
-
-                    CreateUserResponse createUserResponse = await _userApplication.CreateUser(createGenericUserRequest);
-                    if (createUserResponse.IsSuccess)
-                    {
-                        createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                        createAdminResponseJson.Message = createUserResponse.Message;
-                    }
-                    else
-                    {
-                        createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        createAdminResponseJson.IsSuccess = createUserResponse.IsSuccess;
-                        createAdminResponseJson.Message = createUserResponse.Message;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                createAdminResponseJson.IsSuccess = false;
-                createAdminResponseJson.Message = $"unexpected error on UserController -> create-admin: {ex.Message}";
-            }
-
-            return Ok(createAdminResponseJson);
-        }
-        #endregion
-
-        #region Add user to black list
-        [HttpPost("add-user-to-black-list")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
-        public async Task<ActionResult<AddUserToBlackListResponseJson>> AddUserToBlackList([FromBody] AddUserToBlackListRequestJson addUserToBlackListRequestJson)
-        {
-            AddUserToBlackListResponseJson addUserToBlackListResponseJson = new AddUserToBlackListResponseJson();
-            try
-            {
-                if (addUserToBlackListRequestJson == null || 
-                    addUserToBlackListRequestJson?.UserId == null || 
-                    string.IsNullOrEmpty(addUserToBlackListRequestJson.SerialNumber) ||
-                    string.IsNullOrEmpty(addUserToBlackListRequestJson.Description))
-                {
-                    addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
-                    addUserToBlackListResponseJson.IsSuccess = false;
-                    addUserToBlackListResponseJson.Message = "invalid data, the data is null or empty";
-                }
-                else
-                {
-                    AddUserToBlackListRequest addUserToBlackListRequest = new AddUserToBlackListRequest
-                    {
-                        SerialNumber = addUserToBlackListRequestJson.SerialNumber,
-                        UserId = addUserToBlackListRequestJson.UserId,
-                        Description = addUserToBlackListRequestJson.Description,
-                    };
-
-                    AddUserToBlackListResponse addUserToBlackListResponse = await _userApplication.AddUserToBlackList(addUserToBlackListRequest);
-                    if (addUserToBlackListResponse.IsSuccess)
-                    {
-                        addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        addUserToBlackListResponseJson.IsSuccess = addUserToBlackListResponse.IsSuccess;
-                        addUserToBlackListResponseJson.Message = addUserToBlackListResponse.Message;
-                    }
-                    else
-                    {
-                        addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        addUserToBlackListResponseJson.IsSuccess = addUserToBlackListResponse.IsSuccess;
-                        addUserToBlackListResponseJson.Message = addUserToBlackListResponse.Message;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                addUserToBlackListResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                addUserToBlackListResponseJson.IsSuccess = false;
-                addUserToBlackListResponseJson.Message = $"unexpected error on UserController -> add-user-to-black-list {ex.Message}";
-            }
-
-            return Ok(addUserToBlackListResponseJson);
         }
         #endregion
     }

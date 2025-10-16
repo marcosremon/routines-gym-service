@@ -1,20 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
-using RoutinesGymService.Application.DataTransferObject.Entity;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.Mapper;
@@ -109,47 +104,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return getUserByEmailResponse;
-        }
-
-        public async Task<GetUsersResponse> GetUsers()
-        {
-            GetUsersResponse getUsersResponse = new GetUsersResponse();
-            try
-            {
-                string cacheKey = $"{_userPrefix}GetUsers_All";
-
-                List<User>? cacheUsers = _cacheUtils.Get<List<User>>(cacheKey);
-                if (cacheUsers != null)
-                {
-                    if (cacheUsers.Count == 0)
-                    {
-                        getUsersResponse.Message = "No users found";
-                        getUsersResponse.IsSuccess = false;
-                    }
-                    else
-                    {
-                        getUsersResponse.IsSuccess = true;
-                        getUsersResponse.Message = "Users found successfully";
-                        getUsersResponse.UsersDTO = cacheUsers.Select(UserMapper.UserToDto).ToList();
-                    }
-                }
-                else
-                {
-                    List<User> users = await _context.Users.ToListAsync();
-                    getUsersResponse.IsSuccess = true;
-                    getUsersResponse.Message = "Users found successfully";
-                    getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
-
-                    _cacheUtils.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
-                }
-            }
-            catch (Exception ex)
-            {
-                getUsersResponse.Message = $"unexpected error on UserRepository -> GetUsers: {ex.Message}";
-                getUsersResponse.IsSuccess = false;
-            }
-
-            return getUsersResponse;
         }
 
         public async Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
@@ -621,124 +575,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return checkUserExistenceResponse;
-        }
-
-        public async Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest)
-        {
-            AddUserToBlackListResponse addUserToBlackListResponse = new AddUserToBlackListResponse();
-            try
-            {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == addUserToBlackListRequest.UserId);
-                if (user == null)
-                {
-                    addUserToBlackListResponse.IsSuccess = false;
-                    addUserToBlackListResponse.Message = $"User not found with the id {addUserToBlackListRequest.UserId}";
-                }
-                else if (addUserToBlackListRequest.SerialNumber != user.SerialNumber)
-                {
-                    addUserToBlackListResponse.IsSuccess = false;
-                    addUserToBlackListResponse.Message = $"That serial number does not match the user with id: {addUserToBlackListRequest.UserId}";
-                }
-                else
-                {
-                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == addUserToBlackListRequest.SerialNumber &&
-                                                                                 bl.UserId == addUserToBlackListRequest.UserId);
-                    if (isOnBlackList)
-                    {
-                        addUserToBlackListResponse.IsSuccess = false;
-                        addUserToBlackListResponse.Message = $"The user is already on the blacklist";
-                    }
-                    else
-                    {
-                        BlackList blackList = new BlackList
-                        {
-                            SerialNumber = addUserToBlackListRequest.SerialNumber,
-                            UserId = addUserToBlackListRequest.UserId,
-                            Description = addUserToBlackListRequest.Description,
-                        };
-
-                        _genericUtils.ClearCache(_userPrefix);
-
-                        await _context.BlackList.AddAsync(blackList);
-                        await _context.SaveChangesAsync();
-
-                        addUserToBlackListResponse.IsSuccess = true;
-                        addUserToBlackListResponse.Message = $"User with ID: {addUserToBlackListRequest.UserId} and Serial Number: {addUserToBlackListRequest.SerialNumber} added successfuly";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                addUserToBlackListResponse.IsSuccess = false;
-                addUserToBlackListResponse.Message = $"unexpected error on UserRepository -> AddUserToBlackList: {ex.Message}";
-            }
-
-            return addUserToBlackListResponse;
-        }
-
-        public async Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest)
-        {
-            GetIntegralUserInfoResponse getIntegralUserInfoResponse = new GetIntegralUserInfoResponse();
-            try
-            {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == getIntegralUserInfoRequest.UserId);
-                if (user == null)
-                {
-                    getIntegralUserInfoResponse.IsSuccess = false;
-                    getIntegralUserInfoResponse.UserDTO = new UserDTO();
-                    getIntegralUserInfoResponse.Message = $"User not found";
-                }
-                else
-                {
-                    UserDTO userDTO = UserMapper.UserToDto(user);
-                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password!, getIntegralUserInfoRequest.MasterKey);
-
-                    getIntegralUserInfoResponse.IsSuccess = true;
-                    getIntegralUserInfoResponse.UserDTO = userDTO;
-                    getIntegralUserInfoResponse.Message = $"User found";
-                }
-            }
-            catch (Exception ex)
-            {
-                getIntegralUserInfoResponse.IsSuccess = false;
-                getIntegralUserInfoResponse.Message = $"unexpected error on UserRepository -> GetIntegralUserInfo: {ex.Message}";
-            }
-
-            return getIntegralUserInfoResponse;
-        }
-
-        public async Task<GetIntegralUsersResponse> GetIntegralUsers(GetIntegralUsersRequest getIntegralUsersRequest)
-        {
-            GetIntegralUsersResponse getIntegralUsersResponse = new GetIntegralUsersResponse();
-            try
-            {
-                List<User> users = await _context.Users.ToListAsync();
-                if (!users.Any())
-                {
-                    getIntegralUsersResponse.IsSuccess = false;
-                    getIntegralUsersResponse.Message = $"Users not found";
-                }
-                else
-                {
-                    List<UserDTO> usersDto = users.Select(u =>
-                    {
-                        UserDTO user = UserMapper.UserToDto(u);
-                        user.Password = PasswordUtils.DecryptPasswordWithMasterKey(u.Password!, getIntegralUsersRequest.MasterKey);
-                        return user;
-                    }).ToList();
-
-                    getIntegralUsersResponse.IsSuccess = true;
-                    getIntegralUsersResponse.Message = $"Users found";
-                    getIntegralUsersResponse.UsersDto = usersDto;
-                }
-            }
-            catch (Exception ex)
-            {
-                getIntegralUsersResponse.IsSuccess = false;
-                getIntegralUsersResponse.Message = $"unexpected error on UserRepository -> GetIntegralUserInfo: {ex.Message}";
-            }
-
-            return getIntegralUsersResponse;
         }
     }
 }

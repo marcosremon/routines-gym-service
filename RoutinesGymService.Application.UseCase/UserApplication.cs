@@ -1,16 +1,12 @@
 ﻿using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.AddUserToBlackList;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateNewPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.DeleteUser;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUserInfo;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetIntegralUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUserProfileDetails;
-using RoutinesGymService.Application.DataTransferObject.Interchange.User.Get.GetUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.UpdateUser;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
@@ -24,11 +20,6 @@ namespace RoutinesGymService.Application.UseCase
         public UserApplication(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-        }
-
-        public async Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest)
-        {
-            return await _userRepository.AddUserToBlackList(addUserToBlackListRequest);
         }
 
         public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
@@ -61,16 +52,6 @@ namespace RoutinesGymService.Application.UseCase
             return await _userRepository.DeleteUser(deleteUserRequest);
         }
 
-        public async Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest)
-        {
-            return await _userRepository.GetIntegralUserInfo(getIntegralUserInfoRequest);
-        }
-
-        public async Task<GetIntegralUsersResponse> GetIntegralUsers(GetIntegralUsersRequest getIntegralUsersRequest)
-        {
-            return await _userRepository.GetIntegralUsers(getIntegralUsersRequest);
-        }
-
         public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
         {
             return await _userRepository.GetUserByEmail(getUserByEmailRequest);
@@ -79,11 +60,6 @@ namespace RoutinesGymService.Application.UseCase
         public async Task<GetUserProfileDetailsResponse> GetUserProfileDetails(GetUserProfileDetailsRequest GetUserProfileDetails)
         {
             return await _userRepository.GetUserProfileDetails(GetUserProfileDetails);
-        }
-
-        public async Task<GetUsersResponse> GetUsers()
-        {
-            return await _userRepository.GetUsers();
         }
 
         public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
