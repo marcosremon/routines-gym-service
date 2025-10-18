@@ -14,6 +14,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
         {
             // Application
             services.AddScoped<IUserApplication, UserApplication>();
+            services.AddScoped<IAdminApplication, AdminApplication>();
             services.AddScoped<IRoutineApplication, RoutineApplication>();
             services.AddScoped<ISplitDayApplication, SplitDayApplication>();
             services.AddScoped<IExerciseApplication, ExerciseApplication>();
@@ -23,6 +24,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
 
             // Repository
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IAdminRepository, AdminRepository>();
             services.AddScoped<IRoutineRepository, RoutineRepository>();
             services.AddScoped<ISplitDayRepository, SplitDayRepository>();
             services.AddScoped<IExerciseRepository, ExerciseRepository>();
