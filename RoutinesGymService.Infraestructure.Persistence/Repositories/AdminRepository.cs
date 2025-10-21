@@ -35,6 +35,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
+        #region Get users
         public async Task<GetUsersResponse> GetUsers()
         {
             GetUsersResponse getUsersResponse = new GetUsersResponse();
@@ -75,7 +76,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getUsersResponse;
         }
+        #endregion
 
+        #region Add user to black list
         public async Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest)
         {
             AddUserToBlackListResponse addUserToBlackListResponse = new AddUserToBlackListResponse();
@@ -128,7 +131,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return addUserToBlackListResponse;
         }
+        #endregion
 
+        #region Get integral user info
         public async Task<GetIntegralUserInfoResponse> GetIntegralUserInfo(GetIntegralUserInfoRequest getIntegralUserInfoRequest)
         {
             GetIntegralUserInfoResponse getIntegralUserInfoResponse = new GetIntegralUserInfoResponse();
@@ -159,7 +164,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getIntegralUserInfoResponse;
         }
+        #endregion
 
+        #region Get integral users
         public async Task<GetIntegralUsersResponse> GetIntegralUsers(GetIntegralUsersRequest getIntegralUsersRequest)
         {
             GetIntegralUsersResponse getIntegralUsersResponse = new GetIntegralUsersResponse();
@@ -193,7 +200,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getIntegralUsersResponse;
         }
+        #endregion
 
+        #region Change user role
         public async Task<ChangeUserRoleResponse> ChangeUserRole(ChangeUserRoleRequest changeUserRoleRequest)
         {
             ChangeUserRoleResponse changeUserRoleResponse = new ChangeUserRoleResponse();
@@ -207,7 +216,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (changeUserRoleRequest.OldRole == changeUserRoleRequest.NewRole) 
+                    if (changeUserRoleRequest.OldRole == changeUserRoleRequest.NewRole)
                     {
                         changeUserRoleResponse.IsSuccess = false;
                         changeUserRoleResponse.Message = "The old role is the same as the new role";
@@ -240,7 +249,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return changeUserRoleResponse;
         }
+        #endregion
 
+        #region Get blacklisted users
         public async Task<GetBlacklistedUsersResponse> GetBlacklistedUsers(GetBlacklistedUsersRequest getBlacklistedUsersRequest)
         {
             GetBlacklistedUsersResponse getBlacklistedUsersResponse = new GetBlacklistedUsersResponse();
@@ -248,8 +259,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             {
                 List<UserDTO> blacklistedUsers = await _context.Users
                     .Join(_context.BlackList,
-                        user => user.UserId,           
-                        black => black.UserId,     
+                        user => user.UserId,
+                        black => black.UserId,
                         (user, black) => new UserDTO
                         {
                             Dni = user.Dni,
@@ -283,36 +294,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getBlacklistedUsersResponse;
         }
+        #endregion
 
-        public async Task<GetUsersByRoleResponse> GetUsersByRole(GetUsersByRoleRequest getUsersByRoleRequest)
-        {
-            GetUsersByRoleResponse getUsersByRoleResponse = new GetUsersByRoleResponse();
-            try
-            {
-                List<User> users = await _context.Users
-                    .Where(u => u.RoleString.ToLower() == getUsersByRoleRequest.Role.ToLower())
-                    .ToListAsync();
-                if (users.Count == 0)
-                {   
-                    getUsersByRoleResponse.IsSuccess = false;
-                    getUsersByRoleResponse.Message = $"No users found with the role {getUsersByRoleRequest.Role}";
-                }
-                else
-                {
-                    getUsersByRoleResponse.IsSuccess = true;
-                    getUsersByRoleResponse.Message = $"Users found with the role {getUsersByRoleRequest.Role}";
-                    getUsersByRoleResponse.UsersByRole = users.Select(UserMapper.UserToDto).ToList();
-                }   
-            }
-            catch (Exception ex)
-            {
-                getUsersByRoleResponse.IsSuccess = false;
-                getUsersByRoleResponse.Message = $"unexpected error on UserRepository -> GetUsersByRole: {ex.Message}";
-            }
-
-            return getUsersByRoleResponse;
-        }
-
+        #region Remove user from black list
         public async Task<RemoveUserFromBlackListResponse> RemoveUserFromBlackList(RemoveUserFromBlackListRequest removeUserFromBlackListRequest)
         {
             RemoveUserFromBlackListResponse removeUserFromBlackListResponse = new RemoveUserFromBlackListResponse();
@@ -352,5 +336,37 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return removeUserFromBlackListResponse;
         }
+        #endregion
+
+        #region Get users by role
+        public async Task<GetUsersByRoleResponse> GetUsersByRole(GetUsersByRoleRequest getUsersByRoleRequest)
+        {
+            GetUsersByRoleResponse getUsersByRoleResponse = new GetUsersByRoleResponse();
+            try
+            {
+                List<User> users = await _context.Users
+                    .Where(u => u.RoleString.ToLower() == getUsersByRoleRequest.Role.ToLower())
+                    .ToListAsync();
+                if (users.Count == 0)
+                {
+                    getUsersByRoleResponse.IsSuccess = false;
+                    getUsersByRoleResponse.Message = $"No users found with the role {getUsersByRoleRequest.Role}";
+                }
+                else
+                {
+                    getUsersByRoleResponse.IsSuccess = true;
+                    getUsersByRoleResponse.Message = $"Users found with the role {getUsersByRoleRequest.Role}";
+                    getUsersByRoleResponse.UsersByRole = users.Select(UserMapper.UserToDto).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                getUsersByRoleResponse.IsSuccess = false;
+                getUsersByRoleResponse.Message = $"unexpected error on UserRepository -> GetUsersByRole: {ex.Message}";
+            }
+
+            return getUsersByRoleResponse;
+        }
+        #endregion
     }
 }

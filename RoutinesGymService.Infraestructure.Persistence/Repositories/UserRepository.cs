@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
+using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.UserExist;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGenericUser;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.CreateGoogleUser;
@@ -16,6 +17,7 @@ using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security;
 
@@ -32,7 +34,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly string _routinePrefix;
         private readonly string _friendPrefix;
         private readonly string _authPrefix;
-        private readonly string _exercisePrefix;
         private readonly int _expiryMinutes;
 
         public UserRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, PasswordUtils passwordUtils, IConfiguration configuration)
@@ -46,10 +47,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
             _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
             _authPrefix = configuration["CacheSettings:AuthPrefix"]!;
-            _exercisePrefix = configuration["CacheSettings:ExercisePrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
+        #region Get users by email
         public async Task<GetUserByEmailResponse> GetUserByEmail(GetUserByEmailRequest getUserByEmailRequest)
         {
             GetUserByEmailResponse getUserByEmailResponse = new GetUserByEmailResponse();
@@ -105,7 +106,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getUserByEmailResponse;
         }
+        #endregion
 
+        #region Create user
         public async Task<CreateUserResponse> CreateUser(CreateGenericUserRequest createGenericUserRequest)
         {
             CreateUserResponse createUserResponse = new CreateUserResponse();
@@ -127,92 +130,75 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Invalid email format example (example@gmail.com)";
                 }
+                else if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                {
+                    createUserResponse.IsSuccess = false;
+                    createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
+                }
+                else if (createGenericUserRequest.ConfirmPassword != createGenericUserRequest.Password)
+                {
+                    createUserResponse.IsSuccess = false;
+                    createUserResponse.Message = "Password and confirm password do not match";
+                }
                 else
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == createGenericUserRequest.Email);
-                    if (user != null)
+                    UserExistRequest userExistRequest = new UserExistRequest
+                    {
+                        Dni = createGenericUserRequest.Dni!,
+                        UserEmail = createGenericUserRequest.Email!
+                    };
+
+                    /* Si existe un usuario con el mismo email o con el mismo dni o con los dos error */
+                    UserExistResponse userExistResponse = await UserExist(userExistRequest);
+                    if (!userExistResponse.SuccessData)
                     {
                         createUserResponse.IsSuccess = false;
-                        createUserResponse.Message = "User already exists with the provided email";
+                        createUserResponse.Message = userExistResponse.Message;
                     }
                     else
                     {
-                        user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni);
-                        if (user != null)
+                        string friendCode = string.Empty;
+                        do
                         {
-                            createUserResponse.IsSuccess = false;
-                            createUserResponse.Message = "User already exists with the provided DNI";
+                            friendCode = GenericUtils.CreateFriendCode(8);
                         }
-                        else
+                        while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode));
+
+                        if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
+                            createGenericUserRequest.SerialNumber == "UNKNOWN" ||
+                            createGenericUserRequest.SerialNumber.Contains("ERROR_"))
                         {
-                            user = await _context.Users.FirstOrDefaultAsync(u => u.Dni == createGenericUserRequest.Dni && u.Email == createGenericUserRequest.Email);
-                            if (user == null)
+                            string newSerial = string.Empty;
+                            do
                             {
-                                createUserResponse.IsSuccess = false;
-                                createUserResponse.Message = "The email entered does not match the user's email address with the ID number entered";
+                                newSerial = Guid.NewGuid().ToString();
                             }
-                            else
-                            {
-                                if (createGenericUserRequest.Password != createGenericUserRequest.ConfirmPassword)
-                                {
-                                    createUserResponse.IsSuccess = false;
-                                    createUserResponse.Message = "Password and confirm password do not match";
-                                }
-                                else
-                                {
-                                    if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
-                                    {
-                                        createUserResponse.IsSuccess = false;
-                                        createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
-                                    }
-                                    else
-                                    {
-                                        string friendCode = string.Empty;
-                                        do
-                                        {
-                                            friendCode = GenericUtils.CreateFriendCode(8);
-                                        }
-                                        while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode));
+                            while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial));
 
-                                        if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
-                                            createGenericUserRequest.SerialNumber == "UNKNOWN" ||
-                                            createGenericUserRequest.SerialNumber.Contains("ERROR_"))
-                                        {
-                                            string newSerial = string.Empty;
-                                            do
-                                            {
-                                                newSerial = Guid.NewGuid().ToString();
-                                            }
-                                            while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial));
-
-                                            createGenericUserRequest.SerialNumber = newSerial;
-                                        }
-
-                                        User newUser = new User
-                                        {
-                                            Dni = createGenericUserRequest.Dni!,
-                                            Username = createGenericUserRequest.Username!,
-                                            Surname = createGenericUserRequest.Surname ?? "",
-                                            Email = createGenericUserRequest.Email!.ToLower(),
-                                            FriendCode = friendCode,
-                                            SerialNumber = createGenericUserRequest.SerialNumber!,
-                                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
-                                            Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
-                                            RoleString = createGenericUserRequest.Role.ToString().ToLower(),
-                                            InscriptionDate = DateTime.UtcNow
-                                        };
-
-                                        _genericUtils.ClearCache(_userPrefix);
-
-                                        await _context.Users.AddAsync(newUser);
-                                        await _context.SaveChangesAsync();
-
-                                        createUserResponse.IsSuccess = true;
-                                        createUserResponse.Message = "User created successfully";
-                                    }
-                                }
-                            }
+                            createGenericUserRequest.SerialNumber = newSerial;
                         }
+
+                        User newUser = new User
+                        {
+                            Dni = createGenericUserRequest.Dni!,
+                            Username = createGenericUserRequest.Username!,
+                            Surname = createGenericUserRequest.Surname ?? "",
+                            Email = createGenericUserRequest.Email!.ToLower(),
+                            FriendCode = friendCode,
+                            SerialNumber = createGenericUserRequest.SerialNumber!,
+                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                            Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
+                            RoleString = createGenericUserRequest.Role.ToString().ToLower(),
+                            InscriptionDate = DateTime.UtcNow
+                        };
+
+                        _genericUtils.ClearCache(_userPrefix);
+
+                        await _context.Users.AddAsync(newUser);
+                        await _context.SaveChangesAsync();
+
+                        createUserResponse.IsSuccess = true;
+                        createUserResponse.Message = "User created successfully";
                     }
                 }
             }
@@ -224,7 +210,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return createUserResponse;
         }
+        #endregion
 
+        #region Create google user
         public async Task<CreateGoogleUserResponse> CreateGoogleUser(CreateGenericUserRequest createGenericUserRequest)
         {
             CreateGoogleUserResponse createGoogleUserResponse = new CreateGoogleUserResponse();
@@ -297,59 +285,84 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return createGoogleUserResponse;
         }
+        #endregion
 
+        #region Delete user
         public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
         {
             DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
+            using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteUserRequest.Email);
-                if (user == null)
+                var userData = await _context.Users
+                    .Where(u => u.Email == deleteUserRequest.Email)
+                    .GroupJoin(_context.Steps,
+                        u => u.UserId,
+                        s => s.UserId,
+                        (u, stats) => new { User = u, Stats = stats })
+                    .SelectMany(x => x.Stats.DefaultIfEmpty(),
+                        (x, stat) => new { x.User, Stat = stat })
+                    .GroupJoin(_context.UserFriends,
+                        x => x.User.UserId,
+                        uf => uf.UserId,
+                        (x, friends) => new { x.User, x.Stat, Friends = friends })
+                    .SelectMany(x => x.Friends.DefaultIfEmpty(),
+                        (x, friend) => new { x.User, x.Stat, Friend = friend })
+                    .GroupJoin(_context.Routines,
+                        x => x.User.UserId,
+                        r => r.UserId,
+                        (x, routines) => new { x.User, x.Stat, x.Friend, Routines = routines })
+                    .ToListAsync();
+
+                if (!userData.Any())
                 {
                     deleteUserResponse.IsSuccess = false;
                     deleteUserResponse.Message = "User not found with the provided email";
                 }
                 else
                 {
-                    List<Step> steps = await _context.Stats.Where(s => s.UserId == user.UserId).ToListAsync();
-                    _context.Stats.RemoveRange(steps);
+                    User user = userData.First().User;
+                    long userId = user.UserId;
 
-                    List<UserFriend> userFriends = await _context.UserFriends
-                        .Where(uf => uf.UserId == user.UserId || uf.FriendId == user.UserId)
-                        .ToListAsync();
+                    /* Primero eliminamos los pasos y los amigos */
+                    List<Step> steps = await _context.Steps.Where(s => s.UserId == userId).ToListAsync();
+                    List<UserFriend> userFriends = await _context.UserFriends.Where(uf => uf.UserId == userId || uf.FriendId == userId).ToListAsync();
+                    
+                    _context.Steps.RemoveRange(steps);
                     _context.UserFriends.RemoveRange(userFriends);
 
-                    List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
+                    List<long> routineIds = await _context.Routines
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.RoutineId)
+                        .ToListAsync();
 
-                    foreach (Routine routine in routines)
+                    if (routineIds.Any())
                     {
-                        List<ExerciseProgress> progress = await _context.ExerciseProgress
-                            .Where(ep => ep.RoutineId == routine.RoutineId)
-                            .ToListAsync();
-                        _context.ExerciseProgress.RemoveRange(progress);
+                        /* Luego eliminamos el progreso de los ejercicios, los ejerciicos y los splits */
+                        List<ExerciseProgress> exerciseProgresses = await _context.ExerciseProgress.Where(ep => routineIds.Contains(ep.RoutineId)).ToListAsync();
+                        List<Exercise> exercises = await _context.Exercises.Where(e => routineIds.Contains(e.RoutineId)).ToListAsync();
+                        List<SplitDay> splitDays = await _context.SplitDays.Where(sd => routineIds.Contains(sd.RoutineId)).ToListAsync();
 
-                        List<Exercise> exercises = await _context.Exercises
-                            .Where(e => e.RoutineId == routine.RoutineId)
-                            .ToListAsync();
+                        _context.ExerciseProgress.RemoveRange(exerciseProgresses);
                         _context.Exercises.RemoveRange(exercises);
-
-                        List<SplitDay> splitDays = await _context.SplitDays
-                            .Where(sd => sd.RoutineId == routine.RoutineId)
-                            .ToListAsync();
                         _context.SplitDays.RemoveRange(splitDays);
                     }
 
-                    _genericUtils.ClearCache(_userPrefix);
-                    _genericUtils.ClearCache(_stepPrefix);
-                    _genericUtils.ClearCache(_routinePrefix);
-                    _genericUtils.ClearCache(_friendPrefix);
-                    _genericUtils.ClearCache(_authPrefix);
-                    _genericUtils.ClearCache(_exercisePrefix);
-
+                    /* Por ultimo eliminamos las rutinas y el usuario */
+                    List<Routine> routines = await _context.Routines.Where(r => r.UserId == userId).ToListAsync();
+                    
                     _context.Routines.RemoveRange(routines);
                     _context.Users.Remove(user);
+
                     await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _genericUtils.ClearCache($"{_userPrefix}:{userId}");
+                    _genericUtils.ClearCache($"{_stepPrefix}:{userId}");
+                    _genericUtils.ClearCache($"{_routinePrefix}:{userId}");
+                    _genericUtils.ClearCache($"{_friendPrefix}:{userId}");
+                    _genericUtils.ClearCache($"{_authPrefix}:{deleteUserRequest.Email}");
 
                     deleteUserResponse.IsSuccess = true;
                     deleteUserResponse.Message = "User deleted successfully";
@@ -357,16 +370,21 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 deleteUserResponse.IsSuccess = false;
                 deleteUserResponse.Message = $"Unexpected error on UserRepository -> DeleteUser: {ex.Message}";
             }
 
             return deleteUserResponse;
         }
+        #endregion
 
+        #region Update user
         public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
         {
             UpdateUserResponse updateUserResponse = new UpdateUserResponse();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == updateUserRequest.OldEmail);
@@ -377,25 +395,90 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (!GenericUtils.IsDniValid(updateUserRequest.NewDni!))
+                    bool hasError = false;
+                    if (!string.IsNullOrEmpty(updateUserRequest.NewDni) && updateUserRequest.NewDni != user.Dni)
                     {
-                        updateUserResponse.IsSuccess = false;
-                        updateUserResponse.Message = "The dni is not valid you need eight numbers and a capital letter";
-                    }
-                    else
-                    {
-                        user.Dni = updateUserRequest.NewDni ?? user.Dni;
-                        user.Username = updateUserRequest.NewUsername ?? user.Username;
-                        user.Surname = updateUserRequest.NewSurname ?? user.Surname;
-                        user.Email = updateUserRequest.NewEmail ?? user.Email;
+                        if (!GenericUtils.IsDniValid(updateUserRequest.NewDni))
+                        {
+                            updateUserResponse.IsSuccess = false;
+                            updateUserResponse.Message = "The DNI is not valid. You need eight numbers and a capital letter";
+                            hasError = true;
+                        }
+                        else
+                        {
+                            UserExistRequest userExistRequest = new UserExistRequest
+                            {
+                                Dni = updateUserRequest.NewDni!
+                            };
 
-                        _genericUtils.ClearCache(_userPrefix);
+                            UserExistResponse dniExistsResponse = await UserExist(userExistRequest);
+                            if (dniExistsResponse.DniExists)
+                            {
+                                updateUserResponse.IsSuccess = false;
+                                updateUserResponse.Message = "The DNI is already registered by another user";
+                                hasError = true;
+                            }
+                        }
+                    }
+
+                    if (!hasError && !string.IsNullOrEmpty(updateUserRequest.NewEmail) && updateUserRequest.NewEmail != user.Email)
+                    {
+                        UserExistRequest userExistRequest = new UserExistRequest
+                        {
+                            UserEmail = updateUserRequest.NewEmail
+                        };
+
+                        UserExistResponse emailExistsResponse = await UserExist(userExistRequest);
+                        if (emailExistsResponse.EmailExists)
+                        {
+                            updateUserResponse.IsSuccess = false;
+                            updateUserResponse.Message = "The email is already registered by another user";
+                            hasError = true;
+                        }
+                    }
+
+                    if (!hasError)
+                    {
+                        bool emailChanged = false;
+                        string oldEmail = user.Email;
+
+                        if (!string.IsNullOrEmpty(updateUserRequest.NewDni))
+                        {
+                            user.Dni = updateUserRequest.NewDni;
+                        }
+
+                        if (!string.IsNullOrEmpty(updateUserRequest.NewUsername))
+                        {
+                            user.Username = updateUserRequest.NewUsername;
+                        }
+
+                        if (!string.IsNullOrEmpty(updateUserRequest.NewSurname))
+                        {
+                            user.Surname = updateUserRequest.NewSurname;
+                        }
+
+                        if (!string.IsNullOrEmpty(updateUserRequest.NewEmail) &&
+                            updateUserRequest.NewEmail != oldEmail)
+                        {
+                            user.Email = updateUserRequest.NewEmail;
+                            emailChanged = true;
+                        }
+
                         await _context.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        _genericUtils.ClearCache($"{_userPrefix}:{user.UserId}");
+                        _genericUtils.ClearCache($"{_authPrefix}:{oldEmail}");
+
+                        if (emailChanged)
+                        {
+                            _genericUtils.ClearCache($"{_authPrefix}:{user.Email}");
+                        }
 
                         string newToken = string.Empty;
-                        if (user.Email != updateUserRequest.OldEmail)
+                        if (emailChanged)
                         {
-                            newToken = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower()
+                            newToken = user.RoleString.Equals(Role.ADMIN.ToString(), StringComparison.OrdinalIgnoreCase)
                                 ? JwtUtils.GenerateAdminJwtToken(user.Email)
                                 : JwtUtils.GenerateUserJwtToken(user.Email);
                         }
@@ -405,17 +488,24 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         updateUserResponse.UserDTO = UserMapper.UserToDto(user);
                         updateUserResponse.Message = "User updated successfully";
                     }
+                    else
+                    {
+                        await transaction.RollbackAsync();
+                    }
                 }
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 updateUserResponse.IsSuccess = false;
-                updateUserResponse.Message = $"unexpected error on UserRepository -> UpdateUser: {ex.Message}";
+                updateUserResponse.Message = $"Unexpected error on UserRepository -> UpdateUser: {ex.Message}";
             }
 
             return updateUserResponse;
         }
+        #endregion
 
+        #region Create new password
         public async Task<CreateNewPasswordResponse> CreateNewPassword(CreateNewPasswordRequest createNewPasswordRequest)
         {
             CreateNewPasswordResponse createNewPasswordResponse = new CreateNewPasswordResponse();
@@ -453,7 +543,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return createNewPasswordResponse;
         }
+        #endregion
 
+        #region Change password with password and email
         public async Task<ChangePasswordWithPasswordAndEmailResponse> ChangePasswordWithPasswordAndEmail(ChangePasswordWithPasswordAndEmailRequest changePasswordWithPasswordAndEmailRequest)
         {
             ChangePasswordWithPasswordAndEmailResponse changePasswordWithPasswordAndEmailResponse = new ChangePasswordWithPasswordAndEmailResponse();
@@ -502,7 +594,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return changePasswordWithPasswordAndEmailResponse;
         }
+        #endregion
 
+        #region Get user profile details
         public async Task<GetUserProfileDetailsResponse> GetUserProfileDetails(GetUserProfileDetailsRequest GetUserProfileDetails)
         {
             GetUserProfileDetailsResponse getUserProfileDetailsResponse = new GetUserProfileDetailsResponse();
@@ -547,7 +641,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getUserProfileDetailsResponse;
         }
+        #endregion
 
+        #region Check user existence
         public async Task<CheckUserExistenceResponse> CheckUserExistence(CheckUserExistenceRequest checkUserExistenceRequest)
         {
             CheckUserExistenceResponse checkUserExistenceResponse = new CheckUserExistenceResponse();
@@ -576,5 +672,70 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return checkUserExistenceResponse;
         }
+        #endregion
+
+        #region Auxiliary methods
+
+        #region User exist
+        /* Este metodo auxiliar se usa en el create user */
+        private async Task<UserExistResponse> UserExist(UserExistRequest userExistRequest)
+        {
+            UserExistResponse userExistResponse = new UserExistResponse();
+            try
+            {
+                bool existsDni = await _context.Users.AnyAsync(u => u.Dni == userExistRequest.Dni);
+                bool existsEmail = await _context.Users.AnyAsync(u => u.Email == userExistRequest.UserEmail);
+
+                if (existsDni && existsEmail)
+                {
+                    userExistResponse.EmailExists = true;
+                    userExistResponse.DniExists = true;
+                    userExistResponse.DniAndEmailExist = true;
+                    userExistResponse.Message = "Both DNI and Email exist";
+                }
+                else if (existsDni)
+                {
+                    userExistResponse.EmailExists = false;
+                    userExistResponse.DniExists = true;
+                    userExistResponse.DniAndEmailExist = false;
+                    userExistResponse.Message = "DNI exists but Email does not exist";
+                }
+                else if (existsEmail)
+                {
+                    userExistResponse.EmailExists = true;
+                    userExistResponse.DniExists = false;
+                    userExistResponse.DniAndEmailExist = false;
+                    userExistResponse.Message = "Email exists but DNI does not exist";
+                }
+                else
+                {
+                    userExistResponse.EmailExists = false;
+                    userExistResponse.DniExists = false;
+                    userExistResponse.DniAndEmailExist = false;
+                    userExistResponse.Message = "Neither DNI nor Email exist";
+                }
+
+                userExistResponse.ResponsCode = ResponseCodes.OK;
+                userExistResponse.IsSuccess = true;
+
+                userExistResponse.SuccessData = userExistResponse != null && userExistResponse.IsSuccess &&
+                    (userExistResponse.DniAndEmailExist || userExistResponse.EmailExists || userExistResponse.DniAndEmailExist);
+            }
+            catch (Exception)
+            {
+                userExistResponse.ResponsCode = ResponseCodes.INTERNAL_SERVER_ERROR;
+                userExistResponse.Message = "An error occurred while checking user existence";
+                userExistResponse.IsSuccess = false;
+                userExistResponse.DniExists = false;
+                userExistResponse.EmailExists = false;
+                userExistResponse.DniAndEmailExist = false;
+                userExistResponse.SuccessData = false;
+            }
+
+            return userExistResponse;
+        }
+        #endregion
+
+        #endregion
     }
 }
