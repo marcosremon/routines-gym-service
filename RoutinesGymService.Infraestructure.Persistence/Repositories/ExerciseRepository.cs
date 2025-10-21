@@ -31,11 +31,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
+        #region Add exercise
         public async Task<AddExerciseResponse> AddExercise(AddExerciseRequest addExerciseRequest)
         {
-
             AddExerciseResponse addExerciseResponse = new AddExerciseResponse();
-            IDbContextTransaction dbContextTransaction = _context.Database.BeginTransaction();
+            await using IDbContextTransaction dbContextTransaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == addExerciseRequest.UserEmail);
@@ -47,7 +47,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineName == addExerciseRequest.RoutineName &&
-                                                                                        r.UserId == user.UserId);
+                                                                                     r.UserId == user.UserId);
                     if (routine == null)
                     {
                         addExerciseResponse.IsSuccess = false;
@@ -55,12 +55,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        string day = addExerciseRequest.DayName.Contains(".") 
+                        // Clean up day name in case it contains extra formatting like "1.Monday"
+                        string day = addExerciseRequest.DayName.Contains(".")
                             ? addExerciseRequest.DayName.Split(".")[1]
                             : addExerciseRequest.DayName;
+
                         int dayToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(day));
+
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
-                                                                                                s.DayName == dayToInt);
+                                                                                             s.DayName == dayToInt);
                         if (splitDay == null)
                         {
                             addExerciseResponse.IsSuccess = false;
@@ -69,8 +72,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {
                             Exercise? exercise = _context.Exercises.FirstOrDefault(e => e.RoutineId == routine.RoutineId &&
-                                                                                        e.SplitDayId == splitDay.SplitDayId &&
-                                                                                        e.ExerciseName == addExerciseRequest.ExerciseName);
+                                                                                      e.SplitDayId == splitDay.SplitDayId &&
+                                                                                      e.ExerciseName == addExerciseRequest.ExerciseName);
                             if (exercise != null)
                             {
                                 addExerciseResponse.IsSuccess = false;
@@ -90,8 +93,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 _context.Exercises.Add(newExercise);
                                 await _context.SaveChangesAsync();
 
-                                splitDay.Exercises.Add(newExercise);
-                                await _context.SaveChangesAsync();
+                                // Since newExercise is now tracked and has its ID, we can update splitDay's collection if needed (though EF Core usually handles this via FK)
+                                // In this specific case, the SplitDay entity might not strictly need the update here if navigation properties are configured, 
+                                // but for robustness as seen in the original code:
+                                // splitDay.Exercises.Add(newExercise);
+                                // await _context.SaveChangesAsync(); 
 
                                 await dbContextTransaction.CommitAsync();
 
@@ -111,11 +117,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return addExerciseResponse;
         }
+        #endregion
 
+        #region Delete exercise
         public async Task<DeleteExerciseResponse> DeleteExercise(DeleteExerciseRequest deleteExerciseRequest)
         {
             DeleteExerciseResponse deleteExerciseResponse = new DeleteExerciseResponse();
-            IDbContextTransaction dbContextTransaction = _context.Database.BeginTransaction();
+            await using IDbContextTransaction dbContextTransaction = await _context.Database.BeginTransactionAsync();
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteExerciseRequest.UserEmail);
@@ -127,7 +135,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     Routine? routine = await _context.Routines.FirstOrDefaultAsync(r => r.RoutineId == deleteExerciseRequest.RoutineId &&
-                                                                                        r.UserId == user.UserId);
+                                                                                     r.UserId == user.UserId);
                     if (routine == null)
                     {
                         deleteExerciseResponse.IsSuccess = false;
@@ -137,7 +145,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(deleteExerciseRequest.DayName!));
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == deleteExerciseRequest.RoutineId &&
-                                                                                               s.DayName == dayNameToInt);
+                                                                                             s.DayName == dayNameToInt);
                         if (splitDay == null)
                         {
                             deleteExerciseResponse.IsSuccess = false;
@@ -146,8 +154,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {
                             Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e => e.RoutineId == routine.RoutineId &&
-                                                                                                   e.SplitDayId == splitDay.SplitDayId &&
-                                                                                                   e.ExerciseName == deleteExerciseRequest.ExerciseName);
+                                                                                               e.SplitDayId == splitDay.SplitDayId &&
+                                                                                               e.ExerciseName == deleteExerciseRequest.ExerciseName);
                             if (exercise == null)
                             {
                                 deleteExerciseResponse.IsSuccess = false;
@@ -161,9 +169,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                                 _genericUtils.ClearCache(_exercisePrefix);
 
+                                // 1. Delete associated ExerciseProgress records
                                 _context.ExerciseProgress.RemoveRange(exerciseProgresses);
                                 await _context.SaveChangesAsync();
-                                
+
+                                // 2. Delete the Exercise itself
                                 _context.Exercises.Remove(exercise);
                                 await _context.SaveChangesAsync();
 
@@ -185,17 +195,21 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return deleteExerciseResponse;
         }
+        #endregion
 
+        #region Get exercises by day and routine name
         public async Task<GetExercisesByDayAndRoutineNameResponse> GetExercisesByDayAndRoutineName(GetExercisesByDayAndRoutineNameRequest getExercisesByDayAndRoutineNameRequest)
         {
             GetExercisesByDayAndRoutineNameResponse getExercisesByDayAndRoutineIdResponse = new GetExercisesByDayAndRoutineNameResponse();
             try
             {
                 string cacheKey = $"{_exercisePrefix}GetExercisesByDayAndRoutineName_{getExercisesByDayAndRoutineNameRequest.RoutineName}_{getExercisesByDayAndRoutineNameRequest.DayName}";
-                
+
+                // Try to retrieve from cache
                 GetExercisesByDayAndRoutineNameResponse? cacheExercise = _cacheUtils.Get<GetExercisesByDayAndRoutineNameResponse>(cacheKey);
                 if (cacheExercise != null)
                 {
+                    // If found in cache, return cached result
                     getExercisesByDayAndRoutineIdResponse.Exercises = cacheExercise.Exercises;
                     getExercisesByDayAndRoutineIdResponse.PastProgress = cacheExercise.PastProgress;
                     getExercisesByDayAndRoutineIdResponse.IsSuccess = cacheExercise.IsSuccess;
@@ -203,6 +217,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
+                    // If not found in cache, proceed with database query
                     User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getExercisesByDayAndRoutineNameRequest.UserEmail);
                     if (user == null)
                     {
@@ -221,9 +236,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {
                             int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(
-                                               GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName!));
+                                                   GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName!));
                             SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
-                                                                                                   s.DayName == dayNameToInt);
+                                                                                                 s.DayName == dayNameToInt);
                             if (splitDay == null)
                             {
                                 getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
@@ -232,10 +247,10 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             else
                             {
                                 List<Exercise> exercises = await _context.Exercises
-                                    .Where(e =>
-                                        e.RoutineId == routine.RoutineId &&
-                                        e.SplitDayId == splitDay.SplitDayId)
+                                    .Where(e => e.RoutineId == routine.RoutineId &&
+                                                e.SplitDayId == splitDay.SplitDayId)
                                     .ToListAsync();
+
                                 if (exercises.Count == 0)
                                 {
                                     getExercisesByDayAndRoutineIdResponse.IsSuccess = false;
@@ -246,14 +261,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     Dictionary<string, List<string>> pastProgressDict = new Dictionary<string, List<string>>();
                                     foreach (Exercise exercise in exercises)
                                     {
+                                        // Retrieve the last 3 progress records for the exercise, ordered by PerformedAt
                                         List<ExerciseProgress> last3Progress = await _context.ExerciseProgress
-                                           .Where(p => p.ExerciseId == exercise.ExerciseId &&
-                                                p.RoutineId == splitDay.RoutineId &&
-                                                p.DayName == GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString())
-                                           .OrderByDescending(p => p.PerformedAt)  
-                                           .Take(3)  
-                                           .Reverse()
-                                           .ToListAsync();
+                                            .Where(p => p.ExerciseId == exercise.ExerciseId &&
+                                                        p.RoutineId == splitDay.RoutineId &&
+                                                        p.DayName == GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString())
+                                            .OrderByDescending(p => p.PerformedAt)
+                                            .Take(3)
+                                            .Reverse() // Reverse to show oldest to newest (or simply use OrderBy if this order is desired)
+                                            .ToListAsync();
 
                                         List<string> pastProgress = last3Progress
                                             .Select(p => $"{p.Sets}x{p.Reps}@{p.Weight}kg")
@@ -267,6 +283,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     getExercisesByDayAndRoutineIdResponse.IsSuccess = true;
                                     getExercisesByDayAndRoutineIdResponse.Message = "Exercises retrieved successfully.";
 
+                                    // Cache the result
                                     _cacheUtils.Set(cacheKey, getExercisesByDayAndRoutineIdResponse, TimeSpan.FromMinutes(_expiryMinutes));
                                 }
                             }
@@ -282,7 +299,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getExercisesByDayAndRoutineIdResponse;
         }
+        #endregion
 
+        #region Add exercise progress
         public async Task<AddExerciseAddExerciseProgressResponse> AddExerciseProgress(AddExerciseAddExerciseProgressRequest addExerciseAddExerciseProgressRequest)
         {
             AddExerciseAddExerciseProgressResponse addExerciseAddExerciseProgressResponse = new AddExerciseAddExerciseProgressResponse();
@@ -306,7 +325,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => 
+                        SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                             s.SplitDayId == addExerciseAddExerciseProgressRequest.splitDayId &&
                             s.RoutineId == routine.RoutineId);
                         if (splitDay == null)
@@ -316,7 +335,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {
-                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e => 
+                            Exercise? exercise = await _context.Exercises.FirstOrDefaultAsync(e =>
                                 e.ExerciseName == addExerciseAddExerciseProgressRequest.ExerciseName &&
                                 e.RoutineId == routine.RoutineId &&
                                 e.SplitDayId == splitDay.SplitDayId);
@@ -327,10 +346,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             }
                             else
                             {
+                                // Handle potential decimal separator issue (dot vs comma) for parsing float
                                 string weightRaw = addExerciseAddExerciseProgressRequest.ProgressList[2];
-                                string weight = weightRaw.Any(c => c == 46) 
-                                    ? weightRaw.Replace(".", ",") 
+                                string weight = weightRaw.Any(c => c == 46) // ASCII for '.' is 46
+                                    ? weightRaw.Replace(".", ",")
                                     : weightRaw;
+
                                 ExerciseProgress? exerciseProgress = new ExerciseProgress
                                 {
                                     ExerciseId = exercise.ExerciseId,
@@ -338,7 +359,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     DayName = GenericUtils.ChangeIntToEnumOnDayName(splitDay.DayName).ToString(),
                                     Sets = int.Parse(addExerciseAddExerciseProgressRequest.ProgressList[0]),
                                     Reps = int.Parse(addExerciseAddExerciseProgressRequest.ProgressList[1]),
-                                    Weight = float.Parse(weight),
+                                    Weight = float.Parse(weight), // Parsing float with culture info where comma is decimal separator
                                     PerformedAt = DateTime.UtcNow,
                                 };
 
@@ -359,26 +380,31 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 addExerciseAddExerciseProgressResponse.IsSuccess = false;
                 addExerciseAddExerciseProgressResponse.Message = $"unexpected error on ExerciseRepository -> AddExerciseProgress: {ex.Message}";
             }
-        
+
             return addExerciseAddExerciseProgressResponse;
         }
+        #endregion
 
+        #region Get all exercise progress
         public async Task<GetAllExerciseProgressResponse> GetAllExerciseProgress(GetAllExerciseProgressRequest getAllExerciseProgressRequest)
         {
             GetAllExerciseProgressResponse getAllExerciseProgressResponse = new GetAllExerciseProgressResponse();
-            try 
+            try
             {
                 string cacheKey = $"{_exercisePrefix}GetAllExerciseProgress{getAllExerciseProgressRequest.UserEmail}_{getAllExerciseProgressRequest.ExerciseName}_{getAllExerciseProgressRequest.RoutineName}_{getAllExerciseProgressRequest.DayName}";
 
+                // Try to retrieve from cache
                 GetAllExerciseProgressResponse? cacheExercise = _cacheUtils.Get<GetAllExerciseProgressResponse>(cacheKey);
                 if (cacheExercise != null)
                 {
+                    // If found in cache, return cached result
                     getAllExerciseProgressResponse.ExerciseProgressList = cacheExercise.ExerciseProgressList;
                     getAllExerciseProgressResponse.IsSuccess = cacheExercise.IsSuccess;
                     getAllExerciseProgressResponse.Message = cacheExercise.Message;
                 }
                 else
                 {
+                    // If not found in cache, proceed with database query
                     User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getAllExerciseProgressRequest.UserEmail);
                     if (user == null)
                     {
@@ -431,6 +457,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                         .Select(ep => ExerciseMapper.ExerciseProgressToDto(ep))
                                         .ToList();
 
+                                    // Cache the result
                                     _cacheUtils.Set(cacheKey, getAllExerciseProgressResponse, TimeSpan.FromMinutes(_expiryMinutes));
                                 }
                             }
@@ -446,5 +473,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getAllExerciseProgressResponse;
         }
+        #endregion
     }
 }
