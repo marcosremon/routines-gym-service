@@ -20,6 +20,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _passwordUtils = passwordUtils;
         }
 
+        #region Check token status
         public CheckTokenStatusResponse CheckTokenStatus(CheckTokenStatusRequest checkTokenStatusRequest)
         {
             CheckTokenStatusResponse checkTokenStatusResponse = new CheckTokenStatusResponse();
@@ -31,13 +32,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     checkTokenStatusResponse.IsSuccess = true;
                     checkTokenStatusResponse.Message = "The token is valid";
                 }
-                else 
+                else
                 {
                     checkTokenStatusResponse.IsValid = true;
                     checkTokenStatusResponse.IsSuccess = false;
                     checkTokenStatusResponse.Message = "The token is not valid";
                 }
-            } 
+            }
             catch (Exception ex)
             {
                 checkTokenStatusResponse.IsValid = false;
@@ -47,7 +48,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return checkTokenStatusResponse;
         }
+        #endregion
 
+        #region Login
         public async Task<LoginResponse> Login(LoginRequest loginRequest)
         {
             LoginResponse loginResponse = new LoginResponse();
@@ -92,5 +95,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return loginResponse;
         }
+        #endregion
     }
 }

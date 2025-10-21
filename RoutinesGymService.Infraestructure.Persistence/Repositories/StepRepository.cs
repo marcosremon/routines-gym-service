@@ -28,6 +28,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
+        #region Get daily steps info
         public async Task<GetDailyStepsInfoResponse> GetDailyStepsInfo(GetDailyStepsInfoRequest getDailyStepsInfoRequest)
         {
             GetDailyStepsInfoResponse getDailyStepsInfoResponse = new GetDailyStepsInfoResponse();
@@ -42,7 +43,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     DateTime? day = getDailyStepsInfoRequest.Day!.Value.Date;
-                    Step? step = await _context.Stats.FirstOrDefaultAsync(st => st.Date!.Value.Date == day &&
+                    Step? step = await _context.Steps.FirstOrDefaultAsync(st => st.Date!.Value.Date == day &&
                                                                                 st.Steps == getDailyStepsInfoRequest.DailySteps &&
                                                                                 st.UserId == user.UserId);
                     if (step == null)
@@ -67,7 +68,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getDailyStepsInfoResponse;
         }
+        #endregion
 
+        #region Get steps
         public async Task<GetStepResponse> GetStpes(GetStepRequest getStepRequest)
         {
             GetStepResponse getStepResponse = new GetStepResponse();
@@ -92,7 +95,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        List<Step> steps = await _context.Stats
+                        List<Step> steps = await _context.Steps
                             .Where(s => s.UserId == user.UserId)
                             .OrderBy(s => s.Date)
                             .ToListAsync();
@@ -118,7 +121,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
             return getStepResponse;
         }
+        #endregion
 
+        #region Save daily steps
         public async Task<SaveDailyStepsResponse> SaveDailySteps(SaveDailyStepsRequest saveDailyStepsRequest)
         {
             SaveDailyStepsResponse saveDailyStepsResponse = new SaveDailyStepsResponse();
@@ -142,7 +147,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     _genericUtils.ClearCache(_stepPrefix);
 
-                    _context.Stats.Add(step);
+                    _context.Steps.Add(step);
                     await _context.SaveChangesAsync();
 
                     saveDailyStepsResponse.IsSuccess = true;
@@ -157,5 +162,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return saveDailyStepsResponse;
         }
+        #endregion
     }
 }

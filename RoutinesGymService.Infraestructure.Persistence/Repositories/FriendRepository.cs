@@ -28,6 +28,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
+        #region Add new user friend
         public async Task<AddNewUserFriendResponse> AddNewUserFriend(AddNewUserFriendRequest addNewUserFriendRequest)
         {
             AddNewUserFriendResponse addNewUserFriendResponse = new AddNewUserFriendResponse();
@@ -87,10 +88,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 addNewUserFriendResponse.IsSuccess = false;
                 addNewUserFriendResponse.Message = $"Unexpected error on FriendRepository -> AddNewUserFriend: {ex.Message}";
             }
-        
+
             return addNewUserFriendResponse;
         }
+        #endregion
 
+        #region Delete friend
         public async Task<DeleteFriendResponse> DeleteFriend(DeleteFriendRequest deleteFriendRequest)
         {
             DeleteFriendResponse deleteFriendResponse = new DeleteFriendResponse();
@@ -119,14 +122,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             deleteFriendResponse.Message = "This user is already your friend";
                         }
                         else
-                        {   
+                        {
                             _genericUtils.ClearCache(_friendPrefix);
 
                             _context.UserFriends.Remove(userFriend);
                             await _context.SaveChangesAsync();
 
                             userFriend = _context.UserFriends.FirstOrDefault(f => f.UserId == friend.UserId && f.FriendId == user.UserId);
-                            
+
                             _context.UserFriends.Remove(userFriend);
                             await _context.SaveChangesAsync();
 
@@ -144,7 +147,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return deleteFriendResponse;
         }
+        #endregion
 
+        #region Get all user friends
         public async Task<GetAllUserFriendsResponse> GetAllUserFriends(GetAllUserFriendsRequest getAllUserFriendsRequest)
         {
             GetAllUserFriendsResponse getAllUserFriendsResponse = new GetAllUserFriendsResponse();
@@ -198,8 +203,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 getAllUserFriendsResponse.IsSuccess = false;
                 getAllUserFriendsResponse.Message = $"Unexpected error on FriendRepository -> GetAllUserFriends: {ex.Message}";
             }
-        
+
             return getAllUserFriendsResponse;
         }
+        #endregion
     }
 }

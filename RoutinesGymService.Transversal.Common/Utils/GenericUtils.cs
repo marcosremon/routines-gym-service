@@ -165,7 +165,7 @@ namespace RoutinesGymService.Transversal.Common.Utils
                                     .ToList();
             foreach (string key in keys)
             {
-               _cacheUtils.Remove(key); 
+               _cacheUtils.Remove(key);
             }
         }
         #endregion

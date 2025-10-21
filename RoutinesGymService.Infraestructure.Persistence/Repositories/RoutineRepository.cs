@@ -35,6 +35,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
+        #region Create routine
         public async Task<CreateRoutineResponse> CreateRoutine(CreateRoutineRequest createRoutineRequest)
         {
             CreateRoutineResponse createRoutineResponse = new CreateRoutineResponse();
@@ -67,7 +68,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     break;
                                 }
                             }
-                            if (hasInvalidExercise) 
+                            if (hasInvalidExercise)
                                 break;
                         }
 
@@ -138,7 +139,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return createRoutineResponse;
         }
+        #endregion
 
+        #region Delete routine
         public async Task<DeleteRoutineResponse> DeleteRoutine(DeleteRoutineRequest deleteRoutineRequest)
         {
             DeleteRoutineResponse deleteRoutineResponse = new DeleteRoutineResponse();
@@ -205,7 +208,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return deleteRoutineResponse;
         }
+        #endregion
 
+        #region Get all user routines
         public async Task<GetAllUserRoutinesResponse> GetAllUserRoutines(GetAllUserRoutinesRequest getAllUserRoutinesRequest)
         {
             GetAllUserRoutinesResponse getAllUserRoutinesResponse = new GetAllUserRoutinesResponse();
@@ -253,7 +258,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getAllUserRoutinesResponse;
         }
+        #endregion
 
+        #region Get routine by routine name
         public async Task<GetRoutineByRoutineNameResponse> GetRoutineByRoutineName(GetRoutineByRoutineNameRequest getRoutineByRoutineNameRequest)
         {
             GetRoutineByRoutineNameResponse getRoutineByIdResponse = new GetRoutineByRoutineNameResponse();
@@ -292,11 +299,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 }
                             )
                             .SelectMany(
-                                x => x.SplitDaysGroup.DefaultIfEmpty(), 
-                                (parent, child) => new { parent.Routine, SplitDay = child } 
+                                x => x.SplitDaysGroup.DefaultIfEmpty(),
+                                (parent, child) => new { parent.Routine, SplitDay = child }
                             )
                             .GroupBy(x => x.Routine)
-                            .Select(g => new Routine 
+                            .Select(g => new Routine
                             {
                                 RoutineId = g.Key.RoutineId,
                                 RoutineName = g.Key.RoutineName,
@@ -330,7 +337,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getRoutineByIdResponse;
         }
+        #endregion
 
+        #region Get routine stats
         public async Task<GetRoutineStatsResponse> GetRoutineStats(GetRoutineStatsRequest getRoutineStatsRequest)
         {
             GetRoutineStatsResponse getRoutineStatsResponse = new GetRoutineStatsResponse();
@@ -356,20 +365,20 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         {
                             User = u,
 
-                            Routines = u.Routines.ToList(), 
+                            Routines = u.Routines.ToList(),
 
                             SplitDays = u.Routines
-                                .SelectMany(r => r.SplitDays) 
+                                .SelectMany(r => r.SplitDays)
                                 .Distinct()
                                 .ToList(),
 
                             Exercises = u.Routines
                                 .SelectMany(r => r.SplitDays)
-                                .SelectMany(sd => sd.Exercises) 
+                                .SelectMany(sd => sd.Exercises)
                                 .Distinct()
                                 .ToList()
                         })
-                        .FirstOrDefaultAsync(); 
+                        .FirstOrDefaultAsync();
 
                     if (userData == null)
                     {
@@ -411,7 +420,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getRoutineStatsResponse;
         }
+        #endregion
 
+        #region Update routine
         public async Task<UpdateRoutineResponse> UpdateRoutine(UpdateRoutineRequest updateRoutineRequest)
         {
             UpdateRoutineResponse updateRoutineResponse = new UpdateRoutineResponse();
@@ -452,5 +463,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return updateRoutineResponse;
         }
+        #endregion
     }
 }
