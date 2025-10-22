@@ -35,14 +35,15 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         [HttpPost("add-exercise-progress")]
         [Authorize]
         [ResourceAuthorization]
-        public async Task<ActionResult<AddExerciseAddExerciseProgressResponseJson>> AddExerciseProgress([FromBody] AddExerciseAddExerciseProgressRequestJson addExerciseRequestJson)
+        public async Task<ActionResult<AddExerciseProgressResponseJson>> AddExerciseProgress([FromBody] AddExerciseProgressRequestJson addExerciseRequestJson)
         {
-            AddExerciseAddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseAddExerciseProgressResponseJson();
+            AddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseProgressResponseJson();
             try
             {
                 if (addExerciseRequestJson.RoutineId == -1 ||
                     addExerciseRequestJson.splitDayId == -1 ||
-                    string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName))
+                    string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName) ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail))
                 {
                     addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     addExerciseAddExerciseProgressResponseJson.IsSuccess = false;
@@ -95,6 +96,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             try
             {
                 if (deleteExerciseRequestJson.RoutineId == -1 ||
+                    string.IsNullOrEmpty(deleteExerciseRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.DayName))
                 {
@@ -286,6 +288,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             try
             {
                 if (string.IsNullOrEmpty(getAllExerciseProgressRequestJson.RoutineName) ||
+                    string.IsNullOrEmpty(getAllExerciseProgressRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.DayName))
                 {

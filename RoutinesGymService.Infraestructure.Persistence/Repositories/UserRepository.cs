@@ -56,7 +56,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             GetUserByEmailResponse getUserByEmailResponse = new GetUserByEmailResponse();
             try
             {
-                string cacheKey = $"{_userPrefix}GetUserByEmail_{getUserByEmailRequest.Email}";
+                string cacheKey = $"{_userPrefix}GetUserByEmail_{getUserByEmailRequest.UserEmail}";
 
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
                 if (cachedUser != null)
@@ -69,7 +69,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getUserByEmailRequest.Email);
+                    User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == getUserByEmailRequest.UserEmail);
                     if (user == null)
                     {
                         getUserByEmailResponse.IsSuccess = false;
@@ -125,7 +125,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "The dni is not valid you need eight numbers and a capital letter";
                 }
-                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email))
+                else if (!MailUtils.IsEmailValid(createGenericUserRequest.UserEmail))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Invalid email format example (example@gmail.com)";
@@ -145,7 +145,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     UserExistRequest userExistRequest = new UserExistRequest
                     {
                         Dni = createGenericUserRequest.Dni,
-                        UserEmail = createGenericUserRequest.Email
+                        UserEmail = createGenericUserRequest.UserEmail
                     };
 
                     /* Si existe un usuario con el mismo email o con el mismo dni o con los dos error */
@@ -183,7 +183,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             Dni = createGenericUserRequest.Dni,
                             Username = createGenericUserRequest.Username,
                             Surname = createGenericUserRequest.Surname ?? "",
-                            Email = createGenericUserRequest.Email.ToLower(),
+                            Email = createGenericUserRequest.UserEmail.ToLower(),
                             FriendCode = friendCode,
                             SerialNumber = createGenericUserRequest.SerialNumber,
                             Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password),
@@ -224,7 +224,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "You are in Black List 💀";
                 }
-                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email))
+                else if (!MailUtils.IsEmailValid(createGenericUserRequest.UserEmail))
                 {
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "Invalid email format";
@@ -260,7 +260,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         SerialNumber = createGenericUserRequest.SerialNumber,
                         FriendCode = friendCode,
                         Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password.ToLower(), isGoogleLogin: true),
-                        Email = createGenericUserRequest.Email.ToLower(),
+                        Email = createGenericUserRequest.UserEmail.ToLower(),
                         Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
                         RoleString = createGenericUserRequest.Role.ToString().ToLower(),
                         InscriptionDate = DateTime.UtcNow
@@ -296,7 +296,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 var userData = await _context.Users
-                    .Where(u => u.Email == deleteUserRequest.Email)
+                    .Where(u => u.Email == deleteUserRequest.UserEmail)
                     .GroupJoin(_context.Steps,
                         u => u.UserId,
                         s => s.UserId,
@@ -362,7 +362,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     _genericUtils.ClearCache($"{_stepPrefix}:{userId}");
                     _genericUtils.ClearCache($"{_routinePrefix}:{userId}");
                     _genericUtils.ClearCache($"{_friendPrefix}:{userId}");
-                    _genericUtils.ClearCache($"{_authPrefix}:{deleteUserRequest.Email}");
+                    _genericUtils.ClearCache($"{_authPrefix}:{deleteUserRequest.UserEmail}");
 
                     deleteUserResponse.IsSuccess = true;
                     deleteUserResponse.Message = "User deleted successfully";
@@ -387,7 +387,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == updateUserRequest.OldEmail);
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == updateUserRequest.OriginalUserEmail);
                 if (user == null)
                 {
                     updateUserResponse.IsSuccess = false;
@@ -649,7 +649,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CheckUserExistenceResponse checkUserExistenceResponse = new CheckUserExistenceResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == checkUserExistenceRequest.Email);
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == checkUserExistenceRequest.UserEmail);
                 if (user == null)
                 {
                     checkUserExistenceResponse.IsSuccess = true;
