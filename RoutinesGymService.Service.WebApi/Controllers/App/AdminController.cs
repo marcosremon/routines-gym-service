@@ -82,7 +82,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetIntegralUsersResponseJson getIntegralUsersResponseJson = new GetIntegralUsersResponseJson();
             try
             {
-                if (getIntegralUsersRequestJson == null || getIntegralUsersRequestJson.MasterKey == null)
+                if (string.IsNullOrEmpty(getIntegralUsersRequestJson.MasterKey))
                 {
                     getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getIntegralUsersResponseJson.IsSuccess = false;
@@ -131,8 +131,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
             try
             {
-                if (getIntegralUserInfoRequestJson == null ||
-                    getIntegralUserInfoRequestJson?.UserId == null)
+                if (getIntegralUserInfoRequestJson.UserId == -1)
                 {
                     getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getIntegralUserInfoResponseJson.IsSuccess = false;
@@ -182,13 +181,12 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CreateAdminResponseJson createAdminResponseJson = new CreateAdminResponseJson();
             try
             {
-                if (createAdminRequstJson == null ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Dni) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Username) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Email) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.SerialNumber) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.Password) ||
-                 string.IsNullOrEmpty(createAdminRequstJson.ConfirmPassword))
+                if (string.IsNullOrEmpty(createAdminRequstJson.Dni) ||
+                    string.IsNullOrEmpty(createAdminRequstJson.Username) ||
+                    string.IsNullOrEmpty(createAdminRequstJson.Email) ||
+                    string.IsNullOrEmpty(createAdminRequstJson.SerialNumber) ||
+                    string.IsNullOrEmpty(createAdminRequstJson.Password) ||
+                    string.IsNullOrEmpty(createAdminRequstJson.ConfirmPassword))
                 {
                     createAdminResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     createAdminResponseJson.IsSuccess = false;
@@ -242,8 +240,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             AddUserToBlackListResponseJson addUserToBlackListResponseJson = new AddUserToBlackListResponseJson();
             try
             {
-                if (addUserToBlackListRequestJson == null ||
-                    addUserToBlackListRequestJson?.UserId == null ||
+                if (addUserToBlackListRequestJson.UserId == -1 ||
                     string.IsNullOrEmpty(addUserToBlackListRequestJson.SerialNumber) ||
                     string.IsNullOrEmpty(addUserToBlackListRequestJson.Description))
                 {
@@ -390,8 +387,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             ChangeUserRoleResponseJson changeUserRoleResponseJson = new ChangeUserRoleResponseJson();
             try 
             {
-                if (changeUserRoleRequestJson == null ||
-                    string.IsNullOrEmpty(changeUserRoleRequestJson.UserEmail) ||
+                if (string.IsNullOrEmpty(changeUserRoleRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(changeUserRoleRequestJson.OldRole) ||
                     string.IsNullOrEmpty(changeUserRoleRequestJson.NewRole))
                 {

@@ -4,8 +4,8 @@ namespace RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfile
 {
     public class GetUserProfileDetailsResponseJson : BaseResponseJson
     {
-        public string? Username { get; set; }
-        public DateTime? InscriptionDate { get; set; }
-        public int? RoutineCount { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public DateTime InscriptionDate { get; set; } = DateTime.MinValue;
+        public int RoutineCount { get; set; } = -1;
     }
 }

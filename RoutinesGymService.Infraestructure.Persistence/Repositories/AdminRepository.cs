@@ -149,7 +149,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     UserDTO userDTO = UserMapper.UserToDto(user);
-                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password!, getIntegralUserInfoRequest.MasterKey);
+                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password, getIntegralUserInfoRequest.MasterKey);
 
                     getIntegralUserInfoResponse.IsSuccess = true;
                     getIntegralUserInfoResponse.UserDTO = userDTO;
@@ -183,7 +183,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     List<UserDTO> usersDto = users.Select(u =>
                     {
                         UserDTO user = UserMapper.UserToDto(u);
-                        user.Password = PasswordUtils.DecryptPasswordWithMasterKey(u.Password!, getIntegralUsersRequest.MasterKey);
+                        user.Password = PasswordUtils.DecryptPasswordWithMasterKey(u.Password, getIntegralUsersRequest.MasterKey);
                         return user;
                     }).ToList();
 
@@ -268,7 +268,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             Surname = user.Surname,
                             Email = user.Email,
                             FriendCode = user.FriendCode,
-                            Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password!, getBlacklistedUsersRequest.MasterKey),
+                            Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password, getBlacklistedUsersRequest.MasterKey),
                             Role = GenericUtils.ChangeIntToEnumOnRole(user.Role),
                             InscriptionDate = user.InscriptionDate.ToString(),
                         })

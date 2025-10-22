@@ -50,8 +50,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetUserByEmailResponseJson getUserByEmailResponseJson = new GetUserByEmailResponseJson();
             try
             {
-                if (getUserByEmailRequestJson == null ||
-                    string.IsNullOrEmpty(getUserByEmailRequestJson.Email))
+                if (string.IsNullOrEmpty(getUserByEmailRequestJson.Email))
                 {
                     getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getUserByEmailResponseJson.IsSuccess = false;
@@ -151,8 +150,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CreateUserResponseJson createUserResponseJson = new CreateUserResponseJson();
             try
             {
-                if (createUserRequestJson == null ||
-                    string.IsNullOrEmpty(createUserRequestJson.Dni) ||
+                if (string.IsNullOrEmpty(createUserRequestJson.Dni) ||
                     string.IsNullOrEmpty(createUserRequestJson.Username) ||
                     string.IsNullOrEmpty(createUserRequestJson.SerialNumber) ||
                     string.IsNullOrEmpty(createUserRequestJson.Email) ||
@@ -209,12 +207,11 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CreateGoogleUserResponseJson createGoogleUserResponseJson = new CreateGoogleUserResponseJson();
             try
             {
-                if (createGoogleUserRequestJson == null ||
-                   string.IsNullOrEmpty(createGoogleUserRequestJson.Username) ||
-                   string.IsNullOrEmpty(createGoogleUserRequestJson.Email) ||
-                   string.IsNullOrEmpty(createGoogleUserRequestJson.Password) ||
-                   string.IsNullOrEmpty(createGoogleUserRequestJson.SerialNumber) ||
-                   string.IsNullOrEmpty(createGoogleUserRequestJson.ConfirmPassword))
+                if (string.IsNullOrEmpty(createGoogleUserRequestJson.Username) ||
+                    string.IsNullOrEmpty(createGoogleUserRequestJson.Email) ||
+                    string.IsNullOrEmpty(createGoogleUserRequestJson.Password) ||
+                    string.IsNullOrEmpty(createGoogleUserRequestJson.SerialNumber) ||
+                    string.IsNullOrEmpty(createGoogleUserRequestJson.ConfirmPassword))
                 {
                     createGoogleUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     createGoogleUserResponseJson.IsSuccess = false;
@@ -268,8 +265,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             UpdateUserResponseJson updateUserResponseJson = new UpdateUserResponseJson();
             try
             {
-                if (updateUserRequestJson == null ||
-                    string.IsNullOrEmpty(updateUserRequestJson.OriginalEmail) ||
+                if (string.IsNullOrEmpty(updateUserRequestJson.OriginalEmail) ||
                     string.IsNullOrEmpty(updateUserRequestJson.DniToBeFound) ||
                     string.IsNullOrEmpty(updateUserRequestJson.Username) ||
                     string.IsNullOrEmpty(updateUserRequestJson.Email))
@@ -425,8 +421,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             ChangePasswordWithPasswordAndEmailResponseJson changePasswordWithPasswordAndEmailResponseJson = new ChangePasswordWithPasswordAndEmailResponseJson();
             try
             {
-                if (changePasswordWithPasswordAndEmailRequestJson == null ||
-                    string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.UserEmail) ||
+                if (string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.OldPassword) ||
                     string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.NewPassword) ||
                     string.IsNullOrEmpty(changePasswordWithPasswordAndEmailRequestJson.ConfirmNewPassword))

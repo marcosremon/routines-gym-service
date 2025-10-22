@@ -9,7 +9,6 @@ using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.GetR
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.UpdateRoutine;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
-using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.CreateRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.DeleteRoutine;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
@@ -43,8 +42,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
             try
             {
-                if (createRoutineRequestJson == null ||
-                    string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
+                if (string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
                 {
                     createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     createRoutineResponseJson.IsSuccess = false;
@@ -93,8 +91,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             UpdateRoutineResponseJson updateRoutineResponseJson = new UpdateRoutineResponseJson();
             try
             {
-                if (updateRoutineRequestJson == null ||
-                    updateRoutineRequestJson?.RoutineId == null)
+                if (updateRoutineRequestJson.RoutineId == -1)
                 {
                     updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     updateRoutineResponseJson.IsSuccess = false;
@@ -147,8 +144,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
             try
             {
-                if (deleteRoutineRequestJson == null ||
-                    string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
+                if (string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     deleteRoutineResponseJson.IsSuccess = false;
@@ -204,8 +200,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     getAllUserRoutinesResponseJson.IsSuccess = false;
                     getAllUserRoutinesResponseJson.Message = "UNAUTHORIZED";
                 }
-                else if (getAllUserRoutinesRequestJson == null ||
-                    string.IsNullOrEmpty(getAllUserRoutinesRequestJson?.UserEmail))
+                else if (string.IsNullOrEmpty(getAllUserRoutinesRequestJson?.UserEmail))
                 {
                     getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getAllUserRoutinesResponseJson.IsSuccess = false;
@@ -276,8 +271,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();
             try
             {
-                if (getRoutineStatsRequestJson == null ||
-                    string.IsNullOrEmpty(getRoutineStatsRequestJson.UserEmail))
+                if (string.IsNullOrEmpty(getRoutineStatsRequestJson.UserEmail))
                 {
                     getRoutineStatsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getRoutineStatsResponseJson.IsSuccess = false;
@@ -338,9 +332,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     getRoutineByRoutineNameResponseJson.IsSuccess = false;
                     getRoutineByRoutineNameResponseJson.Message = "UNAUTHORIZED";
                 }
-                else if (getRoutineByRoutineNameRequestJson == null ||
-                    string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.RoutineName) ||
-                    string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.UserEmail))
+                else if (string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.RoutineName) ||
+                         string.IsNullOrEmpty(getRoutineByRoutineNameRequestJson.UserEmail))
                 {
                     getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getRoutineByRoutineNameResponseJson.IsSuccess = false;

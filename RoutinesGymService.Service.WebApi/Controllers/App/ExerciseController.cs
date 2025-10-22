@@ -40,9 +40,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             AddExerciseAddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseAddExerciseProgressResponseJson();
             try
             {
-                if (addExerciseRequestJson == null ||
-                    addExerciseRequestJson?.RoutineId == null ||
-                    addExerciseRequestJson?.splitDayId == null ||
+                if (addExerciseRequestJson.RoutineId == -1 ||
+                    addExerciseRequestJson.splitDayId == -1 ||
                     string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName))
                 {
                     addExerciseAddExerciseProgressResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -95,8 +94,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             DeleteExerciseResponseJson deleteExerciseResponseJson = new DeleteExerciseResponseJson();
             try
             {
-                if (deleteExerciseRequestJson == null ||
-                    deleteExerciseRequestJson?.RoutineId == null ||
+                if (deleteExerciseRequestJson.RoutineId == -1 ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(deleteExerciseRequestJson.DayName))
                 {
@@ -149,10 +147,10 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             AddExerciseResponseJson addExerciseResponseJson = new AddExerciseResponseJson();
             try
             {
-                if (addExerciseRequestJson == null ||
-                    string.IsNullOrEmpty(addExerciseRequestJson.RoutineName) ||
+                if (string.IsNullOrEmpty(addExerciseRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(addExerciseRequestJson.ExerciseName) ||
-                    string.IsNullOrEmpty(addExerciseRequestJson.DayName))
+                    string.IsNullOrEmpty(addExerciseRequestJson.DayName) ||
+                    string.IsNullOrEmpty(addExerciseRequestJson.UserEmail))
                 {
                     addExerciseResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     addExerciseResponseJson.IsSuccess = false;
@@ -210,10 +208,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     getExercisesByDayAndRoutineNameResponseJson.IsSuccess = false;
                     getExercisesByDayAndRoutineNameResponseJson.Message = "UNAUTHORIZED";
                 }
-                else if (getExercisesByDayNameAndRoutineNameRequestJson == null ||
-                    string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.RoutineName) ||
-                    string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.DayName) ||
-                    string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.UserEmail)) 
+                else if (string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.RoutineName) ||
+                         string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.DayName) ||
+                         string.IsNullOrEmpty(getExercisesByDayNameAndRoutineNameRequestJson.UserEmail)) 
                 {
                     getExercisesByDayAndRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getExercisesByDayAndRoutineNameResponseJson.IsSuccess = false;
@@ -288,8 +285,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetAllExerciseProgressResponseJson getAllExerciseProgressResponseJson = new GetAllExerciseProgressResponseJson();
             try
             {
-                if (getAllExerciseProgressRequestJson == null ||
-                    string.IsNullOrEmpty(getAllExerciseProgressRequestJson.RoutineName) ||
+                if (string.IsNullOrEmpty(getAllExerciseProgressRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.ExerciseName) ||
                     string.IsNullOrEmpty(getAllExerciseProgressRequestJson.DayName))
                 {
