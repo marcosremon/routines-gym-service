@@ -6,7 +6,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Che
     {
         public bool DniExists { get; set; }
         public bool EmailExists { get; set; }
-        public bool DniAndEmailExist { get; set; }
-        public bool SuccessData { get; set; }
+        public bool UserExist { get; set; }
     }
 }
