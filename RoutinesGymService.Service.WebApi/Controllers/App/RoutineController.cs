@@ -146,7 +146,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             try
             {
                 if (string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName) ||
-                    string.IsNullOrEmpty(deleteRoutineRequestJson.UserEmail)
+                    string.IsNullOrEmpty(deleteRoutineRequestJson.UserEmail))
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     deleteRoutineResponseJson.IsSuccess = false;
