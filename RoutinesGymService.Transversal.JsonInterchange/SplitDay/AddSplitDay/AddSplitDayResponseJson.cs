@@ -5,6 +5,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.SplitDay.AddSplitDay
 {
     public class AddSplitDayResponseJson : BaseResponseJson
     {
-        public UserDTO UserDTO { get; set; } = new UserDTO();
+        public UserDTO UserDto { get; set; } = new UserDTO();
     }
 }

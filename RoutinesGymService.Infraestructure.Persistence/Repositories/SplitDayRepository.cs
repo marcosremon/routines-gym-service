@@ -171,7 +171,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                     userRoutine.SplitDays = routineSplitDays;
                                 }
 
-                                updateSplitDayResponse.UserDTO = UserMapper.UserToDto(updatedUser);
+                                updateSplitDayResponse.UserDto = UserMapper.UserToDto(updatedUser);
                             }
 
                             updateSplitDayResponse.IsSuccess = true;

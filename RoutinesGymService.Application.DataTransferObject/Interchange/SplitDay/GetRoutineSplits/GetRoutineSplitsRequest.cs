@@ -2,6 +2,6 @@
 {
     public class GetRoutineSplitsRequest
     {
-        public long RoutineId { get; set; }
+        public long RoutineId { get; set; } = -1;
     }
 }

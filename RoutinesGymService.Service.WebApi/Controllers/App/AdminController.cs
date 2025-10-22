@@ -51,14 +51,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 if (getUsersResponse.IsSuccess)
                 {
                     getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
+                    getUsersResponseJson.UsersDto = getUsersResponse.UsersDto;
                     getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
                     getUsersResponseJson.Message = getUsersResponse.Message;
                 }
                 else
                 {
                     getUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                    getUsersResponseJson.UsersDTO = getUsersResponse.UsersDTO;
+                    getUsersResponseJson.UsersDto = getUsersResponse.UsersDto;
                     getUsersResponseJson.IsSuccess = getUsersResponse.IsSuccess;
                     getUsersResponseJson.Message = getUsersResponse.Message;
                 }
@@ -99,14 +99,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (getIntegralUsersResponse.IsSuccess)
                     {
                         getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getIntegralUsersResponseJson.UsersDTO = getIntegralUsersResponse.UsersDto;
+                        getIntegralUsersResponseJson.UsersDto = getIntegralUsersResponse.UsersDto;
                         getIntegralUsersResponseJson.IsSuccess = getIntegralUsersResponse.IsSuccess;
                         getIntegralUsersResponseJson.Message = getIntegralUsersResponse.Message;
                     }
                     else
                     {
                         getIntegralUsersResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        getIntegralUsersResponseJson.UsersDTO = getIntegralUsersResponse.UsersDto!;
+                        getIntegralUsersResponseJson.UsersDto = getIntegralUsersResponse.UsersDto;
                         getIntegralUsersResponseJson.IsSuccess = getIntegralUsersResponse.IsSuccess;
                         getIntegralUsersResponseJson.Message = getIntegralUsersResponse.Message;
                     }
@@ -149,14 +149,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (getIntegralUserInfoResponse.IsSuccess)
                     {
                         getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
+                        getIntegralUserInfoResponseJson.UserDto = getIntegralUserInfoResponse.UserDto;
                         getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
                         getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
                     }
                     else
                     {
                         getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        getIntegralUserInfoResponseJson.UserDTO = getIntegralUserInfoResponse.UserDTO;
+                        getIntegralUserInfoResponseJson.UserDto = getIntegralUserInfoResponse.UserDto;
                         getIntegralUserInfoResponseJson.IsSuccess = getIntegralUserInfoResponse.IsSuccess;
                         getIntegralUserInfoResponseJson.Message = getIntegralUserInfoResponse.Message;
                     }

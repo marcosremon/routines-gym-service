@@ -65,7 +65,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     getUserByEmailResponse.Message = "User found successfully";
                     getUserByEmailResponse.RoutinesCount = cachedUser.Routines.Count;
                     getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == cachedUser.UserId);
-                    getUserByEmailResponse.UserDTO = UserMapper.UserToDto(cachedUser);
+                    getUserByEmailResponse.UserDto = UserMapper.UserToDto(cachedUser);
                 }
                 else
                 {
@@ -91,7 +91,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             getUserByEmailResponse.Message = "User found successfully";
                             getUserByEmailResponse.RoutinesCount = user.Routines.Count;
                             getUserByEmailResponse.FriendsCount = await _context.UserFriends.CountAsync(u => u.UserId == user.UserId);
-                            getUserByEmailResponse.UserDTO = UserMapper.UserToDto(user);
+                            getUserByEmailResponse.UserDto = UserMapper.UserToDto(user);
 
                             _cacheUtils.Set(cacheKey, user, TimeSpan.FromMinutes(_expiryMinutes));
                         }
@@ -120,17 +120,17 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "You are in Black List 💀";
                 }
-                else if (!GenericUtils.IsDniValid(createGenericUserRequest.Dni!))
+                else if (!GenericUtils.IsDniValid(createGenericUserRequest.Dni))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "The dni is not valid you need eight numbers and a capital letter";
                 }
-                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Invalid email format example (example@gmail.com)";
                 }
-                else if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password!))
+                else if (!PasswordUtils.IsPasswordValid(createGenericUserRequest.Password))
                 {
                     createUserResponse.IsSuccess = false;
                     createUserResponse.Message = "Password does not meet the required criteria you need: eight characters with one upper case, one lower case, one number and one special character.";
@@ -144,8 +144,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     UserExistRequest userExistRequest = new UserExistRequest
                     {
-                        Dni = createGenericUserRequest.Dni!,
-                        UserEmail = createGenericUserRequest.Email!
+                        Dni = createGenericUserRequest.Dni,
+                        UserEmail = createGenericUserRequest.Email
                     };
 
                     /* Si existe un usuario con el mismo email o con el mismo dni o con los dos error */
@@ -180,13 +180,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                         User newUser = new User
                         {
-                            Dni = createGenericUserRequest.Dni!,
-                            Username = createGenericUserRequest.Username!,
+                            Dni = createGenericUserRequest.Dni,
+                            Username = createGenericUserRequest.Username,
                             Surname = createGenericUserRequest.Surname ?? "",
-                            Email = createGenericUserRequest.Email!.ToLower(),
+                            Email = createGenericUserRequest.Email.ToLower(),
                             FriendCode = friendCode,
-                            SerialNumber = createGenericUserRequest.SerialNumber!,
-                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!),
+                            SerialNumber = createGenericUserRequest.SerialNumber,
+                            Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password),
                             Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
                             RoleString = createGenericUserRequest.Role.ToString().ToLower(),
                             InscriptionDate = DateTime.UtcNow
@@ -224,7 +224,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "You are in Black List 💀";
                 }
-                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email!))
+                else if (!MailUtils.IsEmailValid(createGenericUserRequest.Email))
                 {
                     createGoogleUserResponse.IsSuccess = false;
                     createGoogleUserResponse.Message = "Invalid email format";
@@ -254,13 +254,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     User user = new User()
                     {
-                        Dni = createGenericUserRequest.Dni!,
-                        Username = createGenericUserRequest.Username!,
-                        Surname = createGenericUserRequest.Surname!,
-                        SerialNumber = createGenericUserRequest.SerialNumber!,
+                        Dni = createGenericUserRequest.Dni,
+                        Username = createGenericUserRequest.Username,
+                        Surname = createGenericUserRequest.Surname,
+                        SerialNumber = createGenericUserRequest.SerialNumber,
                         FriendCode = friendCode,
-                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password!.ToLower(), isGoogleLogin: true),
-                        Email = createGenericUserRequest.Email!.ToLower(),
+                        Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password.ToLower(), isGoogleLogin: true),
+                        Email = createGenericUserRequest.Email.ToLower(),
                         Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
                         RoleString = createGenericUserRequest.Role.ToString().ToLower(),
                         InscriptionDate = DateTime.UtcNow
@@ -271,7 +271,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.Users.AddAsync(user);
                     await _context.SaveChangesAsync();
 
-                    MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email!);
+                    MailUtils.SendEmailAfterCreatedAccountByGoogle(user.Username, user.Email);
 
                     createGoogleUserResponse.IsSuccess = true;
                     createGoogleUserResponse.Message = "Usuario creado correctametne";
@@ -408,7 +408,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         {
                             UserExistRequest userExistRequest = new UserExistRequest
                             {
-                                Dni = updateUserRequest.NewDni!
+                                Dni = updateUserRequest.NewDni,
                             };
 
                             UserExistResponse dniExistsResponse = await UserExist(userExistRequest);
@@ -485,7 +485,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                         updateUserResponse.NewToken = newToken;
                         updateUserResponse.IsSuccess = true;
-                        updateUserResponse.UserDTO = UserMapper.UserToDto(user);
+                        updateUserResponse.UserDto = UserMapper.UserToDto(user);
                         updateUserResponse.Message = "User updated successfully";
                     }
                     else
@@ -520,7 +520,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     string newPassword = PasswordUtils.GenerateSecurePassword();
-                    while (_passwordUtils.VerifyPassword(user.Password!, newPassword))
+                    while (_passwordUtils.VerifyPassword(user.Password, newPassword))
                     {
                         newPassword = PasswordUtils.GenerateSecurePassword();
                     }
@@ -559,26 +559,26 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (!_passwordUtils.VerifyPassword(user.Password!, changePasswordWithPasswordAndEmailRequest.OldPassword!))
+                    if (!_passwordUtils.VerifyPassword(user.Password, changePasswordWithPasswordAndEmailRequest.OldPassword))
                     {
                         changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
                         changePasswordWithPasswordAndEmailResponse.Message = "Old password does not match";
                     }
                     else
                     {
-                        if (!PasswordUtils.IsPasswordValid(changePasswordWithPasswordAndEmailRequest.NewPassword!))
+                        if (!PasswordUtils.IsPasswordValid(changePasswordWithPasswordAndEmailRequest.NewPassword))
                         {
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = false;
                             changePasswordWithPasswordAndEmailResponse.Message = "New password does not meet the required criteria";
                         }
                         else
                         {
-                            user.Password = _passwordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.NewPassword!);
+                            user.Password = _passwordUtils.PasswordEncoder(changePasswordWithPasswordAndEmailRequest.NewPassword);
 
                             _genericUtils.ClearCache(_userPrefix);
                             await _context.SaveChangesAsync();
 
-                            MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword!);
+                            MailUtils.SendEmail(user.Username, user.Email, changePasswordWithPasswordAndEmailRequest.NewPassword);
 
                             changePasswordWithPasswordAndEmailResponse.IsSuccess = true;
                             changePasswordWithPasswordAndEmailResponse.Message = "User password changed successfully";

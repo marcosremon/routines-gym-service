@@ -227,7 +227,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;               
+                    bool areFriends = getAllUserFriendsResponse.Friends.Any(f => f.Email == requestedEmail);               
                     bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
                     if (!isOwnProfile && !areFriends && !isAdmin)

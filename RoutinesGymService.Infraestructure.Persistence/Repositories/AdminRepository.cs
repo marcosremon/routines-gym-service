@@ -55,7 +55,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     {
                         getUsersResponse.IsSuccess = true;
                         getUsersResponse.Message = "Users found successfully";
-                        getUsersResponse.UsersDTO = cacheUsers.Select(UserMapper.UserToDto).ToList();
+                        getUsersResponse.UsersDto = cacheUsers.Select(UserMapper.UserToDto).ToList();
                     }
                 }
                 else
@@ -63,7 +63,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     List<User> users = await _context.Users.ToListAsync();
                     getUsersResponse.IsSuccess = true;
                     getUsersResponse.Message = "Users found successfully";
-                    getUsersResponse.UsersDTO = users.Select(UserMapper.UserToDto).ToList();
+                    getUsersResponse.UsersDto = users.Select(UserMapper.UserToDto).ToList();
 
                     _cacheUtils.Set(cacheKey, users, TimeSpan.FromMinutes(_expiryMinutes));
                 }
@@ -143,16 +143,16 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 if (user == null)
                 {
                     getIntegralUserInfoResponse.IsSuccess = false;
-                    getIntegralUserInfoResponse.UserDTO = new UserDTO();
+                    getIntegralUserInfoResponse.UserDto = new UserDTO();
                     getIntegralUserInfoResponse.Message = $"User not found";
                 }
                 else
                 {
-                    UserDTO userDTO = UserMapper.UserToDto(user);
-                    userDTO.Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password, getIntegralUserInfoRequest.MasterKey);
+                    UserDTO userDto = UserMapper.UserToDto(user);
+                    userDto.Password = PasswordUtils.DecryptPasswordWithMasterKey(user.Password, getIntegralUserInfoRequest.MasterKey);
 
                     getIntegralUserInfoResponse.IsSuccess = true;
-                    getIntegralUserInfoResponse.UserDTO = userDTO;
+                    getIntegralUserInfoResponse.UserDto = userDto;
                     getIntegralUserInfoResponse.Message = $"User found";
                 }
             }

@@ -4,8 +4,8 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Routine.
 {
     public class GetRoutineStatsResponse : BaseResponse
     {
-        public int RoutinesCount { get; set; }
-        public int ExercisesCount { get; set; }
-        public int SplitsCount { get; set; }
+        public int RoutinesCount { get; set; } = 0;
+        public int ExercisesCount { get; set; } = 0;
+        public int SplitsCount { get; set; } = 0;
     }
 }

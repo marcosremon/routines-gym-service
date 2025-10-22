@@ -5,6 +5,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Admin.GetUsers
 {
     public class GetUsersResponseJson : BaseResponseJson
     {
-        public List<UserDTO> UsersDTO { get; set; } = new List<UserDTO>();
+        public List<UserDTO> UsersDto { get; set; } = new List<UserDTO>();
     }
 }

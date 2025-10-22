@@ -4,7 +4,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.SplitDay
 {
     public class DayInfoDTO
     {
-        public WeekDay? WeekDay { get; set; }
+        public WeekDay WeekDay { get; set; } = WeekDay.NONE;
         public string DayExercisesDescription { get; set; } = string.Empty; // Pecho, Espalda, Torso...
     }
 }

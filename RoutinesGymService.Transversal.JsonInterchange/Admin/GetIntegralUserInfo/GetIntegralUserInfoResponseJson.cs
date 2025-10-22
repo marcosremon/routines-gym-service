@@ -5,6 +5,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Admin.GetIntegralUserIn
 {
     public class GetIntegralUserInfoResponseJson : BaseResponseJson
     {
-        public UserDTO UserDTO { get; set; } = new UserDTO();
+        public UserDTO UserDto { get; set; } = new UserDTO();
     }
 }

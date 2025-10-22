@@ -67,7 +67,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (getUserByEmailResponse.IsSuccess)
                     {
                         getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        getUserByEmailResponseJson.UserDTO = getUserByEmailResponse.UserDTO;
+                        getUserByEmailResponseJson.UserDto = getUserByEmailResponse.UserDto;
                         getUserByEmailResponseJson.FriendsCount = getUserByEmailResponse.FriendsCount;
                         getUserByEmailResponseJson.RoutinesCount = getUserByEmailResponse.RoutinesCount;
                         getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
@@ -76,7 +76,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     else
                     {
                         getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        getUserByEmailResponseJson.UserDTO = getUserByEmailResponse.UserDTO;
+                        getUserByEmailResponseJson.UserDto = getUserByEmailResponse.UserDto;
                         getUserByEmailResponseJson.FriendsCount = getUserByEmailResponse.FriendsCount;
                         getUserByEmailResponseJson.RoutinesCount = getUserByEmailResponse.RoutinesCount;
                         getUserByEmailResponseJson.IsSuccess = getUserByEmailResponse.IsSuccess;
@@ -102,7 +102,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CheckUserExistenceResponseJson checkUserExistenceResponseJson = new CheckUserExistenceResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(checkUserExistenceRequestJson?.Email))
+                if (string.IsNullOrEmpty(checkUserExistenceRequestJson.Email))
                 {
                     checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     checkUserExistenceResponseJson.Message = "Email is required.";
@@ -289,7 +289,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (updateUserResponse.IsSuccess)
                     {
                         updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
+                        updateUserResponseJson.userDto = updateUserResponse.UserDto;
                         updateUserResponseJson.NewToken = updateUserResponse.NewToken;
                         updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
                         updateUserResponseJson.Message = updateUserResponse.Message;
@@ -297,7 +297,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     else
                     {
                         updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        updateUserResponseJson.userDTO = updateUserResponse.UserDTO;
+                        updateUserResponseJson.userDto = updateUserResponse.UserDto;
                         updateUserResponseJson.NewToken = updateUserResponse.NewToken;
                         updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
                         updateUserResponseJson.Message = updateUserResponse.Message;
@@ -482,7 +482,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     getUserProfileDetailsResponseJson.IsSuccess = false;
                     getUserProfileDetailsResponseJson.Message = "UNAUTHORIZED";
                 }
-                else if (string.IsNullOrEmpty(getUserProfileDetailsRequestJson?.UserEmail))
+                else if (string.IsNullOrEmpty(getUserProfileDetailsRequestJson.UserEmail))
                 {
                     getUserProfileDetailsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getUserProfileDetailsResponseJson.IsSuccess = false;
@@ -499,7 +499,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool areFriends = getAllUserFriendsResponse.Friends.Any(f => f.Email == requestedEmail);
                     bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
                     if (!isOwnProfile && !areFriends && !isAdmin)
