@@ -2,6 +2,6 @@
 {
     public class GetAllUserSplitsRequest
     {
-        public long UserId { get; set; }
+        public long UserId { get; set; } = -1;
     }
 }

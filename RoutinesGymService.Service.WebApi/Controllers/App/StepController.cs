@@ -93,7 +93,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 {
                     GetDailyStepsInfoRequest getDailyStepsInfoRequest = new GetDailyStepsInfoRequest
                     {
-                        UserEmail = getDailyStepsInfoRequestJson.UserEmail!,
+                        UserEmail = getDailyStepsInfoRequestJson.UserEmail,
                         DailySteps = getDailyStepsInfoRequestJson.DailySteps,
                         Day = getDailyStepsInfoRequestJson.Day,
                     };

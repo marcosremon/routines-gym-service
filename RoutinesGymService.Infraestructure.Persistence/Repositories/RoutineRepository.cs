@@ -81,7 +81,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         {
                             Routine routine = new Routine
                             {
-                                RoutineName = createRoutineRequest.RoutineName!,
+                                RoutineName = createRoutineRequest.RoutineName,
                                 RoutineDescription = string.IsNullOrEmpty(createRoutineRequest.RoutineDescription)
                                     ? "sin descripcion"
                                     : createRoutineRequest.RoutineDescription,
@@ -274,7 +274,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     getRoutineByIdResponse.IsSuccess = true;
                     getRoutineByIdResponse.Message = "Routine retrieved successfully from cache";
-                    getRoutineByIdResponse.RoutineDTO = RoutineMapper.RoutineToDto(cachedRoutine);
+                    getRoutineByIdResponse.RoutineDto = RoutineMapper.RoutineToDto(cachedRoutine);
                 }
                 else
                 {
@@ -320,7 +320,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {
-                            getRoutineByIdResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
+                            getRoutineByIdResponse.RoutineDto = RoutineMapper.RoutineToDto(routine);
                             getRoutineByIdResponse.IsSuccess = true;
                             getRoutineByIdResponse.Message = "Routine retrieved successfully";
 
@@ -451,7 +451,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.SaveChangesAsync();
 
                     updateRoutineResponse.IsSuccess = true;
-                    updateRoutineResponse.RoutineDTO = RoutineMapper.RoutineToDto(routine);
+                    updateRoutineResponse.RoutineDto = RoutineMapper.RoutineToDto(routine);
                     updateRoutineResponse.Message = "Routine updated successfully";
                 }
             }

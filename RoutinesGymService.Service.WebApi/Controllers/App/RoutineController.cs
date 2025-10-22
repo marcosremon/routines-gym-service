@@ -111,14 +111,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (updateRoutineResponse.IsSuccess)
                     {
                         updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateRoutineResponseJson.RoutineDTO = updateRoutineResponse.RoutineDTO;
+                        updateRoutineResponseJson.RoutineDto = updateRoutineResponse.RoutineDto;
                         updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
                         updateRoutineResponseJson.Message = updateRoutineResponse.Message;
                     }
                     else
                     {
                         updateRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        updateRoutineResponseJson.RoutineDTO = updateRoutineResponse.RoutineDTO;
+                        updateRoutineResponseJson.RoutineDto = updateRoutineResponse.RoutineDto;
                         updateRoutineResponseJson.IsSuccess = updateRoutineResponse.IsSuccess;
                         updateRoutineResponseJson.Message = updateRoutineResponse.Message;
                     }
@@ -200,7 +200,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     getAllUserRoutinesResponseJson.IsSuccess = false;
                     getAllUserRoutinesResponseJson.Message = "UNAUTHORIZED";
                 }
-                else if (string.IsNullOrEmpty(getAllUserRoutinesRequestJson?.UserEmail))
+                else if (string.IsNullOrEmpty(getAllUserRoutinesRequestJson.UserEmail))
                 {
                     getAllUserRoutinesResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getAllUserRoutinesResponseJson.IsSuccess = false;
@@ -217,7 +217,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool areFriends = getAllUserFriendsResponse.Friends.Any(f => f.Email == requestedEmail);
                     bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
                     if (!isOwnProfile && !areFriends && !isAdmin)
@@ -350,7 +350,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     };
 
                     GetAllUserFriendsResponse getAllUserFriendsResponse = await _friendApplication.GetAllUserFriends(getAllUserFriendsRequest);
-                    bool areFriends = getAllUserFriendsResponse.Friends?.Any(f => f.Email == requestedEmail) == true;
+                    bool areFriends = getAllUserFriendsResponse.Friends.Any(f => f.Email == requestedEmail);
                     bool isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
                     if (!isOwnProfile && !areFriends && !isAdmin)
@@ -371,14 +371,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                         if (getRoutineByRoutineNameResponse.IsSuccess)
                         {
                             getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                            getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
+                            getRoutineByRoutineNameResponseJson.RoutineDto = getRoutineByRoutineNameResponse.RoutineDto;
                             getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
                             getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
                         }
                         else
                         {
                             getRoutineByRoutineNameResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                            getRoutineByRoutineNameResponseJson.RoutineDTO = getRoutineByRoutineNameResponse.RoutineDTO;
+                            getRoutineByRoutineNameResponseJson.RoutineDto = getRoutineByRoutineNameResponse.RoutineDto;
                             getRoutineByRoutineNameResponseJson.IsSuccess = getRoutineByRoutineNameResponse.IsSuccess;
                             getRoutineByRoutineNameResponseJson.Message = getRoutineByRoutineNameResponse.Message;
                         }

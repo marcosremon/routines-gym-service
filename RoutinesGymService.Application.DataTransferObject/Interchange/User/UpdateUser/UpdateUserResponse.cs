@@ -5,7 +5,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Upd
 {
     public class UpdateUserResponse : BaseResponse
     {
-        public UserDTO UserDTO { get; set; } = new UserDTO();
+        public UserDTO UserDto { get; set; } = new UserDTO();
         public string NewToken { get; set; } = string.Empty;
     }
 }

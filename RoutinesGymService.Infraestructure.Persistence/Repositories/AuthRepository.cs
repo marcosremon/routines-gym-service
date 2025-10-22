@@ -57,7 +57,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             try
             {
                 User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.UserEmail.ToLower());
-                bool isPasswordValid = _passwordUtils.VerifyPassword(user?.Password!, loginRequest.UserPassword);
                 if (user == null)
                 {
                     loginResponse.IsSuccess = false;
@@ -65,6 +64,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
+                    bool isPasswordValid = _passwordUtils.VerifyPassword(user.Password, loginRequest.UserPassword);
                     bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == user.SerialNumber);
                     if (isOnBlackList)
                     {
