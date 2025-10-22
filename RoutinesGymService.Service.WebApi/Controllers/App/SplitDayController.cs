@@ -28,8 +28,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             UpdateSplitDayResponseJson updateSplitDayResponseJson = new UpdateSplitDayResponseJson();
             try
             {
-                if (updateSplitDayRequestJson == null ||
-                    string.IsNullOrEmpty(updateSplitDayRequestJson.RoutineName) ||
+                if (string.IsNullOrEmpty(updateSplitDayRequestJson.RoutineName) ||
                     string.IsNullOrEmpty(updateSplitDayRequestJson.UserEmail))
                 {
                     updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;

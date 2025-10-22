@@ -2,8 +2,8 @@
 {
     public class GetExercisesByDayAndRoutineNameRequestJson
     {
-        public string? RoutineName { get; set; }
-        public string? DayName { get; set; }
-        public string? UserEmail { get; set; }
+        public string RoutineName { get; set; } = string.Empty;
+        public string DayName { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
     }
 }

@@ -2,10 +2,10 @@
 {
     public class UpdateUserRequest
     {
-        public string? OldEmail { get; set; }
-        public string? NewEmail { get; set; }
-        public string? NewDni { get; set; }
-        public string? NewUsername { get; set; }
-        public string? NewSurname { get; set; }
+        public string OldEmail { get; set; } = string.Empty;
+        public string NewEmail { get; set; } = string.Empty;
+        public string NewDni { get; set; } = string.Empty;
+        public string NewUsername { get; set; } = string.Empty;
+        public string NewSurname { get; set; } = string.Empty;
     }
 }

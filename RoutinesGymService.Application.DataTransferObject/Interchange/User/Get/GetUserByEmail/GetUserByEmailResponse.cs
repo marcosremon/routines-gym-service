@@ -5,7 +5,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Get
 {
     public class GetUserByEmailResponse : BaseResponse
     {
-        public UserDTO? UserDTO { get; set; }
+        public UserDTO UserDTO { get; set; } = new UserDTO();
         public int RoutinesCount { get; set; }
         public int FriendsCount { get; set; }
         public bool LogoutAccount { get; set; }

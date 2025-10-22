@@ -27,8 +27,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             LoginResponseJson loginResponseJson = new LoginResponseJson();
             try
             {
-                if (loginRequestJson == null ||
-                    string.IsNullOrEmpty(loginRequestJson.UserEmail) ||
+                if (string.IsNullOrEmpty(loginRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(loginRequestJson.UserPassword))
                 {
                     loginResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -82,8 +81,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
             try
             {
-                if (loginWebRequestJson == null ||
-                    string.IsNullOrEmpty(loginWebRequestJson.Email) ||
+                if (string.IsNullOrEmpty(loginWebRequestJson.Email) ||
                     string.IsNullOrEmpty(loginWebRequestJson.Password))
                 {
                     loginWebResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -135,8 +133,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
             try
             {
-                if (checkTokenStatusRequestJson == null ||
-                    string.IsNullOrEmpty(checkTokenStatusRequestJson.Token))
+                if (string.IsNullOrEmpty(checkTokenStatusRequestJson.Token))
                 {
                     checkTokenStatusResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     checkTokenStatusResponseJson.IsSuccess = false;

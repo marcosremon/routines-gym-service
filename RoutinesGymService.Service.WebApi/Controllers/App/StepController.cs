@@ -81,8 +81,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetDailyStepsInfoResponseJson getDailyStepsInfoResponseJson = new GetDailyStepsInfoResponseJson();
             try
             {
-                if (getDailyStepsInfoRequestJson.DailySteps == null || 
-                    getDailyStepsInfoRequestJson.Day == null)
+                if (string.IsNullOrEmpty(getDailyStepsInfoRequestJson.UserEmail) ||
+                    getDailyStepsInfoRequestJson.DailySteps == -1 || 
+                    getDailyStepsInfoRequestJson.Day == DateTime.MinValue)
                 {
                     getDailyStepsInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getDailyStepsInfoResponseJson.IsSuccess = false;
@@ -136,9 +137,9 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             SaveDailyStepsResponseJson saveDailyStepsResponseJson = new SaveDailyStepsResponseJson();
             try
             {
-                if (saveDailyStepsRequestJson == null ||
-                    saveDailyStepsRequestJson.Steps == null ||
-                    saveDailyStepsRequestJson.DailyStepsGoal == null)
+                if (string.IsNullOrEmpty(saveDailyStepsRequestJson.UserEmail) ||
+                    saveDailyStepsRequestJson.Steps == -1 ||
+                    saveDailyStepsRequestJson.DailyStepsGoal == -1)
                 {
                     saveDailyStepsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     saveDailyStepsResponseJson.IsSuccess = false;

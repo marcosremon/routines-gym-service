@@ -5,6 +5,6 @@ namespace RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine
 {
     public class UpdateRoutineResponseJson : BaseResponseJson
     {
-        public RoutineDTO? RoutineDTO { get; set; }
+        public RoutineDTO RoutineDTO { get; set; } = new RoutineDTO();
     }
 }

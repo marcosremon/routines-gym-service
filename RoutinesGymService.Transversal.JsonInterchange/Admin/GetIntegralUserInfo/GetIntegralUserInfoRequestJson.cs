@@ -2,7 +2,7 @@
 {
     public class GetIntegralUserInfoRequestJson
     {
-        public long UserId { get; set; }
+        public long UserId { get; set; } = -1;
         public string MasterKey { get; set; } = string.Empty;
     }
 }

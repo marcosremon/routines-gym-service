@@ -4,7 +4,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Step.Get
 {
     public class GetDailyStepsInfoResponse : BaseResponse
     {
-        public int? DailyStepsGoal { get; set; }
-        public int? DailySteps { get; set; }
+        public int DailyStepsGoal { get; set; } = -1;
+        public int DailySteps { get; set; } = -1;
     }
 }

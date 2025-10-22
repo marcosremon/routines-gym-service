@@ -2,6 +2,6 @@
 {
     public class GetUserProfileDetailsRequest
     {
-        public string? UserEmail { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
     }
 }

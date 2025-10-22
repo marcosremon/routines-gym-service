@@ -2,8 +2,8 @@
 {
     public class SaveDailyStepsRequest
     {
-        public int? Steps { get; set; }
-        public string? UserEmail { get; set; }
-        public int? DailyStepsGoal { get; set; }
+        public int Steps { get; set; } = -1;
+        public string UserEmail { get; set; } = string.Empty;
+        public int DailyStepsGoal { get; set; } = -1;
     }
 }

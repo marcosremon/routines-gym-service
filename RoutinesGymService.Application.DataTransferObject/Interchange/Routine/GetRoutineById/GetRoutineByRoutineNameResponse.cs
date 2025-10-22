@@ -5,6 +5,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Routine.
 {
     public class GetRoutineByRoutineNameResponse : BaseResponse
     {
-        public RoutineDTO? RoutineDTO { get; set; }
+        public RoutineDTO RoutineDTO { get; set; } = new RoutineDTO();
     }
 }

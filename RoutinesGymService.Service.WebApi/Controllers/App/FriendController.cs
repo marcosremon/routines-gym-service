@@ -32,7 +32,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetAllUserFriendsResponseJson getAllUserFriendsResponseJson = new GetAllUserFriendsResponseJson();
             try
             {
-                if (getAllUserFriendsRequestJson == null)
+                if (string.IsNullOrEmpty(getAllUserFriendsRequestJson.UserEmail))
                 {
                     getAllUserFriendsResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getAllUserFriendsResponseJson.IsSuccess = false;
@@ -82,7 +82,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             AddNewUserFriendResponseJson addNewUserFriendResponseJson = new AddNewUserFriendResponseJson();
             try
             {
-                if (addNewUserFriendRequestJson == null ||
+                if (string.IsNullOrEmpty(addNewUserFriendRequestJson.UserEmail) || 
                     string.IsNullOrEmpty(addNewUserFriendRequestJson.FriendCode))
                 {
                     addNewUserFriendResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -132,8 +132,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             DeleteFriendResponseJson deleteFriendResponseJson = new DeleteFriendResponseJson();
             try
             {
-                if (deleteFriendRequestJson == null ||
-                    string.IsNullOrEmpty(deleteFriendRequestJson.UserEmail) ||
+                if (string.IsNullOrEmpty(deleteFriendRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(deleteFriendRequestJson.FriendEmail))
                 {
                     deleteFriendResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;

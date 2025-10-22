@@ -16,13 +16,13 @@ namespace RoutinesGymApp.Domain.Entities
         public long UserId { get; set; }
 
         [Column("date")]
-        public DateTime? Date { get; set; } = DateTime.MinValue;
+        public DateTime Date { get; set; } = DateTime.MinValue;
 
         [Column("steps")]
-        public int? Steps { get; set; } = 0;
+        public int Steps { get; set; } = 0;
 
         [Column("daily_steps_goal")]
-        public int? DailyStepsGoal { get; set; }
+        public int DailyStepsGoal { get; set; } = 10000;
 
         public virtual User? User { get; set; }
     }

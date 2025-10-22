@@ -6,6 +6,6 @@
         public string UserEmail { get; set; } = string.Empty;
         public long RoutineId { get; set; }
         public long splitDayId { get; set; }
-        public string? ExerciseName { get; set; }
+        public string ExerciseName { get; set; } = string.Empty;
     }
 }

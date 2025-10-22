@@ -4,6 +4,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Step.Get
 {
     public class GetStepResponse : BaseResponse
     {
-        public List<RoutinesGymApp.Domain.Entities.Step>? Stats { get; set; }
+        public List<RoutinesGymApp.Domain.Entities.Step> Stats { get; set; } = new List<RoutinesGymApp.Domain.Entities.Step>();
     }
 }

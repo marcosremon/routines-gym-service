@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.CheckTokenStatus;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
 using RoutinesGymService.Domain.Model.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -337,11 +338,5 @@ namespace RoutinesGymService.Transversal.Security
             TimeSpan remaining = expirationDate.Value - DateTime.UtcNow;
             return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
         }
-    }
-    public class ValidateTokenWithDetailsResponse
-        {
-            public bool IsValid { get; set; }
-            public string? ErrorMessage { get; set; }
-            public ClaimsPrincipal? Principal { get; set; }
-        }
+    }   
 }
