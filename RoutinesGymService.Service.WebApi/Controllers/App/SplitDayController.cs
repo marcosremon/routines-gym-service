@@ -49,14 +49,14 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (updateSplitDayResponse.IsSuccess)
                     {
                         updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateSplitDayResponseJson.UserDTO = updateSplitDayResponse.UserDTO;
+                        updateSplitDayResponseJson.UserDto = updateSplitDayResponse.UserDto;
                         updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
                         updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
                     }
                     else
                     {
                         updateSplitDayResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        updateSplitDayResponseJson.UserDTO = updateSplitDayResponse.UserDTO;
+                        updateSplitDayResponseJson.UserDto = updateSplitDayResponse.UserDto;
                         updateSplitDayResponseJson.IsSuccess = updateSplitDayResponse.IsSuccess;
                         updateSplitDayResponseJson.Message = updateSplitDayResponse.Message;
                     }

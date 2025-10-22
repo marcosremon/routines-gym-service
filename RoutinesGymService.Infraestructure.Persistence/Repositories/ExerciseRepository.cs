@@ -143,7 +143,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(deleteExerciseRequest.DayName!));
+                        int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(deleteExerciseRequest.DayName));
                         SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == deleteExerciseRequest.RoutineId &&
                                                                                              s.DayName == dayNameToInt);
                         if (splitDay == null)
@@ -236,7 +236,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         else
                         {
                             int dayNameToInt = GenericUtils.ChangeEnumToIntOnDayName(
-                                                   GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName!));
+                                                   GenericUtils.ChangeStringToEnumOnDayName(getExercisesByDayAndRoutineNameRequest.DayName));
                             SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s => s.RoutineId == routine.RoutineId &&
                                                                                                  s.DayName == dayNameToInt);
                             if (splitDay == null)
@@ -423,7 +423,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         }
                         else
                         {
-                            int dayIndex = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(getAllExerciseProgressRequest.DayName!));
+                            int dayIndex = GenericUtils.ChangeEnumToIntOnDayName(GenericUtils.ChangeStringToEnumOnDayName(getAllExerciseProgressRequest.DayName));
                             SplitDay? splitDay = await _context.SplitDays.FirstOrDefaultAsync(s =>
                                 s.RoutineId == routine.RoutineId &&
                                 s.DayName == dayIndex);

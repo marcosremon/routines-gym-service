@@ -4,8 +4,8 @@ namespace RoutinesGymService.Application.DataTransferObject.Entity
 {
     public class SplitDayDTO
     {
-        public WeekDay DayName { get; set; } 
-        public long RoutineId { get; set; }
+        public WeekDay DayName { get; set; } = WeekDay.NONE;
+        public long RoutineId { get; set; } = -1;
         public string DayExercisesDescription { get; set; } = string.Empty;
         public List<ExerciseDTO> Exercises { get; set; } = new List<ExerciseDTO>();
     }
