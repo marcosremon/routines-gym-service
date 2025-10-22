@@ -5,7 +5,7 @@ namespace RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail
 {
     public class GetUserByEmailResponseJson : BaseResponseJson
     {
-        public UserDTO? UserDTO { get; set; }
+        public UserDTO UserDTO { get; set; } = new UserDTO();
         public int RoutinesCount { get; set; }
         public int FriendsCount { get; set; }
         public bool LogoutAccount { get; set; } = false;

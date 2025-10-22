@@ -4,8 +4,8 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.User.Get
 {
     public class GetUserProfileDetailsResponse : BaseResponse
     {
-        public string? Username { get; set; }
-        public DateTime? InscriptionDate { get; set; }
-        public int? RoutineCount { get; set; }
+        public string Username { get; set; } = string.Empty;
+        public DateTime InscriptionDate { get; set; } = DateTime.MinValue;
+        public int RoutineCount { get; set; } = -1;
     }
 }

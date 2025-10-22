@@ -5,6 +5,6 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Admin.Ge
 {
     public class GetIntegralUserInfoResponse : BaseResponse
     {
-        public UserDTO? UserDTO { get; set; }
+        public UserDTO UserDTO { get; set; } = new UserDTO();
     }
 }

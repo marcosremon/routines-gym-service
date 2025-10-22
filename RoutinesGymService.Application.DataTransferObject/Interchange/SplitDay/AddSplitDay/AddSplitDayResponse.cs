@@ -5,6 +5,6 @@ namespace RoutinesGymService.Application.DataTransferObject.SplitDay.AddSplitDay
 {
     public class AddSplitDayResponse : BaseResponse
     {
-        public UserDTO? UserDTO { get; set; }
+        public UserDTO UserDTO { get; set; } = new UserDTO();
     }
 }

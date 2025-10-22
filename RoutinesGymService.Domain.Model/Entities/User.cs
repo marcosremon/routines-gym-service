@@ -30,7 +30,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         public string FriendCode { get; set; } = string.Empty;
 
         [Column("password")]
-        public byte[]? Password { get; set; }
+        public byte[] Password { get; set; } = Array.Empty<byte>();
 
         [Column("role")]
         public int Role { get; set; }

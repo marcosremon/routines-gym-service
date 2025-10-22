@@ -4,6 +4,6 @@
     {
         public ResponseCodes ResponsCode { get; set; }
         public bool IsSuccess { get; set; } = false;
-        public string? Message { get; set; }
+        public string Message { get; set; } = string.Empty; 
     }
 }
