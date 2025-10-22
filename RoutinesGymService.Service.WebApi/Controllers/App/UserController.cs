@@ -24,6 +24,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
 using RoutinesGymService.Transversal.Security;
+using System.Net;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -50,7 +51,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetUserByEmailResponseJson getUserByEmailResponseJson = new GetUserByEmailResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(getUserByEmailRequestJson.Email))
+                if (string.IsNullOrEmpty(getUserByEmailRequestJson.UserEmail))
                 {
                     getUserByEmailResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getUserByEmailResponseJson.IsSuccess = false;
@@ -60,7 +61,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 {
                     GetUserByEmailRequest getUserByEmailRequest = new GetUserByEmailRequest
                     {
-                        Email = getUserByEmailRequestJson.Email,
+                        UserEmail = getUserByEmailRequestJson.UserEmail,
                     };
 
                     GetUserByEmailResponse getUserByEmailResponse = await _userApplication.GetUserByEmail(getUserByEmailRequest);
@@ -102,7 +103,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CheckUserExistenceResponseJson checkUserExistenceResponseJson = new CheckUserExistenceResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(checkUserExistenceRequestJson.Email))
+                if (string.IsNullOrEmpty(checkUserExistenceRequestJson.UserEmail))
                 {
                     checkUserExistenceResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     checkUserExistenceResponseJson.Message = "Email is required.";
@@ -112,7 +113,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 {
                     CheckUserExistenceRequest checkUserExistenceRequest = new CheckUserExistenceRequest
                     {
-                        Email = checkUserExistenceRequestJson.Email,
+                        UserEmail = checkUserExistenceRequestJson.UserEmail,
                     };
 
                     CheckUserExistenceResponse checkUserExistenceResponse = await _userApplication.CheckUserExistence(checkUserExistenceRequest);
@@ -153,7 +154,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 if (string.IsNullOrEmpty(createUserRequestJson.Dni) ||
                     string.IsNullOrEmpty(createUserRequestJson.Username) ||
                     string.IsNullOrEmpty(createUserRequestJson.SerialNumber) ||
-                    string.IsNullOrEmpty(createUserRequestJson.Email) ||
+                    string.IsNullOrEmpty(createUserRequestJson.UserEmail) ||
                     string.IsNullOrEmpty(createUserRequestJson.Password) ||
                     string.IsNullOrEmpty(createUserRequestJson.ConfirmPassword))
                 {
@@ -167,7 +168,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     {
                         Dni = createUserRequestJson.Dni.Trim(),
                         Username = createUserRequestJson.Username.Trim(),
-                        Email = createUserRequestJson.Email.Trim(),
+                        UserEmail = createUserRequestJson.UserEmail.Trim(),
                         Password = createUserRequestJson.Password.Trim(),
                         ConfirmPassword = createUserRequestJson.ConfirmPassword.Trim(),
                         SerialNumber = createUserRequestJson.SerialNumber,
@@ -224,7 +225,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                         Dni = createGoogleUserRequestJson.Dni,
                         Username = createGoogleUserRequestJson.Username,
                         Surname = createGoogleUserRequestJson.Surname,
-                        Email = createGoogleUserRequestJson.Email,
+                        UserEmail = createGoogleUserRequestJson.Email,
                         Password = createGoogleUserRequestJson.Email, // no se puede sacar la contraseña desde google, a si que se usa el email como contraseña
                         SerialNumber = createGoogleUserRequestJson.SerialNumber,
                         Role = Role.USER
@@ -265,10 +266,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             UpdateUserResponseJson updateUserResponseJson = new UpdateUserResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(updateUserRequestJson.OriginalEmail) ||
-                    string.IsNullOrEmpty(updateUserRequestJson.DniToBeFound) ||
-                    string.IsNullOrEmpty(updateUserRequestJson.Username) ||
-                    string.IsNullOrEmpty(updateUserRequestJson.Email))
+                if (string.IsNullOrEmpty(updateUserRequestJson.OriginalUserEmail))
                 {
                     updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     updateUserResponseJson.IsSuccess = false;
@@ -278,7 +276,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 {
                     UpdateUserRequest updateUserRequest = new UpdateUserRequest
                     {
-                        OldEmail = updateUserRequestJson.OriginalEmail,
+                        OriginalUserEmail = updateUserRequestJson.OriginalUserEmail,
                         NewDni = updateUserRequestJson.DniToBeFound,
                         NewUsername = updateUserRequestJson.Username,
                         NewSurname = updateUserRequestJson.Surname,
@@ -289,7 +287,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     if (updateUserResponse.IsSuccess)
                     {
                         updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
-                        updateUserResponseJson.userDto = updateUserResponse.UserDto;
+                        updateUserResponseJson.UserDto = updateUserResponse.UserDto;
                         updateUserResponseJson.NewToken = updateUserResponse.NewToken;
                         updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
                         updateUserResponseJson.Message = updateUserResponse.Message;
@@ -297,7 +295,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     else
                     {
                         updateUserResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
-                        updateUserResponseJson.userDto = updateUserResponse.UserDto;
+                        updateUserResponseJson.UserDto = updateUserResponse.UserDto;
                         updateUserResponseJson.NewToken = updateUserResponse.NewToken;
                         updateUserResponseJson.IsSuccess = updateUserResponse.IsSuccess;
                         updateUserResponseJson.Message = updateUserResponse.Message;
@@ -324,7 +322,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             DeleteUserResponseJson deleteUserResponseJson = new DeleteUserResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(deleteUserRequestJson.Email))
+                if (string.IsNullOrEmpty(deleteUserRequestJson.UserEmail))
                 {
                     deleteUserResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     deleteUserResponseJson.IsSuccess = false;
@@ -334,7 +332,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                 {
                     DeleteUserRequest deleteUserRequest = new DeleteUserRequest
                     {
-                        Email = deleteUserRequestJson.Email
+                        UserEmail = deleteUserRequestJson.UserEmail
                     };
 
                     DeleteUserResponse deleteUserResponse = await _userApplication.DeleteUser(deleteUserRequest);

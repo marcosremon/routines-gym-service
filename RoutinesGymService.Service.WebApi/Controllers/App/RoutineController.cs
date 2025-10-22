@@ -42,7 +42,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(createRoutineRequestJson.RoutineName))
+                if (string.IsNullOrEmpty(createRoutineRequestJson.RoutineName) ||
+                    string.IsNullOrEmpty(createRoutineRequestJson.UserEmail))
                 {
                     createRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     createRoutineResponseJson.IsSuccess = false;
@@ -144,7 +145,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
             try
             {
-                if (string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName))
+                if (string.IsNullOrEmpty(deleteRoutineRequestJson.RoutineName) ||
+                    string.IsNullOrEmpty(deleteRoutineRequestJson.UserEmail)
                 {
                     deleteRoutineResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     deleteRoutineResponseJson.IsSuccess = false;

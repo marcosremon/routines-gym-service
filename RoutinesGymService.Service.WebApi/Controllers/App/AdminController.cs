@@ -131,7 +131,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
             try
             {
-                if (getIntegralUserInfoRequestJson.UserId == -1)
+                if (getIntegralUserInfoRequestJson.UserId == -1 ||
+                    string.IsNullOrEmpty(getIntegralUserInfoRequestJson.MasterKey))
                 {
                     getIntegralUserInfoResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
                     getIntegralUserInfoResponseJson.IsSuccess = false;
@@ -199,7 +200,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                         Dni = createAdminRequstJson.Dni,
                         Username = createAdminRequstJson.Username,
                         Surname = createAdminRequstJson.Surname,
-                        Email = createAdminRequstJson.Email,
+                        UserEmail = createAdminRequstJson.Email,
                         Password = createAdminRequstJson.Password,
                         ConfirmPassword = createAdminRequstJson.ConfirmPassword,
                         SerialNumber = createAdminRequstJson.SerialNumber,

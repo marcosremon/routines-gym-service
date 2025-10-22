@@ -2,6 +2,6 @@
 {
     public class DeleteUserRequestJson
     {
-        public string Email { get; set; } = string.Empty;
+        public string UserEmail { get; set; } = string.Empty;
     }
 }

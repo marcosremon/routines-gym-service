@@ -1,6 +1,6 @@
 ﻿namespace RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgress
 {
-    public class AddExerciseAddExerciseProgressRequestJson
+    public class AddExerciseProgressRequestJson
     {
         public List<string> ProgressList { get; set; } = new List<string>();
         public string UserEmail { get; set; } = string.Empty;
