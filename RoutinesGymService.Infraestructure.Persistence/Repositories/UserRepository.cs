@@ -150,7 +150,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
                     /* Si existe un usuario con el mismo email o con el mismo dni o con los dos error */
                     UserExistResponse userExistResponse = await UserExist(userExistRequest);
-                    if (!userExistResponse.SuccessData)
+                    if (userExistResponse.UserExist)
                     {
                         createUserResponse.IsSuccess = false;
                         createUserResponse.Message = userExistResponse.Message;
@@ -690,36 +690,25 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     userExistResponse.EmailExists = true;
                     userExistResponse.DniExists = true;
-                    userExistResponse.DniAndEmailExist = true;
                     userExistResponse.Message = "Both DNI and Email exist";
                 }
                 else if (existsDni)
                 {
                     userExistResponse.EmailExists = false;
                     userExistResponse.DniExists = true;
-                    userExistResponse.DniAndEmailExist = false;
                     userExistResponse.Message = "DNI exists but Email does not exist";
                 }
                 else if (existsEmail)
                 {
                     userExistResponse.EmailExists = true;
                     userExistResponse.DniExists = false;
-                    userExistResponse.DniAndEmailExist = false;
                     userExistResponse.Message = "Email exists but DNI does not exist";
-                }
-                else
-                {
-                    userExistResponse.EmailExists = false;
-                    userExistResponse.DniExists = false;
-                    userExistResponse.DniAndEmailExist = false;
-                    userExistResponse.Message = "Neither DNI nor Email exist";
                 }
 
                 userExistResponse.ResponsCode = ResponseCodes.OK;
                 userExistResponse.IsSuccess = true;
 
-                userExistResponse.SuccessData = userExistResponse != null && userExistResponse.IsSuccess &&
-                    (userExistResponse.DniAndEmailExist || userExistResponse.EmailExists || userExistResponse.DniAndEmailExist);
+                userExistResponse.UserExist = userExistResponse != null && userExistResponse.IsSuccess && (existsDni || existsEmail);
             }
             catch (Exception)
             {
@@ -728,8 +717,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 userExistResponse.IsSuccess = false;
                 userExistResponse.DniExists = false;
                 userExistResponse.EmailExists = false;
-                userExistResponse.DniAndEmailExist = false;
-                userExistResponse.SuccessData = false;
+                userExistResponse.UserExist = false;
             }
 
             return userExistResponse;
