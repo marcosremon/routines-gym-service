@@ -46,7 +46,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 List<User>? cacheUsers = _cacheUtils.Get<List<User>>(cacheKey);
                 if (cacheUsers != null)
                 {
-                    if (cacheUsers.Count == 0)
+                    if (!cacheUsers.Any())
                     {
                         getUsersResponse.Message = "No users found";
                         getUsersResponse.IsSuccess = false;
@@ -97,8 +97,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == addUserToBlackListRequest.SerialNumber &&
-                                                                                 bl.UserId == addUserToBlackListRequest.UserId);
+                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => 
+                            bl.SerialNumber == addUserToBlackListRequest.SerialNumber && 
+                            bl.UserId == addUserToBlackListRequest.UserId);
                     if (isOnBlackList)
                     {
                         addUserToBlackListResponse.IsSuccess = false;
@@ -274,7 +275,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         })
                     .ToListAsync();
 
-                if (blacklistedUsers.Count == 0)
+                if (!blacklistedUsers.Any())
                 {
                     getBlacklistedUsersResponse.IsSuccess = false;
                     getBlacklistedUsersResponse.Message = "No blacklisted users found";
@@ -347,7 +348,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 List<User> users = await _context.Users
                     .Where(u => u.RoleString.ToLower() == getUsersByRoleRequest.Role.ToLower())
                     .ToListAsync();
-                if (users.Count == 0)
+                if (!users.Any())
                 {
                     getUsersByRoleResponse.IsSuccess = false;
                     getUsersByRoleResponse.Message = $"No users found with the role {getUsersByRoleRequest.Role}";

@@ -236,7 +236,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     else
                     {
                         List<Routine> routines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
-                        if (routines.Count == 0)
+                        if (!routines.Any())
                         {
                             getAllUserRoutinesResponse.IsSuccess = false;
                             getAllUserRoutinesResponse.Message = "No routines found for the user";

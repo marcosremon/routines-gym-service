@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AreFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.Interface.Repository;
@@ -34,53 +35,42 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             AddNewUserFriendResponse addNewUserFriendResponse = new AddNewUserFriendResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == addNewUserFriendRequest.UserEmail);
-                if (user == null)
+                AreFriendsRequest areFriendsRequest = new AreFriendsRequest
+                {
+                    UserEmail = addNewUserFriendRequest.UserEmail,
+                    FriendCode = addNewUserFriendRequest.FriendCode
+                };
+
+                AreFriendsResponse areFriendsResponse = await AreFriends(areFriendsRequest);
+                if (areFriendsResponse.IsSuccess)
                 {
                     addNewUserFriendResponse.IsSuccess = false;
-                    addNewUserFriendResponse.Message = "User not found";
+                    addNewUserFriendResponse.Message = "This user is already your friend";
                 }
                 else
                 {
-                    User? friend = await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == addNewUserFriendRequest.FriendCode);
-                    if (friend == null)
+                    UserFriend userFriend = new UserFriend
                     {
-                        addNewUserFriendResponse.IsSuccess = false;
-                        addNewUserFriendResponse.Message = "Friend not found";
-                    }
-                    else
+                        UserId = areFriendsResponse.UserId,
+                        FriendId = areFriendsResponse.FriendId,
+                    };
+
+                    _genericUtils.ClearCache(_friendPrefix);
+
+                    _context.UserFriends.Add(userFriend);
+                    await _context.SaveChangesAsync();
+
+                    userFriend = new UserFriend
                     {
-                        if (_context.UserFriends.Any(f => f.UserId == user.UserId && f.FriendId == friend.UserId))
-                        {
-                            addNewUserFriendResponse.IsSuccess = false;
-                            addNewUserFriendResponse.Message = "This user is already your friend";
-                        }
-                        else
-                        {
-                            UserFriend userFriend = new UserFriend
-                            {
-                                UserId = user.UserId,
-                                FriendId = friend.UserId,
-                            };
+                        UserId = areFriendsResponse.FriendId,
+                        FriendId = areFriendsResponse.UserId,
+                    };
 
-                            _genericUtils.ClearCache(_friendPrefix);
+                    _context.UserFriends.Add(userFriend);
+                    await _context.SaveChangesAsync();
 
-                            _context.UserFriends.Add(userFriend);
-                            await _context.SaveChangesAsync();
-
-                            userFriend = new UserFriend
-                            {
-                                UserId = friend.UserId,
-                                FriendId = user.UserId,
-                            };
-
-                            _context.UserFriends.Add(userFriend);
-                            await _context.SaveChangesAsync();
-
-                            addNewUserFriendResponse.IsSuccess = true;
-                            addNewUserFriendResponse.Message = "Friend added successfully";
-                        }
-                    }
+                    addNewUserFriendResponse.IsSuccess = true;
+                    addNewUserFriendResponse.Message = "Friend added successfully";
                 }
             }
             catch (Exception ex)
@@ -99,42 +89,56 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             DeleteFriendResponse deleteFriendResponse = new DeleteFriendResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteFriendRequest.UserEmail);
-                if (user == null)
+                User? friendToDelete = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteFriendRequest.FriendEmail);
+                if (friendToDelete == null)
                 {
                     deleteFriendResponse.IsSuccess = false;
-                    deleteFriendResponse.Message = "User not found";
+                    deleteFriendResponse.Message = "Friend not found";
                 }
                 else
                 {
-                    User? friend = await _context.Users.FirstOrDefaultAsync(u => u.Email == deleteFriendRequest.FriendEmail);
-                    if (friend == null)
+                    AreFriendsRequest areFriendsRequest = new AreFriendsRequest
+                    {
+                        UserEmail = deleteFriendRequest.UserEmail,
+                        FriendCode = friendToDelete.FriendCode
+                    };
+
+                    AreFriendsResponse areFriendsResponse = await AreFriends(areFriendsRequest);
+                    if (!areFriendsResponse.IsSuccess && areFriendsResponse.UserId == -1)
                     {
                         deleteFriendResponse.IsSuccess = false;
-                        deleteFriendResponse.Message = "Friend not found";
+                        deleteFriendResponse.Message = areFriendsResponse.Message;
+                    }
+                    else if (!areFriendsResponse.IsSuccess)
+                    {
+                        deleteFriendResponse.IsSuccess = false;
+                        deleteFriendResponse.Message = "You're not friends with this user";
                     }
                     else
                     {
-                        UserFriend? userFriend = _context.UserFriends.FirstOrDefault(f => f.UserId == user.UserId && f.FriendId == friend.UserId);
-                        if (userFriend == null)
-                        {
-                            deleteFriendResponse.IsSuccess = false;
-                            deleteFriendResponse.Message = "This user is already your friend";
-                        }
-                        else
+                        UserFriend? userFriend = await _context.UserFriends.FirstOrDefaultAsync(f =>
+                            f.UserId == areFriendsResponse.UserId &&
+                            f.FriendId == areFriendsResponse.FriendId);
+
+                        UserFriend? friendUser = await _context.UserFriends.FirstOrDefaultAsync(f =>
+                            f.UserId == areFriendsResponse.FriendId &&
+                            f.FriendId == areFriendsResponse.UserId);
+
+                        if (userFriend != null && friendUser != null)
                         {
                             _genericUtils.ClearCache(_friendPrefix);
 
                             _context.UserFriends.Remove(userFriend);
-                            await _context.SaveChangesAsync();
-
-                            userFriend = _context.UserFriends.FirstOrDefault(f => f.UserId == friend.UserId && f.FriendId == user.UserId);
-
-                            _context.UserFriends.Remove(userFriend);
+                            _context.UserFriends.Remove(friendUser);
                             await _context.SaveChangesAsync();
 
                             deleteFriendResponse.IsSuccess = true;
                             deleteFriendResponse.Message = "Friend deleted successfully";
+                        }
+                        else
+                        {
+                            deleteFriendResponse.IsSuccess = false;
+                            deleteFriendResponse.Message = "Friendship relationship not found";
                         }
                     }
                 }
@@ -142,7 +146,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             catch (Exception ex)
             {
                 deleteFriendResponse.IsSuccess = false;
-                deleteFriendResponse.Message = $"Unexpected error on FriendRepository -> DeleteFriendResponse: {ex.Message}";
+                deleteFriendResponse.Message = $"Unexpected error on FriendRepository -> DeleteFriend: {ex.Message}";
             }
 
             return deleteFriendResponse;
@@ -178,7 +182,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             .Where(uf => uf.UserId == user.UserId)
                             .Select(uf => uf.FriendId)
                             .ToListAsync();
-                        if (friendsIds == null || friendsIds.Count == 0)
+                        if (friendsIds == null || !friendsIds.Any())
                         {
                             getAllUserFriendsResponse.IsSuccess = false;
                             getAllUserFriendsResponse.Message = "No friends found for this user";
@@ -206,6 +210,53 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return getAllUserFriendsResponse;
         }
+        #endregion
+
+        #region Auxiliary methods
+
+        #region Are friends
+        public async Task<AreFriendsResponse> AreFriends(AreFriendsRequest areFriendsRequest)
+        {
+            AreFriendsResponse areFriendsResponse = new AreFriendsResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == areFriendsRequest.UserEmail);
+                if (user == null)
+                {
+                    areFriendsResponse.IsSuccess = false;
+                    areFriendsResponse.Message = "User not found";
+                }
+                else
+                {
+                    User? friend = await _context.Users.FirstOrDefaultAsync(u => u.FriendCode == areFriendsRequest.FriendCode);
+                    if (friend == null)
+                    {
+                        areFriendsResponse.IsSuccess = false;
+                        areFriendsResponse.Message = "Friend not found";
+                    }
+                    else
+                    {
+                        bool areFriends = _context.UserFriends.Any(f => f.UserId == user.UserId && f.FriendId == friend.UserId);
+                        
+                        areFriendsResponse.UserId = user.UserId;
+                        areFriendsResponse.FriendId = friend.UserId;
+                        areFriendsResponse.IsSuccess = areFriends;
+                        areFriendsResponse.Message = areFriends 
+                            ? "This user is already your friend"
+                            : "You're not friends";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                areFriendsResponse.IsSuccess = false;
+                areFriendsResponse.Message = $"Unexpected error on FriendRepository -> AreFriends: {ex.Message}";
+            }
+
+            return areFriendsResponse;
+        }
+        #endregion
+
         #endregion
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Primitives;
 using RoutinesGymService.Transversal.JsonInterchange.Auth;
 using System.Reflection;
 using System.Security.Claims;
@@ -19,18 +20,16 @@ namespace RoutinesGymService.Transversal.Security
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            var user = context.HttpContext.User;
+            ClaimsPrincipal user = context.HttpContext.User;
             string? tokenEmail = user.FindFirst(ClaimTypes.Email)?.Value;
             bool isAdmin = user.FindFirst(ClaimTypes.Role)?.Value == "ADMIN";
 
-            // Si el email del token es null o empty → UNAUTHORIZED
             if (string.IsNullOrEmpty(tokenEmail))
             {
                 SetUnauthorizedResult(context);
                 return;
             }
 
-            // Si es admin → PERMITIR ACCESO (bypass)
             if (isAdmin)
             {
                 await next();
@@ -39,45 +38,37 @@ namespace RoutinesGymService.Transversal.Security
 
             // Si NO es admin → verificar que el email del token coincida con el del request
             string? requestEmail = FindEmailInRequest(context);
-
-            // Si no encuentra email en el request O no coincide con el del token → UNAUTHORIZED
             if (string.IsNullOrEmpty(requestEmail) || tokenEmail != requestEmail)
             {
                 SetUnauthorizedResult(context);
                 return;
             }
 
-            // Si llegó aquí: email del token == email del request → PERMITIR ACCESO
             await next();
         }
 
         private string? FindEmailInRequest(ActionExecutingContext context)
         {
-            // Busca el email usando los nombres de parámetros configurados
             foreach (string paramName in _emailParameterNames)
             {
-                // 1. Buscar en action arguments (AHORA SÍ FUNCIONA porque estamos en ActionExecutingContext)
                 string? emailFromArgs = GetEmailFromActionArguments(context, paramName);
                 if (!string.IsNullOrEmpty(emailFromArgs))
                 {
                     return emailFromArgs;
                 }
 
-                // 2. Buscar en form data
                 if (context.HttpContext.Request.HasFormContentType &&
-                    context.HttpContext.Request.Form.TryGetValue(paramName, out var formValue))
+                    context.HttpContext.Request.Form.TryGetValue(paramName, out StringValues formValue))
                 {
                     return formValue.ToString();
                 }
 
-                // 3. Buscar en query parameters
-                if (context.HttpContext.Request.Query.TryGetValue(paramName, out var queryValue))
+                if (context.HttpContext.Request.Query.TryGetValue(paramName, out StringValues queryValue))
                 {
                     return queryValue.ToString();
                 }
 
-                // 4. Buscar en route parameters
-                if (context.RouteData.Values.TryGetValue(paramName, out var routeValue))
+                if (context.RouteData.Values.TryGetValue(paramName, out object routeValue))
                 {
                     return routeValue?.ToString();
                 }
@@ -90,9 +81,7 @@ namespace RoutinesGymService.Transversal.Security
         {
             try
             {
-                // AHORA ActionArguments ESTÁ DISPONIBLE Y LLENO
-                // Buscar directamente en los argumentos por nombre
-                if (context.ActionArguments.TryGetValue(paramName, out var value))
+                if (context.ActionArguments.TryGetValue(paramName, out object? value))
                 {
                     if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
                     {
@@ -100,12 +89,11 @@ namespace RoutinesGymService.Transversal.Security
                     }
                 }
 
-                // Buscar en todos los objetos de los argumentos
-                foreach (var argument in context.ActionArguments.Values)
+                foreach (object argument in context.ActionArguments.Values)
                 {
                     if (argument != null)
                     {
-                        var emailFromObject = GetEmailFromObject(argument, paramName);
+                        string? emailFromObject = GetEmailFromObject(argument, paramName);
                         if (!string.IsNullOrEmpty(emailFromObject))
                         {
                             return emailFromObject;
@@ -127,7 +115,6 @@ namespace RoutinesGymService.Transversal.Security
             {
                 Type type = obj.GetType();
 
-                // Buscar la propiedad con el nombre exacto
                 PropertyInfo? property = type.GetProperty(propertyName);
                 if (property != null)
                 {
@@ -138,7 +125,6 @@ namespace RoutinesGymService.Transversal.Security
                     }
                 }
 
-                // Buscar ignorando mayúsculas/minúsculas
                 property = type.GetProperty(propertyName,
                     BindingFlags.IgnoreCase |
                     BindingFlags.Public |
