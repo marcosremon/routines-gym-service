@@ -52,7 +52,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         updateSplitDayResponse.IsSuccess = false;
                         updateSplitDayResponse.Message = "Routine not found or does not belong to this user";
                     }
-                    else if (updateSplitDayRequest.DeleteDays.Count == 0 && updateSplitDayRequest.AddDays.Count == 0)
+                    else if (!updateSplitDayRequest.DeleteDays.Any() && !updateSplitDayRequest.AddDays.Any())
                     {
                         updateSplitDayResponse.IsSuccess = false;
                         updateSplitDayResponse.Message = "No days to delete or add";
