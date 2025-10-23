@@ -26,18 +26,13 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CheckTokenStatusResponse checkTokenStatusResponse = new CheckTokenStatusResponse();
             try
             {
-                if (JwtUtils.IsValidToken(checkTokenStatusRequest))
-                {
-                    checkTokenStatusResponse.IsValid = true;
-                    checkTokenStatusResponse.IsSuccess = true;
-                    checkTokenStatusResponse.Message = "The token is valid";
-                }
-                else
-                {
-                    checkTokenStatusResponse.IsValid = true;
-                    checkTokenStatusResponse.IsSuccess = false;
-                    checkTokenStatusResponse.Message = "The token is not valid";
-                }
+                bool isTokenValid = JwtUtils.IsValidToken(checkTokenStatusRequest);
+
+                checkTokenStatusResponse.IsValid = isTokenValid;
+                checkTokenStatusResponse.IsSuccess = isTokenValid;
+                checkTokenStatusResponse.Message = isTokenValid 
+                    ? "The token is valid"
+                    : "The token is not valid";
             }
             catch (Exception ex)
             {
@@ -65,11 +60,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     bool isPasswordValid = _passwordUtils.VerifyPassword(user.Password, loginRequest.UserPassword);
-                    bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == user.SerialNumber);
-                    if (isOnBlackList)
+                    bool onBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == user.SerialNumber);
+
+                    if (onBlackList)
                     {
-                        loginResponse.IsSuccess = false;
-                        loginResponse.Message = "You are in Black List 💀";
+                        loginResponse.IsSuccess = false; 
+                        loginResponse.Message = "The user that created this account is on BlackList 💀";
                     }
                     else if (!isPasswordValid && user.Email != "admin")
                     {
