@@ -4,7 +4,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using System.Reflection;
 using System.Security.Claims;
 
-namespace RoutinesGymService.Transversal.Security.SecurityFilters
+namespace RoutinesGymService.Transversal.Security.Filters
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public class ResourceAuthorizationFilter : Attribute, IAsyncActionFilter

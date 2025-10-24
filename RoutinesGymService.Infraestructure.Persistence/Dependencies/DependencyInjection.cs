@@ -4,7 +4,8 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Infraestructure.Persistence.Repositories;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.Security.SecurityUtils;
+using RoutinesGymService.Transversal.Security.Filters;
+using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
 {
@@ -31,6 +32,16 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
             services.AddScoped<IAuthRepository, AuthRepository>();
             services.AddScoped<IFriendRepository, FriendRepository>();
             services.AddScoped<IStepRepository, StepRepository>();
+
+            // Filtros 
+            services.AddScoped<JwtValidationFilter>();
+            services.AddScoped<ResourceAuthorizationFilter>(provider =>
+            {
+                string[] allowedRoles = { "USER", "ADMIN" };
+                return new ResourceAuthorizationFilter(allowedRoles);
+            });
+
+            services.AddScoped<AdminAuthorizationFilter>();
 
             // Other services
             services.AddScoped<GenericUtils>();

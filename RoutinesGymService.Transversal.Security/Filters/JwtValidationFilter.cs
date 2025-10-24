@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
 using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
-using RoutinesGymService.Transversal.Security.SecurityUtils;
+using RoutinesGymService.Transversal.Security.Utils;
 
-namespace RoutinesGymService.Transversal.Security.SecurityFilters
+namespace RoutinesGymService.Transversal.Security.Filters
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
     public class JwtValidationFilter : Attribute, IAsyncActionFilter

@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace RoutinesGymService.Transversal.Security.SecurityUtils
+namespace RoutinesGymService.Transversal.Security.Utils
 {
     public class PasswordUtils
     {

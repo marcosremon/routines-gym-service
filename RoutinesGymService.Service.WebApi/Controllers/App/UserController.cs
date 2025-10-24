@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -43,7 +42,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get user by email
         [HttpPost("get-user-by-email")]
-        [Authorize]
         [JwtValidationFilter]           
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetUserByEmailResponseJson>> GetUserByEmail([FromBody] GetUserByEmailRequestJson getUserByEmailRequestJson)
@@ -259,7 +257,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Update user
         [HttpPost("update-user")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<UpdateUserResponseJson>> UpdateUser([FromBody] UpdateUserRequestJson updateUserRequestJson)
@@ -316,7 +313,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Delete user
         [HttpPost("delete-user")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteUserResponseJson>> DeleteUser([FromBody] DeleteUserRequestJson deleteUserRequestJson)
@@ -366,7 +362,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Create new password
         [HttpPost("create-new-password")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<CreateNewPasswordResponseJson>> CreateNewPassword([FromBody] CreateNewPasswordRequestJson createNewPasswordRequestJson)
@@ -415,7 +410,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Change password with password and email
         [HttpPost("change-password-with-password-and-email")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<ChangePasswordWithPasswordAndEmailResponseJson>> ChangePasswordWithPasswordAndEmail([FromBody] ChangePasswordWithPasswordAndEmailRequestJson changePasswordWithPasswordAndEmailRequestJson)
@@ -470,7 +464,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get user profile details
         [HttpPost("get-user-profile-details")]
-        [Authorize]
+        [JwtValidationFilter]
         public async Task<ActionResult<GetUserProfileDetailsResponseJson>> GetUserProfileDetails([FromBody] GetUserProfileDetailsRequestJson getUserProfileDetailsRequestJson)
         {
             GetUserProfileDetailsResponseJson getUserProfileDetailsResponseJson = new GetUserProfileDetailsResponseJson();

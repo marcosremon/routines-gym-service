@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Domain.Model.Entities;
-using RoutinesGymService.Transversal.Security.SecurityUtils;
+using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Context
 {
