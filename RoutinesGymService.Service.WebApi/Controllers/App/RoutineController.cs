@@ -14,7 +14,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
-using RoutinesGymService.Transversal.Security.SecurityFilters;
+using RoutinesGymService.Transversal.Security.Filters;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App

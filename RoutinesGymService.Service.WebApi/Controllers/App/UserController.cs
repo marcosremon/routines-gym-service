@@ -22,7 +22,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
-using RoutinesGymService.Transversal.Security.SecurityFilters;
+using RoutinesGymService.Transversal.Security.Filters;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App

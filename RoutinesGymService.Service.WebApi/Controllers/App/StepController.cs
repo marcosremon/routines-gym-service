@@ -6,7 +6,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetStats;
 using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
-using RoutinesGymService.Transversal.Security.SecurityFilters;
+using RoutinesGymService.Transversal.Security.Filters;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
