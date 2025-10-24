@@ -7,7 +7,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
-using RoutinesGymService.Transversal.Security.SecurityFilters;
+using RoutinesGymService.Transversal.Security.Filters;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {

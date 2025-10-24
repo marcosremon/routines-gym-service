@@ -12,7 +12,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgres
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
-using RoutinesGymService.Transversal.Security.SecurityFilters;
+using RoutinesGymService.Transversal.Security.Filters;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
