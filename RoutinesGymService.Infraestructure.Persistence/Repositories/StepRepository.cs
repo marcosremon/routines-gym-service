@@ -43,9 +43,9 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 else
                 {
                     DateTime day = getDailyStepsInfoRequest.Day.Date;
-                    Step? step = await _context.Steps.FirstOrDefaultAsync(st => st.Date.Date == day &&
-                                                                                st.Steps == getDailyStepsInfoRequest.DailySteps &&
-                                                                                st.UserId == user.UserId);
+                    Step? step = await _context.Steps.FirstOrDefaultAsync(st => st.Date.Date == day && 
+                        st.Steps == getDailyStepsInfoRequest.DailySteps &&
+                        st.UserId == user.UserId);
                     if (step == null)
                     {
                         getDailyStepsInfoResponse.IsSuccess = false;
