@@ -7,7 +7,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Transversal.JsonInterchange.Step.GetStats;
 using RoutinesGymService.Transversal.JsonInterchange.Step.SaveDailySteps;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityFilters;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
@@ -25,7 +25,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get steps
         [HttpPost("get-steps")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetStepResponseJson>> GetSteps([FromBody] GetStepRequestJson getStepRequestJson)
         {
             GetStepResponseJson getStepResponseJson = new GetStepResponseJson();
@@ -75,7 +76,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get daily steps info
         [HttpPost("get-daily-steps-info")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetDailyStepsInfoResponseJson>> GetDailyStepsInfo([FromBody] GetDailyStepsInfoRequestJson getDailyStepsInfoRequestJson)
         {
             GetDailyStepsInfoResponseJson getDailyStepsInfoResponseJson = new GetDailyStepsInfoResponseJson();
@@ -131,7 +133,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Save daily steps
         [HttpPost("save-daily-steps")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<SaveDailyStepsResponseJson>> SaveDailySteps([FromBody] SaveDailyStepsRequestJson saveDailyStepsRequestJson)
         {
             SaveDailyStepsResponseJson saveDailyStepsResponseJson = new SaveDailyStepsResponseJson();

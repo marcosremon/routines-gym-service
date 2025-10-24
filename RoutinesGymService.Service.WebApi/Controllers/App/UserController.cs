@@ -23,8 +23,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.DeleteUser;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserByEmail;
 using RoutinesGymService.Transversal.JsonInterchange.User.Get.GetUserProfileDetails;
 using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
-using RoutinesGymService.Transversal.Security;
-using System.Net;
+using RoutinesGymService.Transversal.Security.SecurityFilters;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -45,7 +44,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get user by email
         [HttpPost("get-user-by-email")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]           
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetUserByEmailResponseJson>> GetUserByEmail([FromBody] GetUserByEmailRequestJson getUserByEmailRequestJson)
         {
             GetUserByEmailResponseJson getUserByEmailResponseJson = new GetUserByEmailResponseJson();
@@ -260,7 +260,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Update user
         [HttpPost("update-user")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<UpdateUserResponseJson>> UpdateUser([FromBody] UpdateUserRequestJson updateUserRequestJson)
         {
             UpdateUserResponseJson updateUserResponseJson = new UpdateUserResponseJson();
@@ -316,7 +317,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete user
         [HttpPost("delete-user")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteUserResponseJson>> DeleteUser([FromBody] DeleteUserRequestJson deleteUserRequestJson)
         {
             DeleteUserResponseJson deleteUserResponseJson = new DeleteUserResponseJson();
@@ -365,7 +367,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Create new password
         [HttpPost("create-new-password")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<CreateNewPasswordResponseJson>> CreateNewPassword([FromBody] CreateNewPasswordRequestJson createNewPasswordRequestJson)
         {
             CreateNewPasswordResponseJson createNewPasswordResponseJson = new CreateNewPasswordResponseJson();
@@ -413,7 +416,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Change password with password and email
         [HttpPost("change-password-with-password-and-email")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<ChangePasswordWithPasswordAndEmailResponseJson>> ChangePasswordWithPasswordAndEmail([FromBody] ChangePasswordWithPasswordAndEmailRequestJson changePasswordWithPasswordAndEmailRequestJson)
         {
             ChangePasswordWithPasswordAndEmailResponseJson changePasswordWithPasswordAndEmailResponseJson = new ChangePasswordWithPasswordAndEmailResponseJson();

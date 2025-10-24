@@ -8,7 +8,7 @@ using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.DeleteFriend;
 using RoutinesGymService.Transversal.JsonInterchange.Friend.GetAllUserFriends;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityFilters;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
@@ -26,7 +26,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get all user friends 
         [HttpPost("get-all-user-friends")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetAllUserFriendsResponseJson>> GetAllUserFriends([FromBody] GetAllUserFriendsRequestJson getAllUserFriendsRequestJson)
         {
             GetAllUserFriendsResponseJson getAllUserFriendsResponseJson = new GetAllUserFriendsResponseJson();
@@ -76,7 +77,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Add new user friend 
         [HttpPost("add-new-user-friend")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<AddNewUserFriendResponseJson>> AddNewUserFriend([FromBody] AddNewUserFriendRequestJson addNewUserFriendRequestJson)
         {
             AddNewUserFriendResponseJson addNewUserFriendResponseJson = new AddNewUserFriendResponseJson();
@@ -126,7 +128,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete friend
         [HttpPost("delete-friend")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteFriendResponseJson>> DeleteFriend([FromBody] DeleteFriendRequestJson deleteFriendRequestJson)
         {
             DeleteFriendResponseJson deleteFriendResponseJson = new DeleteFriendResponseJson();

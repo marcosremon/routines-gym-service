@@ -4,7 +4,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.UseCase;
 using RoutinesGymService.Infraestructure.Persistence.Repositories;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityUtils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
 {

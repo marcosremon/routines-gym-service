@@ -13,7 +13,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Exercise.AddExerciseProgres
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.DeleteExercise;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetAllExerciseProgress;
 using RoutinesGymService.Transversal.JsonInterchange.Exercise.GetExercisesByDayAndRoutineId;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityFilters;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -34,7 +34,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Add exercise progress
         [HttpPost("add-exercise-progress")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<AddExerciseProgressResponseJson>> AddExerciseProgress([FromBody] AddExerciseProgressRequestJson addExerciseRequestJson)
         {
             AddExerciseProgressResponseJson addExerciseAddExerciseProgressResponseJson = new AddExerciseProgressResponseJson();
@@ -89,7 +90,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete exercise
         [HttpPost("delete-exercise")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteExerciseResponseJson>> DeleteExercise([FromBody] DeleteExerciseRequestJson deleteExerciseRequestJson)
         {
             DeleteExerciseResponseJson deleteExerciseResponseJson = new DeleteExerciseResponseJson();
@@ -143,7 +145,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Add exercise
         [HttpPost("add-exercise")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<AddExerciseResponseJson>> AddExercise([FromBody] AddExerciseRequestJson addExerciseRequestJson)
         {
             AddExerciseResponseJson addExerciseResponseJson = new AddExerciseResponseJson();
@@ -281,7 +284,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get all exercise progress
         [HttpPost("get-all-exercise-progress")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetAllExerciseProgressResponseJson>> GetAllExerciseProgress([FromBody] GetAllExerciseProgressRequestJson getAllExerciseProgressRequestJson)
         {
             GetAllExerciseProgressResponseJson getAllExerciseProgressResponseJson = new GetAllExerciseProgressResponseJson();

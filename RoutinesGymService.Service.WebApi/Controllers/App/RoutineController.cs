@@ -15,7 +15,7 @@ using RoutinesGymService.Transversal.JsonInterchange.Routine.GetAllUserRoutines;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineById;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.GetRoutineStats;
 using RoutinesGymService.Transversal.JsonInterchange.Routine.UpdateRoutine;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityFilters;
 using System.Security.Claims;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
@@ -36,7 +36,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Create routine
         [HttpPost("create-routine")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
         {
             CreateRoutineResponseJson createRoutineResponseJson = new CreateRoutineResponseJson();
@@ -139,7 +140,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Delete routine
         [HttpPost("delete-routine")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
         {
             DeleteRoutineResponseJson deleteRoutineResponseJson = new DeleteRoutineResponseJson();
@@ -267,7 +269,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Get routine stats
         [HttpPost("get-routine-stats")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
         {
             GetRoutineStatsResponseJson getRoutineStatsResponseJson = new GetRoutineStatsResponseJson();

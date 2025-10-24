@@ -5,10 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Infraestructure.Persistence.Dependencies;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityUtils;
 using System.Text;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers(options =>
@@ -32,9 +32,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddInfrastructureServices();
 
 // Configuración JWT
-var jwtSettings = builder.Configuration.GetSection("JWT");
-var keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key no está configurado");
-var key = Encoding.ASCII.GetBytes(keyString);
+IConfigurationSection jwtSettings = builder.Configuration.GetSection("JWT");
+string keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key no está configurado");
+byte[] key = Encoding.ASCII.GetBytes(keyString);
 JwtUtils.Initialize(builder.Configuration);
 
 // Configuración de Autenticación JWT
@@ -108,7 +108,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheUtils>();
 builder.Services.AddAuthorization();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
@@ -125,11 +125,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var configuration = services.GetRequiredService<IConfiguration>();
-    var dbContext = services.GetRequiredService<ApplicationDbContext>();
+    IServiceProvider services = scope.ServiceProvider;
+    IConfiguration configuration = services.GetRequiredService<IConfiguration>();
+    ApplicationDbContext dbContext = services.GetRequiredService<ApplicationDbContext>();
 
     try
     {
@@ -156,9 +156,9 @@ public class RoutePrefixConvention : IApplicationModelConvention
 
     public void Apply(ApplicationModel application)
     {
-        foreach (var controller in application.Controllers)
+        foreach (ControllerModel controller in application.Controllers)
         {
-            foreach (var selector in controller.Selectors)
+            foreach (SelectorModel selector in controller.Selectors)
             {
                 if (selector.AttributeRouteModel != null)
                 {
