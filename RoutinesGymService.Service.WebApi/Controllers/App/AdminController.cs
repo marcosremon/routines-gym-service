@@ -29,7 +29,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
     [Route("admin")]
     public class AdminController : ControllerBase
     {
-
         private readonly IUserApplication _userApplication;
         private readonly IAdminApplication _adminApplication;
 

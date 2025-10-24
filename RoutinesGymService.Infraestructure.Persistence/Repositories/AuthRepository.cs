@@ -5,7 +5,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityUtils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {

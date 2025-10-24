@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
-using RoutinesGymService.Transversal.JsonInterchange.Auth;
+using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using System.Reflection;
 using System.Security.Claims;
 
-namespace RoutinesGymService.Transversal.Security
+namespace RoutinesGymService.Transversal.Security.SecurityFilters
 {
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false)]
-    public class ResourceAuthorizationAttribute : Attribute, IAsyncActionFilter
+    public class ResourceAuthorizationFilter : Attribute, IAsyncActionFilter
     {
         private readonly string[] _emailParameterNames;
 
-        public ResourceAuthorizationAttribute(params string[] emailParameterNames)
+        public ResourceAuthorizationFilter(params string[] emailParameterNames)
         {
             _emailParameterNames = emailParameterNames?.Any() == true
                 ? emailParameterNames
@@ -26,21 +26,22 @@ namespace RoutinesGymService.Transversal.Security
 
             if (string.IsNullOrEmpty(tokenEmail))
             {
-                SetUnauthorizedResult(context);
+                SetUnauthorizedResult(context, "Invalid token: missing email claim");
                 return;
             }
 
+            // Si es admin → acceso permitido
             if (isAdmin)
             {
                 await next();
                 return;
             }
 
-            // Si NO es admin → verificar que el email del token coincida con el del request
+            // Si no es admin → verificar email
             string? requestEmail = FindEmailInRequest(context);
             if (string.IsNullOrEmpty(requestEmail) || tokenEmail != requestEmail)
             {
-                SetUnauthorizedResult(context);
+                SetUnauthorizedResult(context, "Unauthorized: email mismatch");
                 return;
             }
 
@@ -53,25 +54,17 @@ namespace RoutinesGymService.Transversal.Security
             {
                 string? emailFromArgs = GetEmailFromActionArguments(context, paramName);
                 if (!string.IsNullOrEmpty(emailFromArgs))
-                {
                     return emailFromArgs;
-                }
 
                 if (context.HttpContext.Request.HasFormContentType &&
                     context.HttpContext.Request.Form.TryGetValue(paramName, out StringValues formValue))
-                {
                     return formValue.ToString();
-                }
 
                 if (context.HttpContext.Request.Query.TryGetValue(paramName, out StringValues queryValue))
-                {
                     return queryValue.ToString();
-                }
 
                 if (context.RouteData.Values.TryGetValue(paramName, out object routeValue))
-                {
                     return routeValue?.ToString();
-                }
             }
 
             return null;
@@ -84,9 +77,7 @@ namespace RoutinesGymService.Transversal.Security
                 if (context.ActionArguments.TryGetValue(paramName, out object? value))
                 {
                     if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-                    {
                         return stringValue;
-                    }
                 }
 
                 foreach (object argument in context.ActionArguments.Values)
@@ -95,9 +86,7 @@ namespace RoutinesGymService.Transversal.Security
                     {
                         string? emailFromObject = GetEmailFromObject(argument, paramName);
                         if (!string.IsNullOrEmpty(emailFromObject))
-                        {
                             return emailFromObject;
-                        }
                     }
                 }
             }
@@ -113,19 +102,7 @@ namespace RoutinesGymService.Transversal.Security
         {
             try
             {
-                Type type = obj.GetType();
-
-                PropertyInfo? property = type.GetProperty(propertyName);
-                if (property != null)
-                {
-                    object? value = property.GetValue(obj);
-                    if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-                    {
-                        return stringValue;
-                    }
-                }
-
-                property = type.GetProperty(propertyName,
+                var property = obj.GetType().GetProperty(propertyName,
                     BindingFlags.IgnoreCase |
                     BindingFlags.Public |
                     BindingFlags.Instance);
@@ -134,9 +111,7 @@ namespace RoutinesGymService.Transversal.Security
                 {
                     object? value = property.GetValue(obj);
                     if (value is string stringValue && !string.IsNullOrEmpty(stringValue))
-                    {
                         return stringValue;
-                    }
                 }
             }
             catch (Exception ex)
@@ -147,10 +122,10 @@ namespace RoutinesGymService.Transversal.Security
             return null;
         }
 
-        private void SetUnauthorizedResult(ActionExecutingContext context)
+        private void SetUnauthorizedResult(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = new UnauthorizedObjectResponse();
+            context.Result = new UnauthorizedObjectResponse(message);
         }
     }
 }

@@ -4,7 +4,7 @@ using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.SplitDay.UpdateSplitDay;
-using RoutinesGymService.Transversal.Security;
+using RoutinesGymService.Transversal.Security.SecurityFilters;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
@@ -22,7 +22,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
         #region Update split day
         [HttpPost("update-split-day")]
         [Authorize]
-        [ResourceAuthorization]
+        [JwtValidationFilter]
+        [ResourceAuthorizationFilter]
         public async Task<ActionResult<UpdateSplitDayResponseJson>> UpdateSplitDay([FromBody] UpdateSplitDayRequestJson updateSplitDayRequestJson)
         {
             UpdateSplitDayResponseJson updateSplitDayResponseJson = new UpdateSplitDayResponseJson();
