@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Transversal.Common.Responses;
@@ -21,7 +20,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Update split day
         [HttpPost("update-split-day")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<UpdateSplitDayResponseJson>> UpdateSplitDay([FromBody] UpdateSplitDayRequestJson updateSplitDayRequestJson)

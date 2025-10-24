@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserRole;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetBlacklistedUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetIntegralUserInfo;
@@ -22,11 +21,13 @@ using RoutinesGymService.Transversal.JsonInterchange.Admin.GetIntegralUsers;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.GetUsers;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.GetUsersByRole;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.RemoveUserFromBlackList;
+using RoutinesGymService.Transversal.Security.Filters;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
     [Route("admin")]
+    [ServiceFilter(typeof(AdminAuthorizationFilter))]
     public class AdminController : ControllerBase
     {
         private readonly IUserApplication _userApplication;
@@ -40,7 +41,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get users
         [HttpGet("get-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetUsersResponseJson>> GetUsers()
         {
             GetUsersResponseJson getUsersResponseJson = new GetUsersResponseJson();
@@ -75,7 +75,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get integral users
         [HttpPost("get-integral-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetIntegralUsersResponseJson>> GetIntegralUsers([FromBody] GetIntegralUsersRequestJson getIntegralUsersRequestJson)
         {
             GetIntegralUsersResponseJson getIntegralUsersResponseJson = new GetIntegralUsersResponseJson();
@@ -124,7 +123,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get integral user info
         [HttpPost("get-integral-user-info")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetIntegralUserInfoResponseJson>> GetIntegralUserInfo([FromBody] GetIntegralUserInfoRequestJson getIntegralUserInfoRequestJson)
         {
             GetIntegralUserInfoResponseJson getIntegralUserInfoResponseJson = new GetIntegralUserInfoResponseJson();
@@ -175,7 +173,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Create admin
         [HttpPost("create-admin")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<CreateAdminResponseJson>> CreateAdmin([FromBody] CreateAdminRequestJson createAdminRequstJson)
         {
             CreateAdminResponseJson createAdminResponseJson = new CreateAdminResponseJson();
@@ -234,7 +231,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Add user to blacklist
         [HttpPost("add-user-to-black-list")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<AddUserToBlackListResponseJson>> AddUserToBlackList([FromBody] AddUserToBlackListRequestJson addUserToBlackListRequestJson)
         {
             AddUserToBlackListResponseJson addUserToBlackListResponseJson = new AddUserToBlackListResponseJson();
@@ -285,7 +281,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Remove user from blacklist
         [HttpPost("remove-user-from-black-list")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<RemoveUserFromBlackListResponseJson>> RemoveUserFromBlackList([FromBody] RemoveUserFromBlackListRequestJson removeUserFromBlackListRequestJson)
         {
             RemoveUserFromBlackListResponseJson removeUserFromBlackListResponseJson = new RemoveUserFromBlackListResponseJson();
@@ -332,7 +327,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get blacklisted users
         [HttpPost("get-blacklisted-users")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetBlacklistedUsersResponseJson>> GetBlacklistedUsers([FromBody] GetBlacklistedUsersRequestJson getBlacklistedUsersRequestJson)
         {
             GetBlacklistedUsersResponseJson getBlacklistedUsersResponseJson = new GetBlacklistedUsersResponseJson();
@@ -381,7 +375,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Change user role
         [HttpPost("change-user-role")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<ChangeUserRoleResponseJson>> ChangeUserRole([FromBody] ChangeUserRoleRequestJson changeUserRoleRequestJson)
         {
             ChangeUserRoleResponseJson changeUserRoleResponseJson = new ChangeUserRoleResponseJson();
@@ -432,7 +425,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get users by role
         [HttpPost("get-users-by-role")]
-        [Authorize(Roles = nameof(Role.ADMIN))]
         public async Task<ActionResult<GetUsersByRoleResponseJson>> GetUsersByRole([FromBody] GetUsersByRoleRequestJson getUsersByRoleRequestJson)
         {
             GetUsersByRoleResponseJson getUsersByRoleResponseJson = new GetUsersByRoleResponseJson();

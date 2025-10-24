@@ -14,7 +14,7 @@ using RoutinesGymService.Application.Mapper;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.Security.SecurityUtils;
+using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {

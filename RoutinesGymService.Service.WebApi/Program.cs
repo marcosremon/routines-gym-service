@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Infraestructure.Persistence.Dependencies;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.Security.SecurityUtils;
-using System.Text;
+using RoutinesGymService.Transversal.Security.Utils;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+// ?? Inicializar JwtUtils para que los filtros puedan usarlo
+JwtUtils.Initialize(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddControllers(options =>
@@ -16,8 +16,6 @@ builder.Services.AddControllers(options =>
     options.Conventions.Insert(0, new RoutePrefixConvention("api"));
 });
 
-// Configuración mínima
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -31,69 +29,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Registrar servicios de infraestructura
 builder.Services.AddInfrastructureServices();
 
-// Configuración JWT
-IConfigurationSection jwtSettings = builder.Configuration.GetSection("JWT");
-string keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key no está configurado");
-byte[] key = Encoding.ASCII.GetBytes(keyString);
-JwtUtils.Initialize(builder.Configuration);
-
-// Configuración de Autenticación JWT
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings["Issuer"],
-        ValidAudience = jwtSettings["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ClockSkew = TimeSpan.Zero
-    };
-
-    // Configurar eventos para respetar respuestas personalizadas
-    options.Events = new JwtBearerEvents
-    {
-        OnChallenge = context =>
-        {
-            // Si el filtro de autorización ya estableció una respuesta personalizada, respétala
-            if (context.HttpContext.Items.ContainsKey("CustomAuthResponse"))
-            {
-                context.HandleResponse();
-                return Task.CompletedTask;
-            }
-
-            // Para otros casos (token inválido, expirado, etc.), usa respuesta personalizada
-            context.HandleResponse();
-
-            if (!context.Response.HasStarted)
-            {
-                context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/json";
-
-                return context.Response.WriteAsJsonAsync(new
-                {
-                    responseCodeJson = "UNAUTHORIZED",
-                    isSuccess = false,
-                    message = "Invalid or expired token"
-                });
-            }
-
-            return Task.CompletedTask;
-        },
-
-        OnAuthenticationFailed = context =>
-        {
-            // Logging opcional para debugging
-            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
-            return Task.CompletedTask;
-        }
-    };
-});
-
-// Configuración de CORS
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -106,7 +42,7 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheUtils>();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(); // Mantener por si se usan filtros o futuras autorizaciones
 
 WebApplication app = builder.Build();
 
@@ -120,16 +56,19 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 app.UseCors("AllowAll");
+
+// ?? Podemos dejarlo aunque no haya esquemas; solo para compatibilidad
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
+// Seeder admin
 using (IServiceScope scope = app.Services.CreateScope())
 {
-    IServiceProvider services = scope.ServiceProvider;
-    IConfiguration configuration = services.GetRequiredService<IConfiguration>();
-    ApplicationDbContext dbContext = services.GetRequiredService<ApplicationDbContext>();
+    var services = scope.ServiceProvider;
+    var configuration = services.GetRequiredService<IConfiguration>();
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
 
     try
     {
@@ -145,6 +84,7 @@ using (IServiceScope scope = app.Services.CreateScope())
 
 app.Run();
 
+// Convención de prefijo de rutas
 public class RoutePrefixConvention : IApplicationModelConvention
 {
     private readonly AttributeRouteModel _routePrefix;
@@ -156,9 +96,9 @@ public class RoutePrefixConvention : IApplicationModelConvention
 
     public void Apply(ApplicationModel application)
     {
-        foreach (ControllerModel controller in application.Controllers)
+        foreach (var controller in application.Controllers)
         {
-            foreach (SelectorModel selector in controller.Selectors)
+            foreach (var selector in controller.Selectors)
             {
                 if (selector.AttributeRouteModel != null)
                 {

@@ -20,7 +20,7 @@ using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.Common.Utils;
-using RoutinesGymService.Transversal.Security.SecurityUtils;
+using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 {

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.AddNewUserFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.DeleteFriend;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
@@ -25,7 +24,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get all user friends 
         [HttpPost("get-all-user-friends")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetAllUserFriendsResponseJson>> GetAllUserFriends([FromBody] GetAllUserFriendsRequestJson getAllUserFriendsRequestJson)
@@ -76,7 +74,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Add new user friend 
         [HttpPost("add-new-user-friend")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<AddNewUserFriendResponseJson>> AddNewUserFriend([FromBody] AddNewUserFriendRequestJson addNewUserFriendRequestJson)
@@ -127,7 +124,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Delete friend
         [HttpPost("delete-friend")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteFriendResponseJson>> DeleteFriend([FromBody] DeleteFriendRequestJson deleteFriendRequestJson)
