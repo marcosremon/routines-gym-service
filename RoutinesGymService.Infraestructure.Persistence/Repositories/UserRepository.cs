@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
@@ -291,11 +292,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<DeleteUserResponse> DeleteUser(DeleteUserRequest deleteUserRequest)
         {
             DeleteUserResponse deleteUserResponse = new DeleteUserResponse();
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                var userData = await _context.Users
+                var data = await _context.Users
                     .Where(u => u.Email == deleteUserRequest.UserEmail)
                     .GroupJoin(_context.Steps,
                         u => u.UserId,
@@ -315,14 +316,14 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         (x, routines) => new { x.User, x.Stat, x.Friend, Routines = routines })
                     .ToListAsync();
 
-                if (!userData.Any())
+                if (!data.Any())
                 {
                     deleteUserResponse.IsSuccess = false;
                     deleteUserResponse.Message = "User not found with the provided email";
                 }
                 else
                 {
-                    User user = userData.First().User;
+                    User user = data.First().User;
                     long userId = user.UserId;
 
                     /* Primero eliminamos los pasos y los amigos */
@@ -358,11 +359,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    _genericUtils.ClearCache($"{_userPrefix}:{userId}");
-                    _genericUtils.ClearCache($"{_stepPrefix}:{userId}");
-                    _genericUtils.ClearCache($"{_routinePrefix}:{userId}");
-                    _genericUtils.ClearCache($"{_friendPrefix}:{userId}");
-                    _genericUtils.ClearCache($"{_authPrefix}:{deleteUserRequest.UserEmail}");
+                    _genericUtils.ClearCache(_userPrefix);
+                    _genericUtils.ClearCache(_stepPrefix);
+                    _genericUtils.ClearCache(_routinePrefix);
+                    _genericUtils.ClearCache(_friendPrefix);
+                    _genericUtils.ClearCache(_authPrefix);
 
                     deleteUserResponse.IsSuccess = true;
                     deleteUserResponse.Message = "User deleted successfully";
@@ -383,7 +384,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         public async Task<UpdateUserResponse> UpdateUser(UpdateUserRequest updateUserRequest)
         {
             UpdateUserResponse updateUserResponse = new UpdateUserResponse();
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
             
             try
             {
@@ -467,12 +468,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         await _context.SaveChangesAsync();
                         await transaction.CommitAsync();
 
-                        _genericUtils.ClearCache($"{_userPrefix}:{user.UserId}");
-                        _genericUtils.ClearCache($"{_authPrefix}:{oldEmail}");
+                        _genericUtils.ClearCache(_userPrefix);
+                        _genericUtils.ClearCache(_authPrefix);
 
                         if (emailChanged)
                         {
-                            _genericUtils.ClearCache($"{_authPrefix}:{user.Email}");
+                            _genericUtils.ClearCache(_authPrefix);
                         }
 
                         string newToken = string.Empty;

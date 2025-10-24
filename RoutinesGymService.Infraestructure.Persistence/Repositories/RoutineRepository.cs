@@ -152,53 +152,58 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 {
                     deleteRoutineResponse.IsSuccess = false;
                     deleteRoutineResponse.Message = "User not found";
-                    return deleteRoutineResponse;
                 }
-
-                Routine? routine = await _context.Routines.FirstOrDefaultAsync(r =>
-                    r.RoutineName == deleteRoutineRequest.RoutineName &&
-                    r.UserId == user.UserId);
-                if (routine == null)
+                else
                 {
-                    deleteRoutineResponse.IsSuccess = false;
-                    deleteRoutineResponse.Message = "Routine not found for the user";
-                    return deleteRoutineResponse;
-                }
-
-                if (!user.Routines.Contains(routine))
-                {
-                    deleteRoutineResponse.IsSuccess = false;
-                    deleteRoutineResponse.Message = "This routine does not belong to the user";
-                    return deleteRoutineResponse;
-                }
-
-                List<SplitDay> splitDays = await _context.SplitDays
-                    .Where(sd => sd.RoutineId == routine.RoutineId)
-                    .ToListAsync();
-                foreach (SplitDay splitDay in splitDays)
-                {
-                    List<Exercise> exercises = await _context.Exercises
-                        .Where(e => e.SplitDayId == splitDay.SplitDayId)
-                        .ToListAsync();
-                    foreach (Exercise exercise in exercises)
+                    Routine? routine = await _context.Routines.FirstOrDefaultAsync(r =>
+                        r.RoutineName == deleteRoutineRequest.RoutineName &&
+                        r.UserId == user.UserId);
+                    if (routine == null)
                     {
-                        List<ExerciseProgress> progresses = await _context.ExerciseProgress
-                            .Where(ep => ep.ExerciseId == exercise.ExerciseId)
-                            .ToListAsync();
-                        _context.ExerciseProgress.RemoveRange(progresses);
+                        deleteRoutineResponse.IsSuccess = false;
+                        deleteRoutineResponse.Message = "Routine not found for the user";
                     }
-                    _context.Exercises.RemoveRange(exercises);
+                    else
+                    {
+                        if (!user.Routines.Contains(routine))
+                        {
+                            deleteRoutineResponse.IsSuccess = false;
+                            deleteRoutineResponse.Message = "This routine does not belong to the user";
+                        }
+                        else
+                        {
+                            List<SplitDay> splitDays = await _context.SplitDays
+                                .Where(sd => sd.RoutineId == routine.RoutineId)
+                                .ToListAsync();
+                            foreach (SplitDay splitDay in splitDays)
+                            {
+                                List<Exercise> exercises = await _context.Exercises
+                                    .Where(e => e.SplitDayId == splitDay.SplitDayId)
+                                    .ToListAsync();
+                                foreach (Exercise exercise in exercises)
+                                {
+                                    List<ExerciseProgress> progresses = await _context.ExerciseProgress
+                                        .Where(ep => ep.ExerciseId == exercise.ExerciseId)
+                                        .ToListAsync();
+
+                                    _context.ExerciseProgress.RemoveRange(progresses);
+                                }
+
+                                _context.Exercises.RemoveRange(exercises);
+                            }
+
+                            _genericUtils.ClearCache(_routinePrefix);
+                            _genericUtils.ClearCache(_exercisePrefix);
+
+                            _context.SplitDays.RemoveRange(splitDays);
+                            _context.Routines.Remove(routine);
+                            await _context.SaveChangesAsync();
+
+                            deleteRoutineResponse.IsSuccess = true;
+                            deleteRoutineResponse.Message = "Routine deleted successfully";
+                        }
+                    }
                 }
-
-                _genericUtils.ClearCache(_routinePrefix);
-                _genericUtils.ClearCache(_exercisePrefix);
-
-                _context.SplitDays.RemoveRange(splitDays);
-                _context.Routines.Remove(routine);
-                await _context.SaveChangesAsync();
-
-                deleteRoutineResponse.IsSuccess = true;
-                deleteRoutineResponse.Message = "Routine deleted successfully";
             }
             catch (Exception ex)
             {
@@ -359,19 +364,16 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    var userData = await _context.Users
+                    var data = await _context.Users
                         .Where(u => u.Email == getRoutineStatsRequest.UserEmail)
                         .Select(u => new
                         {
                             User = u,
-
                             Routines = u.Routines.ToList(),
-
                             SplitDays = u.Routines
                                 .SelectMany(r => r.SplitDays)
                                 .Distinct()
                                 .ToList(),
-
                             Exercises = u.Routines
                                 .SelectMany(r => r.SplitDays)
                                 .SelectMany(sd => sd.Exercises)
@@ -380,16 +382,16 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         })
                         .FirstOrDefaultAsync();
 
-                    if (userData == null)
+                    if (data == null)
                     {
                         getRoutineStatsResponse.IsSuccess = false;
                         getRoutineStatsResponse.Message = "User not found";
                     }
                     else
                     {
-                        List<Routine> routines = userData.Routines;
-                        List<SplitDay> splitDays = userData.SplitDays;
-                        List<Exercise> exercises = userData.Exercises;
+                        List<Routine> routines = data.Routines;
+                        List<SplitDay> splitDays = data.SplitDays;
+                        List<Exercise> exercises = data.Exercises;
 
                         if (!routines.Any() && !splitDays.Any() && !exercises.Any())
                         {

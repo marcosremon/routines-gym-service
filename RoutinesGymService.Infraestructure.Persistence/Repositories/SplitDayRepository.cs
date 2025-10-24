@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.SplitDay.UpdateSplitDay;
 using RoutinesGymService.Application.Interface.Repository;
@@ -30,7 +31,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         {
             UpdateSplitDayResponse updateSplitDayResponse = new UpdateSplitDayResponse();
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
+            using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
@@ -140,8 +141,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             await _context.SaveChangesAsync();
                             await transaction.CommitAsync();
 
-                            _genericUtils.ClearCache($"{_userPrefix}:{user.UserId}");
-                            _genericUtils.ClearCache($"{_routinePrefix}:{routine.RoutineId}");
+                            _genericUtils.ClearCache(_userPrefix);
+                            _genericUtils.ClearCache(_routinePrefix);
 
                             User? updatedUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == user.UserId);
                             if (updatedUser != null)
