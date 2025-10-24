@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetDailyStepsInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Step.GetStats;
 using RoutinesGymService.Application.Interface.Application;
@@ -24,7 +23,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get steps
         [HttpPost("get-steps")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetStepResponseJson>> GetSteps([FromBody] GetStepRequestJson getStepRequestJson)
@@ -75,7 +73,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get daily steps info
         [HttpPost("get-daily-steps-info")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetDailyStepsInfoResponseJson>> GetDailyStepsInfo([FromBody] GetDailyStepsInfoRequestJson getDailyStepsInfoRequestJson)
@@ -132,7 +129,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Save daily steps
         [HttpPost("save-daily-steps")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<SaveDailyStepsResponseJson>> SaveDailySteps([FromBody] SaveDailyStepsRequestJson saveDailyStepsRequestJson)

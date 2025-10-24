@@ -8,7 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace RoutinesGymService.Transversal.Security.SecurityUtils
+namespace RoutinesGymService.Transversal.Security.Utils
 {
     public class JwtUtils
     {

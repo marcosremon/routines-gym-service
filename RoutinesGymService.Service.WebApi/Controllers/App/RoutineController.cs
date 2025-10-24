@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Friend.GetAllUserFriends;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.CreateRoutine;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Routine.DeleteRoutine;
@@ -35,7 +34,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Create routine
         [HttpPost("create-routine")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<CreateRoutineResponseJson>> CreateRoutine([FromBody] CreateRoutineRequestJson createRoutineRequestJson)
@@ -139,7 +137,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Delete routine
         [HttpPost("delete-routine")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<DeleteRoutineResponseJson>> DeleteRoutine([FromBody] DeleteRoutineRequestJson deleteRoutineRequestJson)
@@ -190,7 +187,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get all user routine
         [HttpPost("get-all-user-routines")]
-        [Authorize]
+        [JwtValidationFilter]
         public async Task<ActionResult<GetAllUserRoutinesResponseJson>> GetAllUserRoutines([FromBody] GetAllUserRoutinesRequestJson getAllUserRoutinesRequestJson)
         {
             GetAllUserRoutinesResponseJson getAllUserRoutinesResponseJson = new GetAllUserRoutinesResponseJson();
@@ -268,7 +265,6 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get routine stats
         [HttpPost("get-routine-stats")]
-        [Authorize]
         [JwtValidationFilter]
         [ResourceAuthorizationFilter]
         public async Task<ActionResult<GetRoutineStatsResponseJson>> GetRoutineStats([FromBody] GetRoutineStatsRequestJson getRoutineStatsRequestJson)
@@ -323,7 +319,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
 
         #region Get routine by routine name
         [HttpPost("get-routine-by-routine-name")]
-        [Authorize]
+        [JwtValidationFilter]
         public async Task<ActionResult<GetRoutineByRoutineNameResponseJson>> GetRoutineByRoutineName([FromBody] GetRoutineByRoutineNameRequestJson getRoutineByRoutineNameRequestJson)
         {
             GetRoutineByRoutineNameResponseJson getRoutineByRoutineNameResponseJson = new GetRoutineByRoutineNameResponseJson();
