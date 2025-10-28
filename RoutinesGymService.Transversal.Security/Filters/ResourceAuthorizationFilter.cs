@@ -122,7 +122,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
         private void SetUnauthorizedResult(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = new UnauthorizedObjectResponse(message);
+            context.Result = UnauthorizedObjectResponse.Unauthorized(message);
         }
     }
 }
