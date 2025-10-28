@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
-using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Transversal.Security.Filters
@@ -15,8 +14,8 @@ namespace RoutinesGymService.Transversal.Security.Filters
             HttpRequest request = context.HttpContext.Request;
 
             if (!request.Headers.TryGetValue("Authorization", out StringValues authHeader) ||
-                string.IsNullOrWhiteSpace(authHeader) ||
-                !authHeader.ToString().StartsWith("Bearer "))
+            !authHeader.ToString().StartsWith("Bearer ") ||
+            string.IsNullOrWhiteSpace(authHeader))
             {
                 SetUnauthorized(context, "Missing or invalid Authorization header");
                 return;
@@ -45,7 +44,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
         private void SetUnauthorized(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = new UnauthorizedObjectResponse(message);
+            context.Result = UnauthorizedObjectResponse.Unauthorized(message);
         }
     }
 }

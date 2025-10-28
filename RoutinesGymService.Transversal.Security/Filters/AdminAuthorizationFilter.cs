@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
 using RoutinesGymService.Transversal.Common.Responses;
-using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using RoutinesGymService.Transversal.Security.Utils;
 using System.Security.Claims;
 
@@ -20,7 +19,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
                 if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
                 {
-                    context.Result = new UnauthorizedObjectResponse("Authorization header missing or malformed");
+                    context.Result = UnauthorizedObjectResponse.Unauthorized("Authorization header missing or malformed");
                     return;
                 }
 
@@ -29,7 +28,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
                 if (!validationResult.IsValid || validationResult.Principal == null)
                 {
-                    context.Result = new UnauthorizedObjectResponse(validationResult.ErrorMessage ?? "Invalid or expired token");
+                    context.Result = UnauthorizedObjectResponse.Unauthorized(validationResult.ErrorMessage ?? "Invalid or expired token");
                     return;
                 }
 
