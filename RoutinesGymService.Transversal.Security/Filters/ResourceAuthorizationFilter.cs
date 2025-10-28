@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
-using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using System.Reflection;
 using System.Security.Claims;
 
@@ -30,14 +29,12 @@ namespace RoutinesGymService.Transversal.Security.Filters
                 return;
             }
 
-            // Si es admin → acceso permitido
             if (isAdmin)
             {
                 await next();
                 return;
             }
 
-            // Si no es admin → verificar email
             string? requestEmail = FindEmailInRequest(context);
             if (string.IsNullOrEmpty(requestEmail) || tokenEmail != requestEmail)
             {
@@ -102,7 +99,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
         {
             try
             {
-                var property = obj.GetType().GetProperty(propertyName,
+                PropertyInfo? property = obj.GetType().GetProperty(propertyName,
                     BindingFlags.IgnoreCase |
                     BindingFlags.Public |
                     BindingFlags.Instance);

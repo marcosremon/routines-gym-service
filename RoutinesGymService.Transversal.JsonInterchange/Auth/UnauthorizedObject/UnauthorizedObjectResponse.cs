@@ -1,19 +1,37 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Transversal.Common.Responses;
 
-namespace RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject
+public class UnauthorizedObjectResponse : ObjectResult
 {
-    public class UnauthorizedObjectResponse : ObjectResult
-    {
-        public UnauthorizedObjectResponse(string message = "Unauthorized request")
-            : base(new BaseResponseJson
-            {
-                ResponseCodeJson = ResponseCodesJson.UNAUTHORIZED,
-                IsSuccess = false,
-                Message = message
-            })
+    private UnauthorizedObjectResponse(int statusCode, string message) 
+        : base(new BaseResponseJson
         {
-            StatusCode = 401;
-        }
+            ResponseCodeJson = GetResponseCodeFromStatusCode(statusCode),
+            IsSuccess = false,
+            Message = message
+        })
+    {
+        StatusCode = statusCode;
+    }
+
+    public static UnauthorizedObjectResponse Unauthorized(string message = "Unauthorized request") 
+        => new UnauthorizedObjectResponse(StatusCodes.Status401Unauthorized, message);
+
+    public static UnauthorizedObjectResponse Forbidden(string message = "Access denied")
+        => new UnauthorizedObjectResponse(StatusCodes.Status403Forbidden, message);
+
+    public static UnauthorizedObjectResponse InternalServerError(string message = "Internal server error")
+        => new UnauthorizedObjectResponse(StatusCodes.Status500InternalServerError, message);
+
+    private static ResponseCodesJson GetResponseCodeFromStatusCode(int statusCode)
+    {
+        return statusCode switch
+        {
+            StatusCodes.Status401Unauthorized => ResponseCodesJson.UNAUTHORIZED,
+            StatusCodes.Status403Forbidden => ResponseCodesJson.FORBIDDEN,
+            StatusCodes.Status500InternalServerError => ResponseCodesJson.INTERNAL_SERVER_ERROR,
+            _ => ResponseCodesJson.UNAUTHORIZED
+        };
     }
 }
