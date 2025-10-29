@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Entity;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserRole;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetBlacklistedUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetIntegralUserInfo;
@@ -23,13 +24,15 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly ApplicationDbContext _context;
         private readonly GenericUtils _genericUtils;
         private readonly CacheUtils _cacheUtils;
+        private readonly PasswordUtils _passwordUtils;
         private readonly string _userPrefix;
         private readonly int _expiryMinutes;
 
-        public AdminRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
+        public AdminRepository(ApplicationDbContext context, PasswordUtils passwordUtils, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
             _genericUtils = genericUtils;
+            _passwordUtils = passwordUtils;
             _cacheUtils = cacheUtils;
             _userPrefix = configuration["CacheSettings:UserPrefix"]!;
             _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
@@ -367,6 +370,41 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return getUsersByRoleResponse;
+        }
+        #endregion
+
+        #region Change user password    
+        public async Task<ChangeUserPasswordResponse> ChangeUserPassword(ChangeUserPasswordRequest changeUserPasswordRequest)
+        {
+            ChangeUserPasswordResponse changeUserPasswordResponse = new ChangeUserPasswordResponse();
+            try
+            {
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == changeUserPasswordRequest.UserEmail);
+                if (user == null)
+                {
+                    changeUserPasswordResponse.IsSuccess = false;
+                    changeUserPasswordResponse.Message = $"User not found";
+                }
+                else
+                {
+                    byte[] newUserPassword = _passwordUtils.PasswordEncoder(changeUserPasswordRequest.NewPassword);
+                    user.Password = newUserPassword;
+
+                    await _context.SaveChangesAsync();
+
+                    _genericUtils.ClearCache(_userPrefix);
+
+                    changeUserPasswordResponse.IsSuccess = true;
+                    changeUserPasswordResponse.Message = $"User password updated successfully";
+                }
+            }
+            catch (Exception ex)
+            {
+                changeUserPasswordResponse.IsSuccess = false;
+                changeUserPasswordResponse.Message = $"unexpected error on UserRepository -> ChangeUserPassword: {ex.Message}";
+            }
+
+            return changeUserPasswordResponse;
         }
         #endregion
     }

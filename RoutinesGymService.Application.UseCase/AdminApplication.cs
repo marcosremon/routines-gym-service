@@ -1,4 +1,5 @@
-﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserRole;
+﻿using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserPassword;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserRole;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetBlacklistedUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetIntegralUserInfo;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetIntegralUsers;
@@ -23,6 +24,11 @@ namespace RoutinesGymService.Application.UseCase
         public async Task<AddUserToBlackListResponse> AddUserToBlackList(AddUserToBlackListRequest addUserToBlackListRequest)
         {
             return await _adminRepository.AddUserToBlackList(addUserToBlackListRequest);
+        }
+
+        public async Task<ChangeUserPasswordResponse> ChangeUserPassword(ChangeUserPasswordRequest changeUserPasswordRequest)
+        {
+            return await _adminRepository.ChangeUserPassword(changeUserPasswordRequest);
         }
 
         public async Task<ChangeUserRoleResponse> ChangeUserRole(ChangeUserRoleRequest changeUserRoleRequest)
