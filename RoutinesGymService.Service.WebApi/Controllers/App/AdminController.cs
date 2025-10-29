@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserPassword;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.ChangeUserRole;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetBlacklistedUsers;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Admin.GetIntegralUserInfo;
@@ -13,6 +14,7 @@ using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.AddUserToBlackList;
+using RoutinesGymService.Transversal.JsonInterchange.Admin.ChangeUserPassword;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.ChangeUserRole;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.CreateAdmin;
 using RoutinesGymService.Transversal.JsonInterchange.Admin.GetBlacklistedUsers;
@@ -470,5 +472,53 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             return Ok(getUsersByRoleResponseJson);
         }
         #endregion
+
+        #region Change user password
+        [HttpPost("change-user-password")]
+        public async Task<ActionResult<ChangeUserPasswordResponseJson>> ChangeUserPassword([FromBody] ChangeUserPasswordRequestJson changeUserPasswordRequestJson)
+        {
+            ChangeUserPasswordResponseJson changeUserPasswordResponseJson = new ChangeUserPasswordResponseJson(); 
+            try
+            {
+                if (string.IsNullOrEmpty(changeUserPasswordRequestJson.UserEmail) ||
+                    string.IsNullOrEmpty(changeUserPasswordRequestJson.NewPassword))
+                {
+                    changeUserPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
+                    changeUserPasswordResponseJson.IsSuccess = false;
+                    changeUserPasswordResponseJson.Message = "invalid data, the data is null or empty";
+                }
+                else
+                {
+                    ChangeUserPasswordRequest changeUserPasswordRequest = new ChangeUserPasswordRequest
+                    {
+                        UserEmail = changeUserPasswordRequestJson.UserEmail,
+                        NewPassword = changeUserPasswordRequestJson.NewPassword,
+                    };
+
+                    ChangeUserPasswordResponse changeUserPasswordResponse = await _adminApplication.ChangeUserPassword(changeUserPasswordRequest);
+                    if (changeUserPasswordResponse.IsSuccess)
+                    {
+                        changeUserPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.OK;
+                        changeUserPasswordResponseJson.IsSuccess = changeUserPasswordResponse.IsSuccess;
+                        changeUserPasswordResponseJson.Message = changeUserPasswordResponse.Message;
+                    }
+                    else
+                    {
+                        changeUserPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.BAD_REQUEST;
+                        changeUserPasswordResponseJson.IsSuccess = changeUserPasswordResponse.IsSuccess;
+                        changeUserPasswordResponseJson.Message = changeUserPasswordResponse.Message;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                changeUserPasswordResponseJson.ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR;
+                changeUserPasswordResponseJson.IsSuccess = false;
+                changeUserPasswordResponseJson.Message = $"unexpected error on AdminController -> change-user-password {ex.Message}";
+            }
+
+            return Ok(changeUserPasswordResponseJson);
+        }
     }
+    #endregion
 }
