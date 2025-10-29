@@ -338,5 +338,12 @@ namespace RoutinesGymService.Transversal.Security.Utils
             TimeSpan remaining = expirationDate.Value - DateTime.UtcNow;
             return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
         }
+
+        public static string GenerateJwtWithRole(string userRole, string userEmail)
+        {
+            return userRole.ToLower() == Role.ADMIN.ToString().ToLower()
+                ? GenerateAdminJwtToken(userEmail)
+                : GenerateUserJwtToken(userEmail);
+        } 
     }   
 }
