@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.BlackListValidation;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.Interface.Repository;
@@ -51,34 +53,34 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             LoginResponse loginResponse = new LoginResponse();
             try
             {
-                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == loginRequest.UserEmail.ToLower());
-                if (user == null)
+                User? user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email.ToLower() == loginRequest.UserEmail.ToLower());
+                
+                BlackListValidationRequest blackListValidationRequest = new BlackListValidationRequest
+                {
+                    MobileGuid = loginRequest.MobileGuid ?? string.Empty,
+                    UserSerialNumber = user?.SerialNumber ?? string.Empty,
+                    EncryptedPassword = user?.Password ?? Array.Empty<byte>(),
+                    UserPassword = loginRequest.UserPassword
+                };
+
+                BlackListValidationResponse blackListValidationResponse = await BlackListValidation(blackListValidationRequest);
+                if (!blackListValidationResponse.IsSuccess)
                 {
                     loginResponse.IsSuccess = false;
-                    loginResponse.Message = "User not found";
+                    loginResponse.Message = blackListValidationResponse.Message;
+                }
+                else if (user == null) 
+                {
+                    loginResponse.IsSuccess = false;
+                    loginResponse.Message = "Invalid credentials"; 
                 }
                 else
                 {
-                    bool isPasswordValid = _passwordUtils.VerifyPassword(user.Password, loginRequest.UserPassword);
-                    bool onBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == user.SerialNumber);
-
-                    if (onBlackList)
-                    {
-                        loginResponse.IsSuccess = false; 
-                        loginResponse.Message = "The user that created this account is on BlackList 💀";
-                    }
-                    else if (!isPasswordValid)
-                    {
-                        loginResponse.IsSuccess = false;
-                        loginResponse.Message = "Password is not valid";
-                    }
-                    else
-                    {
-                        loginResponse.IsSuccess = true;
-                        loginResponse.Message = "Login successful.";
-                        loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();
-                        loginResponse.BearerToken = JwtUtils.GenerateJwtWithRole(user.RoleString, loginRequest.UserEmail);
-                    }
+                    loginResponse.IsSuccess = true;
+                    loginResponse.Message = "Login successful.";
+                    loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();
+                    loginResponse.BearerToken = JwtUtils.GenerateJwtWithRole(user.RoleString, loginRequest.UserEmail);
                 }
             }
             catch (Exception ex)
@@ -89,6 +91,67 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
             return loginResponse;
         }
+        #endregion
+
+        #region Auxiliary methods
+
+        #region Black list validation
+        public async Task<BlackListValidationResponse> BlackListValidation(BlackListValidationRequest blackListValidationRequest)
+        {
+            BlackListValidationResponse blackListValidationResponse = new BlackListValidationResponse();
+            try
+            {
+                if (string.IsNullOrEmpty(blackListValidationRequest.MobileGuid) ||
+                    string.IsNullOrEmpty(blackListValidationRequest.UserSerialNumber) ||
+                    string.IsNullOrEmpty(blackListValidationRequest.UserPassword) ||
+                    blackListValidationRequest.EncryptedPassword == Array.Empty<byte>())
+                {
+                    blackListValidationResponse.IsSuccess = false;
+                    blackListValidationResponse.Message = "Invalid data provided for blacklist validation";
+                }
+                else
+                {
+                    List<string> blackListSerials = await _context.BlackList
+                                .Where(bl => bl.SerialNumber == blackListValidationRequest.MobileGuid ||
+                                             bl.SerialNumber == blackListValidationRequest.UserSerialNumber)
+                                .Select(bl => bl.SerialNumber)
+                                .ToListAsync();
+
+                    bool deviceOnBlackList = blackListSerials.Contains(blackListValidationRequest.MobileGuid);
+                    bool userOnBlackList = blackListSerials.Contains(blackListValidationRequest.UserSerialNumber);
+                    bool isPasswordValid = _passwordUtils.VerifyPassword(blackListValidationRequest.EncryptedPassword, blackListValidationRequest.UserPassword);
+
+                    if (deviceOnBlackList)
+                    {
+                        blackListValidationResponse.Message = "The mobile device you are using is on the blacklist. Contact the app creator";
+                        blackListValidationResponse.IsSuccess = false;
+                    }
+                    else if (userOnBlackList)
+                    {
+                        blackListValidationResponse.Message = "The user that created this account is on BlackList 💀";
+                        blackListValidationResponse.IsSuccess = false;
+                    }
+                    else if (!isPasswordValid)
+                    {
+                        blackListValidationResponse.Message = "The password provided does not match the encrypted password";
+                        blackListValidationResponse.IsSuccess = false;
+                    }
+                    else
+                    {
+                        blackListValidationResponse.IsSuccess = true;
+                    }
+                } 
+            }
+            catch 
+            {
+                blackListValidationResponse.IsSuccess = false;
+                blackListValidationResponse.Message = $"unexpected error on AuthRepository -> BlackListValidation";
+            }
+
+            return blackListValidationResponse;
+        }
+        #endregion
+
         #endregion
     }
 }

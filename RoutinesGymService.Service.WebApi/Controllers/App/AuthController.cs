@@ -28,6 +28,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
             try
             {
                 if (string.IsNullOrEmpty(loginRequestJson.UserEmail) ||
+                    string.IsNullOrEmpty(loginRequestJson.MobileGuid) ||
                     string.IsNullOrEmpty(loginRequestJson.UserPassword))
                 {
                     loginResponseJson.ResponseCodeJson = ResponseCodesJson.INVALID_DATA;
@@ -39,7 +40,8 @@ namespace RoutinesGymService.Service.WebApi.Controllers.App
                     LoginRequest loginRequest = new LoginRequest
                     {
                         UserEmail = loginRequestJson.UserEmail,
-                        UserPassword = loginRequestJson.UserPassword
+                        UserPassword = loginRequestJson.UserPassword,
+                        MobileGuid = loginRequestJson.MobileGuid,
                     };
 
                     LoginResponse loginResponse = await _authApplication.Login(loginRequest);
