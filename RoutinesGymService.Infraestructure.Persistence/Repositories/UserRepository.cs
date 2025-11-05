@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
+using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.UserExist;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -60,7 +61,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 string cacheKey = $"{_userPrefix}GetUserByEmail_{getUserByEmailRequest.UserEmail}";
 
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
-                if (cachedUser != null)
+                if (cachedUser == null)
                 {
                     getUserByEmailResponse.IsSuccess = true;
                     getUserByEmailResponse.Message = "User found successfully";
@@ -219,11 +220,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             CreateGoogleUserResponse createGoogleUserResponse = new CreateGoogleUserResponse();
             try
             {
-                bool isOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == createGenericUserRequest.SerialNumber);
-                if (isOnBlackList)
+                bool deviceOnBlackList = await _context.BlackList.AnyAsync(bl => bl.SerialNumber == createGenericUserRequest.SerialNumber);
+
+                if (deviceOnBlackList)
                 {
                     createGoogleUserResponse.IsSuccess = false;
-                    createGoogleUserResponse.Message = "You are in Black List 💀";
+                    createGoogleUserResponse.Message = "The mobile device you are using is on the blacklist. Contact the app creator";
                 }
                 else if (!MailUtils.IsEmailValid(createGenericUserRequest.UserEmail))
                 {
