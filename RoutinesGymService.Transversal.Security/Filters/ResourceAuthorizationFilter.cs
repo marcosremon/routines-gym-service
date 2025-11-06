@@ -25,7 +25,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
             if (string.IsNullOrEmpty(tokenEmail))
             {
-                SetUnauthorizedResult(context, "Invalid token: missing email claim");
+                _SetUnauthorizedResult(context, "Invalid token: missing email claim");
                 return;
             }
 
@@ -35,21 +35,21 @@ namespace RoutinesGymService.Transversal.Security.Filters
                 return;
             }
 
-            string? requestEmail = FindEmailInRequest(context);
+            string? requestEmail = _FindEmailInRequest(context);
             if (string.IsNullOrEmpty(requestEmail) || tokenEmail != requestEmail)
             {
-                SetUnauthorizedResult(context, "Unauthorized: email mismatch");
+                _SetUnauthorizedResult(context, "Unauthorized: email mismatch");
                 return;
             }
 
             await next();
         }
 
-        private string? FindEmailInRequest(ActionExecutingContext context)
+        private string? _FindEmailInRequest(ActionExecutingContext context)
         {
             foreach (string paramName in _emailParameterNames)
             {
-                string? emailFromArgs = GetEmailFromActionArguments(context, paramName);
+                string? emailFromArgs = _GetEmailFromActionArguments(context, paramName);
                 if (!string.IsNullOrEmpty(emailFromArgs))
                     return emailFromArgs;
 
@@ -67,7 +67,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             return null;
         }
 
-        private string? GetEmailFromActionArguments(ActionExecutingContext context, string paramName)
+        private string? _GetEmailFromActionArguments(ActionExecutingContext context, string paramName)
         {
             try
             {
@@ -81,7 +81,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
                 {
                     if (argument != null)
                     {
-                        string? emailFromObject = GetEmailFromObject(argument, paramName);
+                        string? emailFromObject = _GetEmailFromObject(argument, paramName);
                         if (!string.IsNullOrEmpty(emailFromObject))
                             return emailFromObject;
                     }
@@ -95,7 +95,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             return null;
         }
 
-        private string? GetEmailFromObject(object obj, string propertyName)
+        private string? _GetEmailFromObject(object obj, string propertyName)
         {
             try
             {
@@ -119,7 +119,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             return null;
         }
 
-        private void SetUnauthorizedResult(ActionExecutingContext context, string message)
+        private void _SetUnauthorizedResult(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
             context.Result = UnauthorizedObjectResponse.Unauthorized(message);

@@ -151,7 +151,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     };
 
                     /* Si existe un usuario con el mismo email o con el mismo dni o con los dos error */
-                    UserExistResponse userExistResponse = await UserExist(userExistRequest);
+                    UserExistResponse userExistResponse = await _UserExist(userExistRequest);
                     if (userExistResponse.UserExist)
                     {
                         createUserResponse.IsSuccess = false;
@@ -414,7 +414,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                                 Dni = updateUserRequest.NewDni,
                             };
 
-                            UserExistResponse dniExistsResponse = await UserExist(userExistRequest);
+                            UserExistResponse dniExistsResponse = await _UserExist(userExistRequest);
                             if (dniExistsResponse.DniExists)
                             {
                                 updateUserResponse.IsSuccess = false;
@@ -431,7 +431,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             UserEmail = updateUserRequest.NewEmail
                         };
 
-                        UserExistResponse emailExistsResponse = await UserExist(userExistRequest);
+                        UserExistResponse emailExistsResponse = await _UserExist(userExistRequest);
                         if (emailExistsResponse.EmailExists)
                         {
                             updateUserResponse.IsSuccess = false;
@@ -681,7 +681,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
 
         #region User exist
         /* Este metodo auxiliar se usa en el create user */
-        private async Task<UserExistResponse> UserExist(UserExistRequest userExistRequest)
+        private async Task<UserExistResponse> _UserExist(UserExistRequest userExistRequest)
         {
             UserExistResponse userExistResponse = new UserExistResponse();
             try

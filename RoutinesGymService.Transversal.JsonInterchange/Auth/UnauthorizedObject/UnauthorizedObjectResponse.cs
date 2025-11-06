@@ -7,7 +7,7 @@ public class UnauthorizedObjectResponse : ObjectResult
     private UnauthorizedObjectResponse(int statusCode, string message) 
         : base(new BaseResponseJson
         {
-            ResponseCodeJson = GetResponseCodeFromStatusCode(statusCode),
+            ResponseCodeJson = _GetResponseCodeFromStatusCode(statusCode),
             IsSuccess = false,
             Message = message
         })
@@ -24,7 +24,7 @@ public class UnauthorizedObjectResponse : ObjectResult
     public static UnauthorizedObjectResponse InternalServerError(string message = "Internal server error")
         => new UnauthorizedObjectResponse(StatusCodes.Status500InternalServerError, message);
 
-    private static ResponseCodesJson GetResponseCodeFromStatusCode(int statusCode)
+    private static ResponseCodesJson _GetResponseCodeFromStatusCode(int statusCode)
     {
         return statusCode switch
         {

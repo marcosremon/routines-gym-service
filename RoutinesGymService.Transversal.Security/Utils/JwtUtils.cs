@@ -20,10 +20,10 @@ namespace RoutinesGymService.Transversal.Security.Utils
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger;
 
-            ValidateJwtConfiguration();
+            _ValidateJwtConfiguration();
         }
 
-        private static void ValidateJwtConfiguration()
+        private static void _ValidateJwtConfiguration()
         {
             if (_configuration == null) return;
 
