@@ -9,7 +9,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Key]
         [Column("user_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long UserId { get; set; }
+        public long UserId { get; set; } = -1;
 
         [Column("dni")]
         public string Dni { get; set; } = string.Empty;
@@ -33,7 +33,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         public byte[] Password { get; set; } = Array.Empty<byte>();
 
         [Column("role")]
-        public int Role { get; set; }
+        public int Role { get; set; } = -1;
 
         [Column("role_string")]
         public string RoleString { get; set; } = string.Empty;

@@ -9,10 +9,10 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Key]
         [Column("black_list_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long BlackListId { get; set; }
+        public long BlackListId { get; set; } = -1;
 
         [Column("user_id")]
-        public long UserId { get; set; }
+        public long UserId { get; set; } = -1;
 
         [Column("movile_serial_number")]
         public string SerialNumber { get; set; } = string.Empty;
