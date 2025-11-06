@@ -9,11 +9,11 @@ namespace RoutinesGymApp.Domain.Entities
     {
         [Key]
         [Column("steps_id")]
-        public long StepsId { get; set; }
+        public long StepsId { get; set; } = -1;
 
         [Column("user_id")]
         [ForeignKey("User")]
-        public long UserId { get; set; }
+        public long UserId { get; set; } = -1;
 
         [Column("date")]
         public DateTime Date { get; set; } = DateTime.MinValue;
@@ -24,6 +24,6 @@ namespace RoutinesGymApp.Domain.Entities
         [Column("daily_steps_goal")]
         public int DailyStepsGoal { get; set; } = 10000;
 
-        public virtual User? User { get; set; }
+        public virtual User User { get; set; } = new User();
     }
 }

@@ -9,16 +9,16 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Key]
         [Column("split_day_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long SplitDayId { get; set; }
+        public long SplitDayId { get; set; } = -1;
 
         [Column("day_name")]
-        public int DayName { get; set; } 
+        public int DayName { get; set; } = -1;
 
         [Column("day_name_string")]
         public string DayNameString { get; set; } = string.Empty;
 
         [Column("routine_id")]
-        public long RoutineId { get; set; }
+        public long RoutineId { get; set; } = -1;
 
         [Column("day_exercises_description")]
         public string DayExercisesDescription { get; set; } = string.Empty;
@@ -26,7 +26,7 @@ namespace RoutinesGymService.Domain.Model.Entities
 
         [ForeignKey("RoutineId")]
         [InverseProperty("SplitDays")]
-        public virtual Routine? Routine { get; set; }
+        public virtual Routine Routine { get; set; } = new Routine();
 
         [InverseProperty("SplitDay")]
         public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
