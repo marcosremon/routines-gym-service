@@ -33,7 +33,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
             try
             {
                 byte[] masterNonce = RandomNumberGenerator.GetBytes(_nonceSize);
-                byte[] encryptedPassword = EncryptWithAesGcm(_masterKey, masterNonce, Encoding.UTF8.GetBytes(password));
+                byte[] encryptedPassword = _EncryptWithAesGcm(_masterKey, masterNonce, Encoding.UTF8.GetBytes(password));
 
                 byte[] marker = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
 
@@ -59,7 +59,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
         {
             try
             {
-                if (HasMasterKeyLayer(encryptedPassword))
+                if (_HasMasterKeyLayer(encryptedPassword))
                 {
                     try
                     {
@@ -76,7 +76,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
                 }
                 else
                 {
-                    return VerifyOldFormatPassword(encryptedPassword, plainPassword);
+                    return _VerifyOldFormatPassword(encryptedPassword, plainPassword);
                 }
             }
             catch
@@ -131,7 +131,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
             return Encoding.UTF8.GetString(plaintext);
         }
 
-        private bool VerifyOldFormatPassword(byte[] encryptedPassword, string plainPassword)
+        private bool _VerifyOldFormatPassword(byte[] encryptedPassword, string plainPassword)
         {
             try
             {
@@ -147,9 +147,9 @@ namespace RoutinesGymService.Transversal.Security.Utils
                 Buffer.BlockCopy(encryptedPassword, _saltSize, nonce, 0, _nonceSize);
                 Buffer.BlockCopy(encryptedPassword, _saltSize + _nonceSize, cipherText, 0, cipherText.Length);
 
-                byte[] key = DeriveKey(plainPassword, salt);
+                byte[] key = _DeriveKey(plainPassword, salt);
 
-                byte[] decryptedData = DecryptWithAesGcm(key, nonce, cipherText);
+                byte[] decryptedData = _DecryptWithAesGcm(key, nonce, cipherText);
                 return Encoding.UTF8.GetString(decryptedData) == plainPassword;
             }
             catch (CryptographicException)
@@ -158,7 +158,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
             }
         }
 
-        private bool HasMasterKeyLayer(byte[] encryptedPassword)
+        private bool _HasMasterKeyLayer(byte[] encryptedPassword)
         {
             if (encryptedPassword.Length < 4) return false;
 
@@ -168,7 +168,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
                    encryptedPassword[^1] == 0xEF;
         }
 
-        private byte[] DeriveKey(string password, byte[] salt)
+        private byte[] _DeriveKey(string password, byte[] salt)
         {
             using var deriveBytes = new Rfc2898DeriveBytes(
                 password,
@@ -179,7 +179,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
             return deriveBytes.GetBytes(_keySize);
         }
 
-        private byte[] EncryptWithAesGcm(byte[] key, byte[] nonce, byte[] plaintext)
+        private byte[] _EncryptWithAesGcm(byte[] key, byte[] nonce, byte[] plaintext)
         {
             byte[] ciphertext = new byte[plaintext.Length];
             byte[] tag = new byte[_tagSize];
@@ -194,7 +194,7 @@ namespace RoutinesGymService.Transversal.Security.Utils
             return result;
         }
 
-        private byte[] DecryptWithAesGcm(byte[] key, byte[] nonce, byte[] ciphertextWithTag)
+        private byte[] _DecryptWithAesGcm(byte[] key, byte[] nonce, byte[] ciphertextWithTag)
         {
             if (ciphertextWithTag.Length < _tagSize)
                 throw new CryptographicException("Datos cifrados insuficientes");

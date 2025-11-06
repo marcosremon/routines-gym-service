@@ -17,14 +17,14 @@ namespace RoutinesGymService.Transversal.Security.Filters
             !authHeader.ToString().StartsWith("Bearer ") ||
             string.IsNullOrWhiteSpace(authHeader))
             {
-                SetUnauthorized(context, "Missing or invalid Authorization header");
+                _SetUnauthorized(context, "Missing or invalid Authorization header");
                 return;
             }
 
             string token = authHeader.ToString().Substring("Bearer ".Length).Trim();
             if (string.IsNullOrWhiteSpace(token))
             {
-                SetUnauthorized(context, "Empty JWT token");
+                _SetUnauthorized(context, "Empty JWT token");
                 return;
             }
 
@@ -32,7 +32,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             if (!validationResult.IsValid || validationResult.Principal == null)
             {
                 string error = validationResult.ErrorMessage ?? "Invalid or expired JWT token";
-                SetUnauthorized(context, error);
+                _SetUnauthorized(context, error);
                 return;
             }
 
@@ -41,7 +41,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             await next();
         }
 
-        private void SetUnauthorized(ActionExecutingContext context, string message)
+        private void _SetUnauthorized(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
             context.Result = UnauthorizedObjectResponse.Unauthorized(message);

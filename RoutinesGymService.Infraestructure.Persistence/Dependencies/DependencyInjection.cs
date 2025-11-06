@@ -2,6 +2,7 @@
 using RoutinesGymService.Application.Interface.Application;
 using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Application.UseCase;
+using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Repositories;
 using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security.Filters;
@@ -37,7 +38,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Dependencies
             services.AddScoped<JwtValidationFilter>();
             services.AddScoped<ResourceAuthorizationFilter>(provider =>
             {
-                string[] allowedRoles = { "USER", "ADMIN" };
+                string[] allowedRoles = { Role.USER.ToString(), Role.ADMIN.ToString() };
                 return new ResourceAuthorizationFilter(allowedRoles);
             });
 

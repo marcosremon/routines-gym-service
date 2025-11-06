@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
-using RoutinesGymService.Transversal.Common.Responses;
 using RoutinesGymService.Transversal.Security.Utils;
 using System.Security.Claims;
 
@@ -35,15 +33,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
                 string? role = validationResult.Principal.FindFirst(ClaimTypes.Role)?.Value;
                 if (string.IsNullOrWhiteSpace(role) || !role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
                 {
-                    context.Result = new ObjectResult(new BaseResponseJson
-                    {
-                        ResponseCodeJson = ResponseCodesJson.FORBIDDEN,
-                        IsSuccess = false,
-                        Message = "Access denied. Admin privileges required."
-                    })
-                    {
-                        StatusCode = 403
-                    };
+                    context.Result = UnauthorizedObjectResponse.Forbidden("Access denied. Admin privileges required.");
                     return;
                 }
 
@@ -51,15 +41,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             }
             catch (Exception ex)
             {
-                context.Result = new ObjectResult(new BaseResponseJson
-                {
-                    ResponseCodeJson = ResponseCodesJson.INTERNAL_SERVER_ERROR,
-                    IsSuccess = false,
-                    Message = $"Unexpected error in AdminAuthorizationFilter: {ex.Message}"
-                })
-                {
-                    StatusCode = 500
-                };
+                context.Result = UnauthorizedObjectResponse.InternalServerError($"Unexpected error in AdminAuthorizationFilter: {ex.Message}");
             }
         }
     }

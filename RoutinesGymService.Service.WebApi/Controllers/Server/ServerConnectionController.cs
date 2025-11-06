@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RoutinesGymService.Infraestructure.Persistence.Context;
-using RoutinesGymService.Transversal.Common.Responses;
-using RoutinesGymService.Transversal.JsonInterchange.Status.CheckDatabaseConnection;
-using RoutinesGymService.Transversal.JsonInterchange.Status.CheckServiceConnection;
 
 namespace RoutinesGymService.Service.WebApi.Controllers.Server
 {
@@ -19,43 +16,30 @@ namespace RoutinesGymService.Service.WebApi.Controllers.Server
 
         #region CheckServiceConnection
         [HttpGet("service")]
-        public ActionResult<CheckServiceConnectionResponseJson> CheckServiceConnection()
+        public ActionResult<string> CheckServiceConnection()
         {
-            CheckServiceConnectionResponseJson checkServiceConnectionResponseJson = new CheckServiceConnectionResponseJson
-            {
-                CheckServiceConnection = "Serice connection Ok"
-            };
-
-            return Ok(checkServiceConnectionResponseJson);
+            return Ok("OK");
         }
         #endregion
 
         #region CheckDatabaseConnection
         [HttpGet("database")]
-        public async Task<ActionResult<CheckDatabaseConnectionResponseJson>> CheckDatabaseConnection()
+        public async Task<ActionResult<string>> CheckDatabaseConnection()
         {
-            CheckDatabaseConnectionResponseJson checkDatabaseConnectionResponseJson = new CheckDatabaseConnectionResponseJson();
+            string message = string.Empty;  
             try
             {
-                bool canConnect = await _context.Database.CanConnectAsync();
-                if (canConnect)
-                {
-                    checkDatabaseConnectionResponseJson.Status = ResponseCodesJson.OK;
-                    checkDatabaseConnectionResponseJson.DatabaseConnection = "Database connection Ok";
-                }
-                else
-                {
-                    checkDatabaseConnectionResponseJson.Status = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                    checkDatabaseConnectionResponseJson.DatabaseConnection = "Cannot connect to the database";
-                }
+                bool databaseConnect = await _context.Database.CanConnectAsync();
+                message = databaseConnect
+                    ? "Database connection Ok" 
+                    : "Cannot connect to the database";
             }
             catch (Exception ex)
             {
-                checkDatabaseConnectionResponseJson.Status = ResponseCodesJson.INTERNAL_SERVER_ERROR;
-                checkDatabaseConnectionResponseJson.DatabaseConnection = $"Database connection error {ex.Message}";
+                message = $"Database connection error {ex.Message}";
             }
 
-            return Ok(checkDatabaseConnectionResponseJson);
+            return Ok(message);
         }
         #endregion
     }

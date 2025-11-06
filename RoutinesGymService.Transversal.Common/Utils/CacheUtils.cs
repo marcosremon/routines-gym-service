@@ -25,9 +25,6 @@ namespace RoutinesGymService.Transversal.Common.Utils
             return value;
         }
 
-        public bool TryGet<T>(string key, out T value) =>
-            _cache.TryGetValue(key, out value);
-
         public void Remove(string key)
         {
             _cache.Remove(key);  
