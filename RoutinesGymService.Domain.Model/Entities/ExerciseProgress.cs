@@ -39,6 +39,6 @@ namespace RoutinesGymService.Domain.Model.Entities
 
         [ForeignKey("RoutineId")]
         [InverseProperty("ProgressEntries")]
-        public virtual Routine Routine { get; set; } = new Routine()
+        public virtual Routine Routine { get; set; } = new Routine();
     }
 }
