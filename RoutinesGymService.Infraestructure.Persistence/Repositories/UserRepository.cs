@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using RoutinesGymApp.Domain.Entities;
-using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.CheckUserExistence;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Check.UserExist;
 using RoutinesGymService.Application.DataTransferObject.Interchange.User.Create.ChangePasswordWithPasswordAndEmail;
@@ -159,25 +158,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     }
                     else
                     {
-                        string friendCode = string.Empty;
-                        do
-                        {
-                            friendCode = GenericUtils.CreateFriendCode(8);
-                        }
-                        while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode));
-
                         if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
                             createGenericUserRequest.SerialNumber == "UNKNOWN" ||
                             createGenericUserRequest.SerialNumber.Contains("ERROR_"))
                         {
-                            string newSerial = string.Empty;
-                            do
-                            {
-                                newSerial = Guid.NewGuid().ToString();
-                            }
-                            while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial));
-
-                            createGenericUserRequest.SerialNumber = newSerial;
+                            createGenericUserRequest.SerialNumber = await _CreateUniqueSerialNumber();
                         }
 
                         User newUser = new User
@@ -186,7 +171,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                             Username = createGenericUserRequest.Username,
                             Surname = createGenericUserRequest.Surname ?? "",
                             Email = createGenericUserRequest.UserEmail.ToLower(),
-                            FriendCode = friendCode,
+                            FriendCode = await _CreateUniqueFriendCode(8),
                             SerialNumber = createGenericUserRequest.SerialNumber,
                             Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password),
                             Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
@@ -234,25 +219,11 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    string friendCode = string.Empty;
-                    do
-                    {
-                        friendCode = GenericUtils.CreateFriendCode(8);
-                    }
-                    while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode));
-
                     if (createGenericUserRequest.SerialNumber == "UNKNOWN_IOS" ||
                        createGenericUserRequest.SerialNumber == "UNKNOWN" ||
                        createGenericUserRequest.SerialNumber.Contains("ERROR_"))
                     {
-                        string newSerial = string.Empty;
-                        do
-                        {
-                            newSerial = Guid.NewGuid().ToString();
-                        }
-                        while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial));
-
-                        createGenericUserRequest.SerialNumber = newSerial;
+                        createGenericUserRequest.SerialNumber = await _CreateUniqueSerialNumber();
                     }
 
                     User user = new User()
@@ -261,7 +232,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         Username = createGenericUserRequest.Username,
                         Surname = createGenericUserRequest.Surname,
                         SerialNumber = createGenericUserRequest.SerialNumber,
-                        FriendCode = friendCode,
+                        FriendCode = await _CreateUniqueFriendCode(8),
                         Password = _passwordUtils.PasswordEncoder(createGenericUserRequest.Password.ToLower(), isGoogleLogin: true),
                         Email = createGenericUserRequest.UserEmail.ToLower(),
                         Role = GenericUtils.ChangeEnumToIntOnRole(createGenericUserRequest.Role),
@@ -711,7 +682,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 userExistResponse.ResponsCode = ResponseCodes.OK;
                 userExistResponse.IsSuccess = true;
 
-                userExistResponse.UserExist = userExistResponse != null && userExistResponse.IsSuccess && (existsDni || existsEmail);
+                userExistResponse.UserExist = existsDni || existsEmail;
             }
             catch (Exception)
             {
@@ -724,6 +695,30 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             }
 
             return userExistResponse;
+        }
+        #endregion
+
+        #region Create unique serial number 
+        private async Task<string> _CreateUniqueSerialNumber()
+        {
+            string newSerial = Guid.NewGuid().ToString();
+            while (await _context.Users.AnyAsync(u => u.SerialNumber == newSerial)) 
+            {
+                newSerial = Guid.NewGuid().ToString();
+            }
+            return newSerial;
+        }
+        #endregion
+
+        #region Create unique friend code 
+        private async Task<string> _CreateUniqueFriendCode(int length)
+        {
+            string friendCode = GenericUtils.CreateFriendCode(8);
+            while (await _context.Users.AnyAsync(u => u.FriendCode == friendCode))
+            {
+                friendCode = GenericUtils.CreateFriendCode(8);
+            }
+            return friendCode;
         }
         #endregion
 
