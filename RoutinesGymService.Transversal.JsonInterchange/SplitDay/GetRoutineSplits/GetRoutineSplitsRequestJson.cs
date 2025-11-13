@@ -2,6 +2,6 @@
 {
     public class GetRoutineSplitsRequestJson
     {
-        public long RoutineId { get; set; } = -1;
+        public long RoutineId { get; set; }
     }
 }

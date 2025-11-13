@@ -4,7 +4,7 @@
     {
         public string RoutineName { get; set; } = string.Empty;
         public string RoutineDescription { get; set; } = string.Empty;
-        public long UserId { get; set; } = -1;
+        public long UserId { get; set; }
         public List<SplitDayDTO> SplitDays { get; set; } = new List<SplitDayDTO>();
     }
 }

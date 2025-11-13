@@ -60,7 +60,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 string cacheKey = $"{_userPrefix}GetUserByEmail_{getUserByEmailRequest.UserEmail}";
 
                 User? cachedUser = _cacheUtils.Get<User>(cacheKey);
-                if (cachedUser == null)
+                if (cachedUser != null)
                 {
                     getUserByEmailResponse.IsSuccess = true;
                     getUserByEmailResponse.Message = "User found successfully";

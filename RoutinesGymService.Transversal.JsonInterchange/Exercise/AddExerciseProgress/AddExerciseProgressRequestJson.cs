@@ -4,8 +4,8 @@
     {
         public List<string> ProgressList { get; set; } = new List<string>();
         public string UserEmail { get; set; } = string.Empty;
-        public long RoutineId { get; set; } = -1;
-        public long splitDayId { get; set; } = -1;
+        public long RoutineId { get; set; }
+        public long splitDayId { get; set; }
         public string ExerciseName { get; set; } = string.Empty;
     }
 }

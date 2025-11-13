@@ -9,11 +9,11 @@ namespace RoutinesGymApp.Domain.Entities
     {
         [Key]
         [Column("steps_id")]
-        public long StepsId { get; set; } = -1;
+        public long StepsId { get; set; }
 
         [Column("user_id")]
         [ForeignKey("User")]
-        public long UserId { get; set; } = -1;
+        public long UserId { get; set; }
 
         [Column("date")]
         public DateTime Date { get; set; } = DateTime.MinValue;

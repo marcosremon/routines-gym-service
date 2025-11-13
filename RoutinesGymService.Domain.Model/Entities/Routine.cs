@@ -9,7 +9,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Key]
         [Column("routine_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long RoutineId { get; set; } = -1;
+        public long RoutineId { get; set; }
 
         [Column("routine_name")]
         public string RoutineName { get; set; } = string.Empty;
@@ -18,7 +18,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         public string RoutineDescription { get; set; } = string.Empty ;
 
         [Column("user_id")]
-        public long UserId { get; set; } = -1;
+        public long UserId { get; set; }
 
 
         [ForeignKey("UserId")]
