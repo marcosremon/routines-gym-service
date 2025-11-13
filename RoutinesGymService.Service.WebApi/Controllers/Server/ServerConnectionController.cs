@@ -18,7 +18,7 @@ namespace RoutinesGymService.Service.WebApi.Controllers.Server
         [HttpGet("service")]
         public ActionResult<string> CheckServiceConnection()
         {
-            return Ok("OK");
+            return Ok("Ok");
         }
         #endregion
 
