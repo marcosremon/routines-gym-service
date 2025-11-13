@@ -52,8 +52,7 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             LoginResponse loginResponse = new LoginResponse();
             try
             {
-                User? user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email.ToLower() == loginRequest.UserEmail.ToLower());
+                User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == loginRequest.UserEmail.ToLower());
                 
                 BlackListValidationRequest blackListValidationRequest = new BlackListValidationRequest
                 {
