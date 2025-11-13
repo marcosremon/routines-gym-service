@@ -4,7 +4,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Exercise
 {
     public class ExerciseExistInThisWeekdayResponse : BaseResponse
     {
-        public long RoutineId { get; set; } = -1;
-        public long SplitDayId { get; set; } = -1;
+        public long RoutineId { get; set; }
+        public long SplitDayId { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Key]
         [Column("split_day_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long SplitDayId { get; set; } = -1;
+        public long SplitDayId { get; set; }
 
         [Column("day_name")]
         public int DayName { get; set; } = -1;
@@ -18,7 +18,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         public string DayNameString { get; set; } = string.Empty;
 
         [Column("routine_id")]
-        public long RoutineId { get; set; } = -1;
+        public long RoutineId { get; set; }
 
         [Column("day_exercises_description")]
         public string DayExercisesDescription { get; set; } = string.Empty;

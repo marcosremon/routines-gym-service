@@ -4,7 +4,7 @@ namespace RoutinesGymService.Application.DataTransferObject.Interchange.Friend.A
 {
     public class AreFriendsResponse : BaseResponse
     {
-        public long UserId { get; set; } = -1;
-        public long FriendId { get; set; } = -1;
+        public long UserId { get; set; }
+        public long FriendId { get; set; }
     }
 }
