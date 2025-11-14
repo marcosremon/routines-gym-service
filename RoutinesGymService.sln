@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36127.28
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11205.157 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
@@ -26,8 +26,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Applicat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Domain.Model", "RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj", "{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Infraestructure.Persistence", "RoutinesGymService.Infraestructure.Persistence\RoutinesGymService.Infraestructure.Persistence.csproj", "{54654264-0469-454C-9DA3-249EDF900C55}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.Common", "RoutinesGymService.Transversal.Common\RoutinesGymService.Transversal.Common.csproj", "{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.JsonInterchange", "RoutinesGymService.Transversal.JsonInterchange\RoutinesGymService.Transversal.JsonInterchange.csproj", "{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA}"
@@ -39,6 +37,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Service.WebApi", "RoutinesGymService.Service.WebApi\RoutinesGymService.Service.WebApi.csproj", "{63A73A8A-B9E5-415E-AC12-A269E3D4E0D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Transversal.CleanSolution", "RoutinesGymService.Transversal.CleanSolution\RoutinesGymService.Transversal.CleanSolution.csproj", "{FF092085-B747-4320-9BC9-6FA8FE935825}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutinesGymService.Infraestructure.Persistence", "RoutinesGymService.Infraestructure.Persistence\RoutinesGymService.Infraestructure.Persistence.csproj", "{D145816A-2567-446D-90C6-A85639E18745}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -62,10 +62,6 @@ Global
 		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{54654264-0469-454C-9DA3-249EDF900C55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{54654264-0469-454C-9DA3-249EDF900C55}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{54654264-0469-454C-9DA3-249EDF900C55}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{54654264-0469-454C-9DA3-249EDF900C55}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -90,6 +86,10 @@ Global
 		{FF092085-B747-4320-9BC9-6FA8FE935825}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF092085-B747-4320-9BC9-6FA8FE935825}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF092085-B747-4320-9BC9-6FA8FE935825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D145816A-2567-446D-90C6-A85639E18745}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D145816A-2567-446D-90C6-A85639E18745}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D145816A-2567-446D-90C6-A85639E18745}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D145816A-2567-446D-90C6-A85639E18745}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,13 +99,13 @@ Global
 		{DA1BAF6B-1D7D-4FAA-875C-2C47582C080C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{E4DA5681-390E-45D6-9BBA-8E08D10052A2} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{AA12B878-5506-4811-AC53-2FDE6AF2D4BE} = {196FD5B5-5253-41F2-B5E4-FB36F32AF5B9}
-		{54654264-0469-454C-9DA3-249EDF900C55} = {B3C20526-5EE1-4736-952B-EEB97A60B85D}
 		{2363D4AC-0F2B-40F9-B4A0-E66AD9CC913D} = {B8F65FF4-B835-4818-85AC-D856B237E266}
 		{A32AF457-A723-4F3F-8B5F-6F11DF0EE1EA} = {B8F65FF4-B835-4818-85AC-D856B237E266}
 		{C4BBF8EE-03C4-4F36-BA04-BAB3AE0B76E0} = {B8F65FF4-B835-4818-85AC-D856B237E266}
 		{2700FE29-3F3B-49CE-B4C1-E25FA9A6CAF6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{63A73A8A-B9E5-415E-AC12-A269E3D4E0D4} = {B6EFB35F-7DC1-417B-87EF-3EE8705C9A2D}
 		{FF092085-B747-4320-9BC9-6FA8FE935825} = {B8F65FF4-B835-4818-85AC-D856B237E266}
+		{D145816A-2567-446D-90C6-A85639E18745} = {B3C20526-5EE1-4736-952B-EEB97A60B85D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6BC8EE02-A4EC-481A-A989-D00E346C5864}

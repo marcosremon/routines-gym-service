@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<IsPublishable>false</IsPublishable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+		<PackageReference Include="Npgsql" Version="10.0.0-rc.2" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-rc.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+
+		<ProjectReference Include="..\RoutinesGymService.Application.Interface\RoutinesGymService.Application.Interface.csproj" />
+		<ProjectReference Include="..\RoutinesGymService.Application.Mapper\RoutinesGymService.Application.Mapper.csproj" />
+		<ProjectReference Include="..\RoutinesGymService.Application.UseCase\RoutinesGymService.Application.UseCase.csproj" />
+		<ProjectReference Include="..\RoutinesGymService.Domain.Model\RoutinesGymService.Domain.Model.csproj" />
+		<ProjectReference Include="..\RoutinesGymService.Transversal.Security\RoutinesGymService.Transversal.Security.csproj" />
+	</ItemGroup>
+
+</Project>

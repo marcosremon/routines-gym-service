@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.EntityFrameworkCore;
 using RoutinesGymService.Infraestructure.Persistence.Context;
 using RoutinesGymService.Infraestructure.Persistence.Dependencies;
 using RoutinesGymService.Transversal.Common.Utils;
@@ -23,7 +22,7 @@ builder.Services.AddSwaggerGen();
 MailUtils.Initialize(builder.Configuration);
 
 // Configuración de PostgreSQL
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
 
 // Registrar servicios de infraestructura
