@@ -96,9 +96,9 @@ public class RoutePrefixConvention : IApplicationModelConvention
 
     public void Apply(ApplicationModel application)
     {
-        foreach (var controller in application.Controllers)
+        foreach (ControllerModel controller in application.Controllers)
         {
-            foreach (var selector in controller.Selectors)
+            foreach (SelectorModel selector in controller.Selectors)
             {
                 if (selector.AttributeRouteModel != null)
                 {
