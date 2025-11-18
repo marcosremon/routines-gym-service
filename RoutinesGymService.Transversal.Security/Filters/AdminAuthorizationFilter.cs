@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
 using RoutinesGymService.Transversal.Security.Utils;
@@ -17,7 +18,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
                 if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
                 {
-                    context.Result = UnauthorizedObjectResponse.Unauthorized("Authorization header missing or malformed");
+                    context.Result = (IActionResult) UnauthorizedObjectResponse.Unauthorized("Authorization header missing or malformed");
                     return;
                 }
 
@@ -26,14 +27,14 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
                 if (!validationResult.IsValid || validationResult.Principal == null)
                 {
-                    context.Result = UnauthorizedObjectResponse.Unauthorized(validationResult.ErrorMessage ?? "Invalid or expired token");
+                    context.Result = (IActionResult) UnauthorizedObjectResponse.Unauthorized(validationResult.ErrorMessage ?? "Invalid or expired token");
                     return;
                 }
 
                 string? role = validationResult.Principal.FindFirst(ClaimTypes.Role)?.Value;
                 if (string.IsNullOrWhiteSpace(role) || !role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
                 {
-                    context.Result = UnauthorizedObjectResponse.Forbidden("Access denied. Admin privileges required.");
+                    context.Result = (IActionResult) UnauthorizedObjectResponse.Forbidden("Access denied. Admin privileges required.");
                     return;
                 }
 
@@ -41,7 +42,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             }
             catch (Exception ex)
             {
-                context.Result = UnauthorizedObjectResponse.InternalServerError($"Unexpected error in AdminAuthorizationFilter: {ex.Message}");
+                context.Result = (IActionResult) UnauthorizedObjectResponse.InternalServerError($"Unexpected error in AdminAuthorizationFilter: {ex.Message}");
             }
         }
     }
