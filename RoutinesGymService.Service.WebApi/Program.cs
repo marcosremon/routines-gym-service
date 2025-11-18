@@ -23,7 +23,9 @@ MailUtils.Initialize(builder.Configuration);
 
 // Configuración de PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection")));
+{ 
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQLConnection"));
+});
 
 // Registrar servicios de infraestructura
 builder.Services.AddInfrastructureServices();
