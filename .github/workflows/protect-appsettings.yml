@@ -1,0 +1,24 @@
+name: Protect appsettings.json
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  protect-file:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Block modifications to appsettings.json
+      run: |
+        if git diff --name-only HEAD^ HEAD | grep -q "RoutinesGymService.Service.WebApi/appsettings.json"; then
+          echo "❌ ERROR: appsettings.json está protegido y no puede modificarse ni subirse."
+          exit 1
+        fi
