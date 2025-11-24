@@ -25,6 +25,7 @@ using RoutinesGymService.Transversal.JsonInterchange.User.UpdateUser;
 using RoutinesGymService.Transversal.Security.Filters;
 using System.Security.Claims;
 
+
 namespace RoutinesGymService.Service.WebApi.Controllers.App
 {
     [ApiController]
