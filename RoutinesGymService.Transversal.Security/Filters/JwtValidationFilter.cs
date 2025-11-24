@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
+using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Transversal.Security.Filters
@@ -45,7 +45,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
         private void _SetUnauthorized(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = (IActionResult) UnauthorizedObjectResponse.Unauthorized(message);
+            context.Result = UnauthorizedObjectResponse.Unauthorized(message);
         }
     }
 }

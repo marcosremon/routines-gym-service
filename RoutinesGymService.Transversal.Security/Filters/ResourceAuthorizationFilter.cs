@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
+using RoutinesGymService.Transversal.JsonInterchange.Auth.UnauthorizedObject;
 using System.Reflection;
 using System.Security.Claims;
 
@@ -123,7 +124,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
         private void _SetUnauthorizedResult(ActionExecutingContext context, string message)
         {
             context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = (IActionResult) UnauthorizedObjectResponse.Unauthorized(message);
+            context.Result = UnauthorizedObjectResponse.Unauthorized(message);
         }
     }
 }
