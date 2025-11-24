@@ -1,5 +1,4 @@
 ﻿### Archivos de Configuración Críticos y Secretos ###
-*.json
 FolderProfile.pubxml
 
 ### Directorios y Archivos de Caché y Compilación de .NET / C# ###
