@@ -35,10 +35,10 @@ namespace RoutinesGymService.Domain.Model.Entities
 
         [ForeignKey("ExerciseId")]
         [InverseProperty("ProgressEntries")]
-        public virtual Exercise Exercise { get; set; } = new Exercise();
+        public virtual Exercise? Exercise { get; set; }
 
         [ForeignKey("RoutineId")]
         [InverseProperty("ProgressEntries")]
-        public virtual Routine Routine { get; set; } = new Routine();
+        public virtual Routine? Routine { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.BlackListValidation;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.CheckTokenStatus;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.Login;
@@ -6,6 +7,7 @@ using RoutinesGymService.Application.Interface.Repository;
 using RoutinesGymService.Domain.Model.Entities;
 using RoutinesGymService.Domain.Model.Enums;
 using RoutinesGymService.Infraestructure.Persistence.Context;
+using RoutinesGymService.Transversal.Common.Utils;
 using RoutinesGymService.Transversal.Security.Utils;
 
 namespace RoutinesGymService.Infraestructure.Persistence.Repositories
@@ -14,11 +16,23 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordUtils _passwordUtils;
+        private readonly GenericUtils _genericUtils;
+        private readonly string _userPrefix;
+        private readonly string _stepPrefix;
+        private readonly string _routinePrefix;
+        private readonly string _friendPrefix;
+        private readonly string _authPrefix;
 
-        public AuthRepository(ApplicationDbContext context, PasswordUtils passwordUtils)
+        public AuthRepository(ApplicationDbContext context, GenericUtils genericUtils, PasswordUtils passwordUtils, IConfiguration configuration)
         {
             _context = context;
+            _genericUtils = genericUtils;
             _passwordUtils = passwordUtils;
+            _userPrefix = configuration["CacheSettings:UserPrefix"]!;
+            _stepPrefix = configuration["CacheSettings:StepPrefix"]!;
+            _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
+            _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
+            _authPrefix = configuration["CacheSettings:AuthPrefix"]!;
         }
 
         #region Check token status
@@ -75,6 +89,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
+                    _genericUtils.ClearCache(_userPrefix);
+                    _genericUtils.ClearCache(_stepPrefix);
+                    _genericUtils.ClearCache(_routinePrefix);
+                    _genericUtils.ClearCache(_friendPrefix);
+                    _genericUtils.ClearCache(_authPrefix);
+
                     loginResponse.IsSuccess = true;
                     loginResponse.Message = "Login successful.";
                     loginResponse.IsAdmin = user.RoleString.ToLower() == Role.ADMIN.ToString().ToLower();

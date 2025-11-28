@@ -20,10 +20,10 @@ namespace RoutinesGymService.Domain.Model.Entities
 
         [ForeignKey("UserId")]
         [InverseProperty("FriendshipsAsUser")]
-        public virtual User? User { get; set; } = new User();
+        public virtual User? User { get; set; }
 
         [ForeignKey("FriendId")]
         [InverseProperty("FriendshipsAsFriend")]
-        public virtual User Friend { get; set; } = new User();
+        public virtual User? Friend { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace RoutinesGymService.Domain.Model.Entities
 
         [ForeignKey("RoutineId")]
         [InverseProperty("SplitDays")]
-        public virtual Routine Routine { get; set; } = new Routine();
+        public virtual Routine? Routine { get; set; }
 
         [InverseProperty("SplitDay")]
         public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace RoutinesGymService.Transversal.Security.Filters
 {
@@ -25,7 +27,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
             if (string.IsNullOrEmpty(tokenEmail))
             {
-                _SetUnauthorizedResult(context, "Invalid token: missing email claim");
+                await _SetUnauthorizedResultAsync(context, "Invalid token: missing email claim");
                 return;
             }
 
@@ -38,7 +40,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
             string? requestEmail = _FindEmailInRequest(context);
             if (string.IsNullOrEmpty(requestEmail) || tokenEmail != requestEmail)
             {
-                _SetUnauthorizedResult(context, "Unauthorized: email mismatch");
+                await _SetUnauthorizedResultAsync(context, "Unauthorized: email mismatch");
                 return;
             }
 
@@ -60,7 +62,7 @@ namespace RoutinesGymService.Transversal.Security.Filters
                 if (context.HttpContext.Request.Query.TryGetValue(paramName, out StringValues queryValue))
                     return queryValue.ToString();
 
-                if (context.RouteData.Values.TryGetValue(paramName, out object routeValue))
+                if (context.RouteData.Values.TryGetValue(paramName, out object? routeValue))
                     return routeValue?.ToString();
             }
 
@@ -119,10 +121,16 @@ namespace RoutinesGymService.Transversal.Security.Filters
             return null;
         }
 
-        private void _SetUnauthorizedResult(ActionExecutingContext context, string message)
+        private static async Task _SetUnauthorizedResultAsync(ActionExecutingContext context, string message)
         {
-            context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = UnauthorizedObjectResponse.Unauthorized(message);
+            var response = UnauthorizedObjectResponse.Unauthorized(message);
+            var httpContext = context.HttpContext;
+
+            httpContext.Response.StatusCode = response.StatusCode;
+            httpContext.Response.ContentType = "application/json";
+
+            string jsonResponse = JsonSerializer.Serialize(response.Value);
+            await httpContext.Response.WriteAsync(jsonResponse);
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
 using RoutinesGymService.Transversal.Security.Utils;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace RoutinesGymService.Transversal.Security.Filters
 {
@@ -12,12 +13,12 @@ namespace RoutinesGymService.Transversal.Security.Filters
         {
             try
             {
-                HttpContext httpContext = context.HttpContext;
+                var httpContext = context.HttpContext;
                 string? authHeader = httpContext.Request.Headers["Authorization"].FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer "))
                 {
-                    context.Result = UnauthorizedObjectResponse.Unauthorized("Authorization header missing or malformed");
+                    await _WriteResponseAsync(httpContext, UnauthorizedObjectResponse.Unauthorized("Authorization header missing or malformed"));
                     return;
                 }
 
@@ -26,14 +27,15 @@ namespace RoutinesGymService.Transversal.Security.Filters
 
                 if (!validationResult.IsValid || validationResult.Principal == null)
                 {
-                    context.Result = UnauthorizedObjectResponse.Unauthorized(validationResult.ErrorMessage ?? "Invalid or expired token");
+                    await _WriteResponseAsync(httpContext, UnauthorizedObjectResponse.Unauthorized(validationResult.ErrorMessage ?? "Invalid or expired token"));
                     return;
                 }
 
                 string? role = validationResult.Principal.FindFirst(ClaimTypes.Role)?.Value;
+
                 if (string.IsNullOrWhiteSpace(role) || !role.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
                 {
-                    context.Result = UnauthorizedObjectResponse.Forbidden("Access denied. Admin privileges required.");
+                    await _WriteResponseAsync(httpContext, UnauthorizedObjectResponse.Forbidden("Access denied. Admin privileges required."));
                     return;
                 }
 
@@ -41,8 +43,17 @@ namespace RoutinesGymService.Transversal.Security.Filters
             }
             catch (Exception ex)
             {
-                context.Result = UnauthorizedObjectResponse.InternalServerError($"Unexpected error in AdminAuthorizationFilter: {ex.Message}");
+                await _WriteResponseAsync(context.HttpContext, UnauthorizedObjectResponse.InternalServerError($"Unexpected error in AdminAuthorizationFilter: {ex.Message}"));
             }
+        }
+
+        private static async Task _WriteResponseAsync(HttpContext httpContext, UnauthorizedObjectResponse unauthorizedObjectResponse)
+        {
+            httpContext.Response.StatusCode = unauthorizedObjectResponse.StatusCode;
+            httpContext.Response.ContentType = "application/json";
+
+            string jsonResponse = JsonSerializer.Serialize(unauthorizedObjectResponse.Value);
+            await httpContext.Response.WriteAsync(jsonResponse);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Column("inscription_date")]
         public DateTime InscriptionDate { get; set; } = DateTime.MinValue;
 
-        
+
         public virtual ICollection<Routine> Routines { get; set; } = new List<Routine>();
 
         [InverseProperty("User")]

@@ -20,13 +20,14 @@ namespace RoutinesGymService.Domain.Model.Entities
         [Column("split_day_id")]
         public long SplitDayId { get; set; }
 
+
         [ForeignKey("SplitDayId")]
         [InverseProperty("Exercises")]
-        public virtual SplitDay SplitDay { get; set; } = new SplitDay();
+        public virtual SplitDay? SplitDay { get; set; }
 
         [ForeignKey("RoutineId")]
         [InverseProperty("Exercises")]
-        public virtual Routine Routine { get; set; } = new Routine();
+        public virtual Routine? Routine { get; set; }
 
         [InverseProperty("Exercise")]
         public virtual ICollection<ExerciseProgress> ProgressEntries { get; set; } = new List<ExerciseProgress>();

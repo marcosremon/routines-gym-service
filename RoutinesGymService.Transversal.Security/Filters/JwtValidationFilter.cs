@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using RoutinesGymService.Application.DataTransferObject.Interchange.Auth.ValidateTokenWithDetails;
 using RoutinesGymService.Transversal.Security.Utils;
+using System.Text.Json;
 
 namespace RoutinesGymService.Transversal.Security.Filters
 {
@@ -11,40 +12,47 @@ namespace RoutinesGymService.Transversal.Security.Filters
     {
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            HttpRequest request = context.HttpContext.Request;
+            var httpRequest = context.HttpContext.Request;
 
-            if (!request.Headers.TryGetValue("Authorization", out StringValues authHeader) ||
-            !authHeader.ToString().StartsWith("Bearer ") ||
-            string.IsNullOrWhiteSpace(authHeader))
+            if (!httpRequest.Headers.TryGetValue("Authorization", out StringValues authHeader) ||
+                !authHeader.ToString().StartsWith("Bearer ") ||
+                string.IsNullOrWhiteSpace(authHeader))
             {
-                _SetUnauthorized(context, "Missing or invalid Authorization header");
+                await _SetUnauthorizedAsync(context, "Missing or invalid Authorization header");
                 return;
             }
 
             string token = authHeader.ToString().Substring("Bearer ".Length).Trim();
+
             if (string.IsNullOrWhiteSpace(token))
             {
-                _SetUnauthorized(context, "Empty JWT token");
+                await _SetUnauthorizedAsync(context, "Empty JWT token");
                 return;
             }
 
             ValidateTokenWithDetailsResponse validationResult = JwtUtils.ValidateTokenWithDetails(token);
+
             if (!validationResult.IsValid || validationResult.Principal == null)
             {
                 string error = validationResult.ErrorMessage ?? "Invalid or expired JWT token";
-                _SetUnauthorized(context, error);
+                await _SetUnauthorizedAsync(context, error);
                 return;
             }
 
             context.HttpContext.User = validationResult.Principal;
-
             await next();
         }
 
-        private void _SetUnauthorized(ActionExecutingContext context, string message)
+        private static async Task _SetUnauthorizedAsync(ActionExecutingContext context, string message)
         {
-            context.HttpContext.Items["CustomAuthResponse"] = true;
-            context.Result = UnauthorizedObjectResponse.Unauthorized(message);
+            var unauthorizedObjectResponse = UnauthorizedObjectResponse.Unauthorized(message);
+            var httpContext = context.HttpContext;
+
+            httpContext.Response.StatusCode = unauthorizedObjectResponse.StatusCode;
+            httpContext.Response.ContentType = "application/json";
+
+            string jsonResponse = JsonSerializer.Serialize(unauthorizedObjectResponse.Value);
+            await httpContext.Response.WriteAsync(jsonResponse);
         }
     }
 }
