@@ -50,7 +50,8 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                 }
                 else
                 {
-                    if (user.Routines.Any(r => r.RoutineName == createRoutineRequest.RoutineName))
+                    List<Routine> userRoutines = await _context.Routines.Where(r => r.UserId == user.UserId).ToListAsync();
+                    if (userRoutines.Any(r => r.RoutineName == createRoutineRequest.RoutineName))
                     {
                         createRoutineResponse.Message = "Routine with this name already exists for the user";
                         createRoutineResponse.IsSuccess = false;
