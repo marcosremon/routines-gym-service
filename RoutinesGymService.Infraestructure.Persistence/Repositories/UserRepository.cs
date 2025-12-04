@@ -31,7 +31,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
         private readonly CacheUtils _cacheUtils;
         private readonly PasswordUtils _passwordUtils;
         private readonly string _userPrefix;
-        private readonly string _stepPrefix;
         private readonly string _routinePrefix;
         private readonly string _friendPrefix;
         private readonly string _authPrefix;
@@ -44,7 +43,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
             _cacheUtils = cacheUtils;
             _passwordUtils = passwordUtils;
             _userPrefix = configuration["CacheSettings:UserPrefix"]!;
-            _stepPrefix = configuration["CacheSettings:StepPrefix"]!;
             _routinePrefix = configuration["CacheSettings:RoutinePrefix"]!;
             _friendPrefix = configuration["CacheSettings:FriendPrefix"]!;
             _authPrefix = configuration["CacheSettings:AuthPrefix"]!;
@@ -333,7 +331,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                     await transaction.CommitAsync();
 
                     _genericUtils.ClearCache(_userPrefix);
-                    _genericUtils.ClearCache(_stepPrefix);
                     _genericUtils.ClearCache(_routinePrefix);
                     _genericUtils.ClearCache(_friendPrefix);
                     _genericUtils.ClearCache(_authPrefix);

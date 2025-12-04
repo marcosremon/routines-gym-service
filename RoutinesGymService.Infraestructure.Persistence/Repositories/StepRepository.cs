@@ -14,18 +14,12 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
     public class StepRepository : IStepRepository
     {
         private readonly ApplicationDbContext _context;
-        private readonly CacheUtils _cacheUtils;
         private readonly GenericUtils _genericUtils;
-        private readonly string _stepPrefix;
-        private readonly int _expiryMinutes;
 
-        public StepRepository(ApplicationDbContext context, CacheUtils cacheUtils, GenericUtils genericUtils, IConfiguration configuration)
+        public StepRepository(ApplicationDbContext context, GenericUtils genericUtils, IConfiguration configuration)
         {
             _context = context;
-            _cacheUtils = cacheUtils;
-            _stepPrefix = configuration["CacheSettings:StepPrefix"]!;
             _genericUtils = genericUtils;
-            _expiryMinutes = int.TryParse(configuration["CacheSettings:CacheExpiryMinutes"], out var m) ? m : 60;
         }
 
         #region Get daily steps info
@@ -131,8 +125,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         DailyStepsGoal = saveDailyStepsRequest.DailyStepsGoal,
                         Date = DateTime.UtcNow.AddDays(-1),
                     };
-
-                    _genericUtils.ClearCache(_stepPrefix);
 
                     _context.Steps.Add(step);
                     await _context.SaveChangesAsync();
