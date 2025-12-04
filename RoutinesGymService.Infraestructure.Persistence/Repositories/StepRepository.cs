@@ -98,7 +98,6 @@ namespace RoutinesGymService.Infraestructure.Persistence.Repositories
                         getStepResponse.IsSuccess = true;
                         getStepResponse.Message = "Stats retrieved successfully.";
                         getStepResponse.Stats = steps;
-                        _cacheUtils.Set(cacheKey, steps, TimeSpan.FromMinutes(_expiryMinutes));
                     }
                 }
             }
